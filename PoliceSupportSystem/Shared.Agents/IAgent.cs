@@ -6,9 +6,9 @@ public interface IAgent : IHostedService
 {
     Guid Id { get; }
     
-    IEnumerable<string> AcceptedMessageTypes { get; }
+    IEnumerable<Type> AcceptedMessageTypes { get; }
     
-    IEnumerable<string> AcceptedEnvironmentSignalTypes { get; }
+    IEnumerable<Type> AcceptedEnvironmentSignalTypes { get; }
 
     Task PushMessageAsync(IMessage message);
 

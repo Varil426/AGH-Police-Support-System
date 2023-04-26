@@ -5,8 +5,8 @@ namespace Shared.Agents;
 public abstract class AgentBase : BackgroundService, IAgent
 {
     public Guid Id { get; }
-    public IEnumerable<string> AcceptedMessageTypes { get; }
-    public IEnumerable<string> AcceptedEnvironmentSignalTypes { get; }
+    public IEnumerable<Type> AcceptedMessageTypes { get; }
+    public IEnumerable<Type> AcceptedEnvironmentSignalTypes { get; }
     protected IMessageService MessageService { get; }
 
     protected Queue<IMessage> MessageQueue { get; } = new();
@@ -15,7 +15,7 @@ public abstract class AgentBase : BackgroundService, IAgent
 
     private readonly SemaphoreSlim _semaphore = new( 1);
     
-    protected AgentBase(Guid id, IEnumerable<string> acceptedMessageTypes, IEnumerable<string> acceptedEnvironmentSignalTypes, IMessageService messageService)
+    protected AgentBase(Guid id, IEnumerable<Type> acceptedMessageTypes, IEnumerable<Type> acceptedEnvironmentSignalTypes, IMessageService messageService)
     {
         Id = id;
         AcceptedMessageTypes = acceptedMessageTypes;
@@ -50,10 +50,10 @@ public abstract class AgentBase : BackgroundService, IAgent
         {
             await _semaphore.WaitAsync(stoppingToken);
             
-            if (MessageQueue.TryDequeue(out var message) && AcceptedMessageTypes.Contains(message.MessageType))
+            if (MessageQueue.TryDequeue(out var message) && AcceptedMessageTypes.Contains(message.GetType()))
                 await HandleMessage(message);
             
-            if (EnvironmentSignalQueue.TryDequeue(out var signal) && AcceptedEnvironmentSignalTypes.Contains(signal.Name))
+            if (EnvironmentSignalQueue.TryDequeue(out var signal) && AcceptedEnvironmentSignalTypes.Contains(signal.GetType()))
                 await HandleSignal(signal);
                 
             

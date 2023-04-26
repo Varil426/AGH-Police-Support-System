@@ -6,4 +6,15 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Shared.Agents\Shared.Agents.csproj" />
+      <ProjectReference Include="..\Shared.Infrastructure.Integration\Shared.Infrastructure.Integration.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="WolverineFx" Version="0.9.16" />
+      <PackageReference Include="WolverineFx.RabbitMQ" Version="0.9.16" />
+    </ItemGroup>
+
 </Project>

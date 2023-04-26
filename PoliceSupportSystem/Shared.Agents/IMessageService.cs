@@ -4,5 +4,5 @@ public interface IMessageService
 {
     Task SendMessageAsync(IMessage message);
 
-    Task SubscribeForMessagesAsync(IAgent agent);
+    Task SubscribeForMessagesAsync(IAgent agent); // TODO Internal?
 }
