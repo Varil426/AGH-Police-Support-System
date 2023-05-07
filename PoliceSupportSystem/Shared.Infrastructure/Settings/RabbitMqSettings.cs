@@ -3,10 +3,9 @@
 public record RabbitMqSettings(
     string Host,
     int Port,
-    string Exchange,
     string? Username = null,
     string? Password = null,
-    string? MessageQueue = null,
-    string? QueryQueue = null,
-    string? CommandQueue = null,
-    string? EventQueue = null);
+    string? MessageExchange = null,
+    string? EventExchange = null,
+    string? QueryExchange = null,
+    string? CommandExchange = null);
