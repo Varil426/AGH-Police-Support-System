@@ -8,7 +8,6 @@ using Wolverine;
 using Wolverine.RabbitMQ;
 using ICommand = Shared.Infrastructure.Integration.Commands.ICommand;
 using IEvent = Shared.Infrastructure.Integration.Events.IEvent;
-using IMessage = Shared.Agents.Communication.Messages.IMessage;
 
 var host = Host.CreateDefaultBuilder(args)
     .UseWolverineWithRabbitMq(

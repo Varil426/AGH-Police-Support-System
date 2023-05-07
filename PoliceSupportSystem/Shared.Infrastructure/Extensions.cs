@@ -68,41 +68,41 @@ public static class Extensions
                 
                 
                 // var messageQueueQueue = rabbitMqConfig["MessageQueue"];
-                if (rabbitMqConfig.MessageQueue is not null) // TODO Change to queue for each message type, 4 exchanges
-                {
-                    options.ListenToRabbitQueue(rabbitMqConfig.MessageQueue);//.DefaultIncomingMessage<IMessage>(); // TODO Use this!
-                    // options.PublishMessage<IMessage>().ToRabbitQueue(messageQueue);
-                    // options.PublishMessage<TestMessage>().ToRabbitQueue(messageQueue);
-                    // options.Publish().MessagesFromNamespace(typeof(IMessage).Namespace!).ToRabbitQueue(messageQueue);
-                    options.Publish().MessagesFromNamespaceContaining<IMessage>().ToRabbitQueue(rabbitMqConfig.MessageQueue);
-                    // options.Publish().MessagesFromNamespaceContaining<TestMessage>().ToRabbitQueue(rabbitMqConfig.MessageQueue);
-                    // options.PublishAllMessages();
-                }
-
-                // var queryQueue = rabbitMqConfig["QueryQueue"];
-                if (rabbitMqConfig.QueryQueue is not null)
-                {
-                    options.ListenToRabbitQueue(rabbitMqConfig.QueryQueue);
-                    // options.PublishMessage().ToRabbitQueue(queryQueue); // TODO
-                    options.Publish().MessagesFromNamespace(typeof(IQuery<>).Namespace!).ToRabbitQueue(rabbitMqConfig.QueryQueue);
-                }
-                
-                // var commandQueue = rabbitMqConfig["CommandQueue"];
-                if (rabbitMqConfig.CommandQueue is not null)
-                {
-                    options.ListenToRabbitQueue(rabbitMqConfig.CommandQueue);
-                    // options.PublishMessage<ICommand>().ToRabbitQueue(commandQueue);
-                    options.Publish().MessagesFromNamespaceContaining<ICommand>().ToRabbitQueue(rabbitMqConfig.CommandQueue);
-
-                }
-                
-                // var eventQueue = rabbitMqConfig["EventQueue"];
-                if (rabbitMqConfig.EventQueue is not null)
-                {
-                    options.ListenToRabbitQueue(rabbitMqConfig.EventQueue);
-                    // options.PublishMessage<IEvent>().ToRabbitQueue(eventQueue);
-                    options.Publish().MessagesFromNamespaceContaining<IEvent>().ToRabbitQueue(rabbitMqConfig.EventQueue);
-                }
+                // if (rabbitMqConfig.MessageQueue is not null) // TODO Change to queue for each message type, 4 exchanges
+                // {
+                //     options.ListenToRabbitQueue(rabbitMqConfig.MessageQueue);//.DefaultIncomingMessage<IMessage>(); // TODO Use this!
+                //     // options.PublishMessage<IMessage>().ToRabbitQueue(messageQueue);
+                //     // options.PublishMessage<TestMessage>().ToRabbitQueue(messageQueue);
+                //     // options.Publish().MessagesFromNamespace(typeof(IMessage).Namespace!).ToRabbitQueue(messageQueue);
+                //     options.Publish().MessagesFromNamespaceContaining<IMessage>().ToRabbitQueue(rabbitMqConfig.MessageQueue);
+                //     // options.Publish().MessagesFromNamespaceContaining<TestMessage>().ToRabbitQueue(rabbitMqConfig.MessageQueue);
+                //     // options.PublishAllMessages();
+                // }
+                //
+                // // var queryQueue = rabbitMqConfig["QueryQueue"];
+                // if (rabbitMqConfig.QueryQueue is not null)
+                // {
+                //     options.ListenToRabbitQueue(rabbitMqConfig.QueryQueue);
+                //     // options.PublishMessage().ToRabbitQueue(queryQueue); // TODO
+                //     options.Publish().MessagesFromNamespace(typeof(IQuery<>).Namespace!).ToRabbitQueue(rabbitMqConfig.QueryQueue);
+                // }
+                //
+                // // var commandQueue = rabbitMqConfig["CommandQueue"];
+                // if (rabbitMqConfig.CommandQueue is not null)
+                // {
+                //     options.ListenToRabbitQueue(rabbitMqConfig.CommandQueue);
+                //     // options.PublishMessage<ICommand>().ToRabbitQueue(commandQueue);
+                //     options.Publish().MessagesFromNamespaceContaining<ICommand>().ToRabbitQueue(rabbitMqConfig.CommandQueue);
+                //
+                // }
+                //
+                // // var eventQueue = rabbitMqConfig["EventQueue"];
+                // if (rabbitMqConfig.EventQueue is not null)
+                // {
+                //     options.ListenToRabbitQueue(rabbitMqConfig.EventQueue);
+                //     // options.PublishMessage<IEvent>().ToRabbitQueue(eventQueue);
+                //     options.Publish().MessagesFromNamespaceContaining<IEvent>().ToRabbitQueue(rabbitMqConfig.EventQueue);
+                // }
 
                 var transportExpression = options.UseRabbitMq(
                         rabbitMq =>
@@ -118,17 +118,17 @@ public static class Extensions
                     .AutoProvision()
                     .AutoPurgeOnStartup();
 
-                if (rabbitMqConfig.MessageQueue is not null)
-                    transportExpression.BindExchange(rabbitMqConfig.Exchange).ToQueue(rabbitMqConfig.MessageQueue);
-                
-                if (rabbitMqConfig.QueryQueue is not null)
-                    transportExpression.BindExchange(rabbitMqConfig.Exchange).ToQueue(rabbitMqConfig.QueryQueue);
-                
-                if (rabbitMqConfig.CommandQueue is not null)
-                    transportExpression.BindExchange(rabbitMqConfig.Exchange).ToQueue(rabbitMqConfig.CommandQueue);
-                
-                if (rabbitMqConfig.EventQueue is not null)
-                    transportExpression.BindExchange(rabbitMqConfig.Exchange).ToQueue(rabbitMqConfig.EventQueue);
+                // if (rabbitMqConfig.MessageQueue is not null)
+                //     transportExpression.BindExchange(rabbitMqConfig.Exchange).ToQueue(rabbitMqConfig.MessageQueue);
+                //
+                // if (rabbitMqConfig.QueryQueue is not null)
+                //     transportExpression.BindExchange(rabbitMqConfig.Exchange).ToQueue(rabbitMqConfig.QueryQueue);
+                //
+                // if (rabbitMqConfig.CommandQueue is not null)
+                //     transportExpression.BindExchange(rabbitMqConfig.Exchange).ToQueue(rabbitMqConfig.CommandQueue);
+                //
+                // if (rabbitMqConfig.EventQueue is not null)
+                //     transportExpression.BindExchange(rabbitMqConfig.Exchange).ToQueue(rabbitMqConfig.EventQueue);
 
                 configureServices?.Invoke(options.Services);
             });

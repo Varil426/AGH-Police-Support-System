@@ -6,13 +6,13 @@ namespace HqService.Application.Agents;
 
 public class HqAgent : AgentBase
 {
-    private static readonly IReadOnlyCollection<Type> s_acceptedMessageTypes = new[] { typeof(TestMessage) }.AsReadOnly();
-    private static readonly IReadOnlyCollection<Type> s_acceptedSignalTypes = new[] { typeof(TestSignal) }.AsReadOnly();
+    private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[] { typeof(TestMessage) }.AsReadOnly();
+    private static readonly IReadOnlyCollection<Type> HqAcceptedSignalTypes = new[] { typeof(TestSignal) }.AsReadOnly();
 
 
     public HqAgent(
         Guid id,
-        IMessageService messageService) : base(id, s_acceptedMessageTypes, s_acceptedSignalTypes, messageService)
+        IMessageService messageService) : base(id, HqAcceptedMessageTypes, HqAcceptedSignalTypes, messageService)
     {
     }
 
