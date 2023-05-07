@@ -1,4 +1,4 @@
-﻿namespace Shared.Agents.Communication.Messages;
+﻿namespace Shared.Application.Agents.Communication.Messages;
 
 public record TestMessage/*(Guid Id, Guid? ResponseTo, Guid Sender, IEnumerable<Guid>? Receivers, string MessageType, DateTimeOffset CreatedAt)*/ : IMessage
 {

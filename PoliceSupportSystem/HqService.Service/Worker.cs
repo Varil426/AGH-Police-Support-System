@@ -1,4 +1,4 @@
-using Shared.Agents.Communication.Messages;
+using Shared.Application.Agents.Communication.Messages;
 using Wolverine;
 
 namespace HqService.Service;

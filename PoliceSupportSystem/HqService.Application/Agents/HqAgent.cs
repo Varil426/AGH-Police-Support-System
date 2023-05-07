@@ -1,6 +1,6 @@
-﻿using Shared.Agents;
-using Shared.Agents.Communication.Messages;
-using Shared.Agents.Communication.Signals;
+﻿using Shared.Application.Agents;
+using Shared.Application.Agents.Communication.Messages;
+using Shared.Application.Agents.Communication.Signals;
 
 namespace HqService.Application.Agents;
 

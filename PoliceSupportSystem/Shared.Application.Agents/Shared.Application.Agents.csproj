@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Shared.Agents.Communication\Shared.Agents.Communication.csproj" />
+      <ProjectReference Include="..\Shared.Application.Agents.Communication\Shared.Application.Agents.Communication.csproj" />
     </ItemGroup>
 
 </Project>

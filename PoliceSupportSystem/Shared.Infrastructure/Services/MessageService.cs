@@ -1,6 +1,6 @@
-﻿using Shared.Agents;
+﻿using Shared.Application.Agents;
 using Wolverine;
-using IMessage = Shared.Agents.Communication.Messages.IMessage;
+using IMessage = Shared.Application.Agents.Communication.Messages.IMessage;
 
 namespace Shared.Infrastructure.Services;
 

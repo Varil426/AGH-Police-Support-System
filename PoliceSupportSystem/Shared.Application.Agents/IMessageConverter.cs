@@ -1,4 +1,4 @@
-﻿namespace Shared.Agents;
+﻿namespace Shared.Application.Agents;
 
 public interface IMessageConverter
 {

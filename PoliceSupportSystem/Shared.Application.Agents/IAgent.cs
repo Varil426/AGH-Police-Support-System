@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 
-namespace Shared.Agents;
+namespace Shared.Application.Agents;
 
 public interface IAgent : IHostedService
 {

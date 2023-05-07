@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using Shared.Agents;
+using Shared.Application.Agents;
 using Shared.Infrastructure.Exceptions;
 using Shared.Infrastructure.Integration.Queries;
 using Shared.Infrastructure.Services;
@@ -12,7 +12,7 @@ using Wolverine;
 using Wolverine.RabbitMQ;
 using ICommand = Shared.Infrastructure.Integration.Commands.ICommand;
 using IEvent = Shared.Infrastructure.Integration.Events.IEvent;
-using IMessage = Shared.Agents.Communication.Messages.IMessage;
+using IMessage = Shared.Application.Agents.Communication.Messages.IMessage;
 
 namespace Shared.Infrastructure;
 

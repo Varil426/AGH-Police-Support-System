@@ -1,4 +1,4 @@
-﻿namespace Shared.Agents.Communication.Messages;
+﻿namespace Shared.Application.Agents.Communication.Messages;
 
 public interface IMessage
 {

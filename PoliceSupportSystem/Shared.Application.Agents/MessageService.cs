@@ -2,7 +2,7 @@
 // using RabbitMQ.Client;
 // using RabbitMQ.Client.Events;
 //
-// namespace Shared.Agents;
+// namespace Shared.Application.Agents;
 //
 // public class MessageService : IMessageService, IDisposable // TODO Maybe some IDisposableGenerator (https://github.com/Elskom/IDisposableGenerator)
 // {
