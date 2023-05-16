@@ -13,7 +13,6 @@ services:
         - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     networks:
         - rabbitmq_go_net
-
 networks:
   rabbitmq_go_net:
     driver: bridge

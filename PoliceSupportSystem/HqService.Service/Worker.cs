@@ -1,5 +1,7 @@
+using Shared.Application;
 using Shared.Application.Agents.Communication.Messages;
-using Wolverine;
+using Shared.Application.Integration.Events;
+using Shared.Application.Integration.Queries;
 
 namespace HqService.Service;
 
@@ -18,7 +20,10 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await _messageBus.SendAsync(new TestMessage());
+            // await _messageBus.SendAsync(new TestMessage());
+            // await _messageBus.PublishAsync(new TestEvent("TEST"));
+            var queryResult = await _messageBus.QueryAsync<TestQuery, string>(new TestQuery(10, "hq-service"));
+            Console.WriteLine($"Worker: {queryResult}");
             await Task.Delay(1000, stoppingToken);
         }
     }

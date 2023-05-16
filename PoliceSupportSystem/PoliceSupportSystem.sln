@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Application.Agents",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Application.Agents.Communication", "Shared.Application.Agents.Communication\Shared.Application.Agents.Communication.csproj", "{4A34A0FB-D16E-4BAC-A4D4-A5C692D901FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Infrastructure.Integration", "Shared.Infrastructure.Integration\Shared.Infrastructure.Integration.csproj", "{7F7CE58D-3537-41E4-9647-9AF169F6AB73}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Application.Integration", "Shared.Application.Integration\Shared.Application.Integration.csproj", "{7F7CE58D-3537-41E4-9647-9AF169F6AB73}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Infrastructure", "Shared.Infrastructure\Shared.Infrastructure.csproj", "{854E6180-5A4C-4C7C-9CF3-799AAFC15309}"
 EndProject
