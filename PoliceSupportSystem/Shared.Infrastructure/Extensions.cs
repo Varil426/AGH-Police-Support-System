@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections;
+using System.Reflection;
 using Lamar;
 using MassTransit;
 using MassTransit.Configuration;
@@ -746,7 +747,7 @@ public static class Extensions
         return result;
     }
     
-    public static IHost SubscribeQueryHandlers(this IHost host, Action<IAsyncSubscriber, IServiceProvider> action)
+    public static IHost SubscribeQueryHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
     {
         var bus = host.Services.GetRequiredService<IBus>();
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
@@ -755,13 +756,23 @@ public static class Extensions
         var querySubscriber = bus.CreateAsyncSubscriber(
             x =>
             
-                x.SetExchange(rabbitMqSettings.QueryExchange)
+                x.SetExchange(rabbitMqSettings.QueryExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.QueryExchange)))
                 .SetRoutingKey(serviceSettings.Id)
                 .SetConsumerTag(serviceSettings.Id)
                 .SetReceiveSelfPublish() // TODO Add to config
             );
 
-        action.Invoke(querySubscriber, host.Services);
+        // action.Invoke(querySubscriber, host.Services);
+
+        foreach (var handlerType in DiscoverQueryHandlers(handlerAssemblies))
+        {
+            var queryHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IQueryHandler<,>));
+            var queryType = queryHandlerInterface.GetGenericArguments()[0];
+            var resultType = queryHandlerInterface.GetGenericArguments()[1];
+            typeof(Extensions).GetMethod(nameof(AddHandler))!
+                .MakeGenericMethod(handlerType, queryType, resultType).Invoke(null, new object[] { querySubscriber, host.Services });
+        }
+        
         querySubscriber.Open();
 
         return host;
@@ -779,4 +790,11 @@ public static class Extensions
             });
         return subscriber;
     }
+
+    // private static IEnumerable<T> GetAll<T> (this IServiceProvider provider)
+    // {
+    //     var site = typeof(ServiceProvider).GetProperty("CallSiteFactory", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(provider);
+    //     var desc = site.GetType().GetField("_descriptors", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(site) as ServiceDescriptor[];
+    //     return desc.Select(s => provider.GetRequiredService(s.ServiceType)).OfType<T>();
+    // }
 }

@@ -31,6 +31,6 @@ var host = Host.CreateDefaultBuilder(args)
     )
     .Build();
 
-host.SubscribeQueryHandlers(Routing.SubscribeQueryHandlers);
+host.SubscribeQueryHandlers(new[] { typeof(TestCommandHandler).Assembly }/*Routing.SubscribeQueryHandlers*/);
     
 host.Run();

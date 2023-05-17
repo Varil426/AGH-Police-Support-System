@@ -7,8 +7,8 @@ using Shared.Infrastructure.Settings;
 
 namespace HqService.Service;
 
-internal static class Routing
-{
-    public static void SubscribeQueryHandlers(IAsyncSubscriber subscriber, IServiceProvider serviceProvider) =>
-        subscriber.AddHandler<TestQueryHandler, TestQuery, String>(serviceProvider); // TODO Move to infrastructure
-}
+// internal static class Routing
+// {
+//     public static void SubscribeQueryHandlers(IAsyncSubscriber subscriber, IServiceProvider serviceProvider) =>
+//         subscriber.AddHandler<TestQueryHandler, TestQuery, String>(serviceProvider); // TODO Move to infrastructure
+// }
