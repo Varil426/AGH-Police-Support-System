@@ -31,6 +31,7 @@ var host = Host.CreateDefaultBuilder(args)
     )
     .Build();
 
-host.SubscribeQueryHandlers(new[] { typeof(TestCommandHandler).Assembly }/*Routing.SubscribeQueryHandlers*/);
+host.SubscribeQueryHandlers(new[] { typeof(TestCommandHandler).Assembly }/*Routing.SubscribeQueryHandlers*/); // TODO SUBSCRIBE ALL HANDLERS FROM ONE METHOD
+host.SubscribeCommandHandlers(new[] { typeof(TestCommandHandler).Assembly }/*Routing.SubscribeQueryHandlers*/); // TODO SUBSCRIBE ALL HANDLERS FROM ONE METHOD
     
 host.Run();

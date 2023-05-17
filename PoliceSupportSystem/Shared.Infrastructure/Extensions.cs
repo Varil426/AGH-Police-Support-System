@@ -717,7 +717,7 @@ public static class Extensions
                 assembly.GetTypes().Where(
                     x => x.GetInterfaces().Any(
                         @interface => @interface.IsGenericType &&
-                                      (@interface.GetGenericTypeDefinition() == typeof(ICommandHandler<>) || @interface.GetGenericTypeDefinition() == typeof(ICommandHandler<>)))));
+                                      (@interface.GetGenericTypeDefinition() == typeof(ICommandHandler<>) || @interface.GetGenericTypeDefinition() == typeof(ICommandHandler<,>)))));
         return commandHandlers;
     }
 
@@ -769,7 +769,7 @@ public static class Extensions
             var queryHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IQueryHandler<,>));
             var queryType = queryHandlerInterface.GetGenericArguments()[0];
             var resultType = queryHandlerInterface.GetGenericArguments()[1];
-            typeof(Extensions).GetMethod(nameof(AddHandler))!
+            typeof(Extensions).GetMethod(nameof(AddQueryHandler))!
                 .MakeGenericMethod(handlerType, queryType, resultType).Invoke(null, new object[] { querySubscriber, host.Services });
         }
         
@@ -778,7 +778,44 @@ public static class Extensions
         return host;
     }
     
-    public static IAsyncSubscriber AddHandler<THandler, TQuery, TResult>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
+    public static IHost SubscribeCommandHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
+    {
+        var bus = host.Services.GetRequiredService<IBus>();
+        var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
+        var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
+
+        var commandSubscriber = bus.CreateAsyncSubscriber(
+            x =>
+            
+                x.SetExchange(rabbitMqSettings.CommandExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.CommandExchange)))
+                    .SetRoutingKey(serviceSettings.Id)
+                    .SetConsumerTag(serviceSettings.Id)
+                    .SetReceiveSelfPublish() // TODO Add to config
+        );
+        
+        foreach (var handlerType in DiscoverCommandHandlers(handlerAssemblies))
+        {
+            var commandHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType &&
+                                                                               (x.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
+                                                                                x.GetGenericTypeDefinition() == typeof(ICommandHandler<,>)));
+            var commandType = commandHandlerInterface.GetGenericArguments()[0];
+            if (commandHandlerInterface.GetGenericArguments().Length == 2)
+            {
+                var resultType = commandHandlerInterface.GetGenericArguments()[1];
+                typeof(Extensions).GetMethods().First(x => x.Name == nameof(AddCommandHandler) && x.GetGenericArguments().Length == 3)
+                    .MakeGenericMethod(handlerType, commandType, resultType).Invoke(null, new object[] { commandSubscriber, host.Services });
+            }
+            else
+                typeof(Extensions).GetMethods().First(x => x.Name == nameof(AddCommandHandler) && x.GetGenericArguments().Length == 2)
+                    .MakeGenericMethod(handlerType, commandType).Invoke(null, new object[] { commandSubscriber, host.Services });
+        }
+        
+        commandSubscriber.Open();
+
+        return host;
+    }
+    
+    public static IAsyncSubscriber AddQueryHandler<THandler, TQuery, TResult>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
     where THandler : class, IQueryHandler<TQuery, TResult>
     where TQuery : class, IQuery<TResult>
     {
@@ -791,6 +828,32 @@ public static class Extensions
         return subscriber;
     }
 
+    public static IAsyncSubscriber AddCommandHandler<THandler, TCommand, TResult>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
+        where THandler : class, ICommandHandler<TCommand, TResult>
+        where TCommand : class, ICommand<TResult>
+    {
+        subscriber.Subscribe<TCommand, TResult>(
+            async x =>
+            {
+                await using var scope = serviceProvider.CreateAsyncScope();
+                return await scope.ServiceProvider.GetRequiredService<THandler>().Handle(x);
+            });
+        return subscriber;
+    }
+    
+    public static IAsyncSubscriber AddCommandHandler<THandler, TCommand>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
+        where THandler : class, ICommandHandler<TCommand>
+        where TCommand : class, ICommand
+    {
+        subscriber.Subscribe<TCommand>(
+            async x =>
+            {
+                await using var scope = serviceProvider.CreateAsyncScope();
+                await scope.ServiceProvider.GetRequiredService<THandler>().Handle(x);
+            });
+        return subscriber;
+    }
+    
     // private static IEnumerable<T> GetAll<T> (this IServiceProvider provider)
     // {
     //     var site = typeof(ServiceProvider).GetProperty("CallSiteFactory", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(provider);

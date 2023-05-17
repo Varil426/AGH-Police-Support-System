@@ -8,6 +8,6 @@ public class TestCommandHandler : ICommandHandler<TestCommand, string>
     public Task<string> Handle(TestCommand command)
     {
         Console.WriteLine("TEST");
-        return Task.FromResult("TEST");
+        return Task.FromResult("TEST SUCCESSFUL");
     }
 }

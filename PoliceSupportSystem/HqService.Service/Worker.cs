@@ -1,5 +1,6 @@
 using Shared.Application;
 using Shared.Application.Agents.Communication.Messages;
+using Shared.Application.Integration.Commands;
 using Shared.Application.Integration.Events;
 using Shared.Application.Integration.Queries;
 
@@ -22,8 +23,10 @@ public class Worker : BackgroundService
         {
             // await _messageBus.SendAsync(new TestMessage());
             // await _messageBus.PublishAsync(new TestEvent("TEST"));
-            var queryResult = await _messageBus.QueryAsync<TestQuery, string>(new TestQuery(10, "hq-service"));
-            Console.WriteLine($"Worker: {queryResult}");
+            var commandResult = await _messageBus.InvokeAsync<TestCommand, string>(new TestCommand(123, "hq-service"));
+            // var queryResult = await _messageBus.QueryAsync<TestQuery, string>(new TestQuery(10, "hq-service"));
+            // Console.WriteLine($"Worker: {queryResult}");
+            Console.WriteLine($"Worker: {commandResult}");
             await Task.Delay(1000, stoppingToken);
         }
     }
