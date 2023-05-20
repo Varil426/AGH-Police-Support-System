@@ -1,7 +1,4 @@
-﻿// using MassTransit;
-
-using MassTransit;
-using MessageBus.Core.API;
+﻿using MessageBus.Core.API;
 using Shared.Application;
 using Shared.Application.Agents.Communication.Messages;
 using Shared.Application.Integration.Commands;
@@ -15,56 +12,6 @@ namespace Shared.Infrastructure.Services;
 
 internal class MessageBus : IMessageBus, IDisposable
 {
-    // private readonly Wolverine.IMessageBus _messageBus;
-    //
-    // public MessageBus(Wolverine.IMessageBus messageBus)
-    // {
-    //     _messageBus = messageBus;
-    // }
-    //
-    // public Task InvokeAsync<TCommand>(TCommand command, CancellationToken cancellation = default(CancellationToken), TimeSpan? timeout = null) where TCommand : ICommand
-    //     => _messageBus.InvokeAsync(command, cancellation, timeout);
-    //
-    // public Task<TResult> InvokeAsync<TCommand, TResult>(TCommand command, CancellationToken cancellation = default(CancellationToken), TimeSpan? timeout = null)
-    //     where TCommand : ICommand<TResult>
-    //     => _messageBus.InvokeAsync<TResult>(command, cancellation, timeout);
-    //
-    // public Task<TResult> QueryAsync<TQuery, TResult>(TQuery query, CancellationToken cancellation = default(CancellationToken), TimeSpan? timeout = null)
-    //     where TQuery : IQuery<TResult>
-    //     => _messageBus.InvokeAsync<TResult>(query, cancellation, timeout);
-    //
-    // public ValueTask SendAsync<TMessage>(TMessage message) where TMessage : IMessage
-    //     => _messageBus.SendAsync(message);
-    //
-    // public ValueTask PublishAsync<TEvent>(TEvent @event) where TEvent : IEvent
-    //     => _messageBus.PublishAsync(@event);
-    
-    // private readonly IBus _messageBus;
-    //
-    // public MessageBus(IBus messageBus)
-    // {
-    //     _messageBus = messageBus;
-    // }
-    //
-    // public Task InvokeAsync<TCommand>(TCommand command, CancellationToken cancellation = default) where TCommand : ICommand
-    //     => _messageBus.Send(command, cancellation);
-    //
-    // public async Task<TResult> InvokeAsync<TCommand, TResult>(TCommand command, CancellationToken cancellation = default, TimeSpan? timeout = null)
-    //     where TCommand : class, ICommand<TResult>
-    //     where TResult : class
-    //     => (await _messageBus.Request<TCommand, TResult>(command, cancellation, timeout ?? default)).Message;
-    //
-    // public async Task<TResult> QueryAsync<TQuery, TResult>(TQuery query, CancellationToken cancellation = default, TimeSpan? timeout = null)
-    //     where TQuery : class, IQuery<TResult>
-    //     where TResult : class
-    //     => (await _messageBus.Request<TQuery, TResult>(query, cancellation, timeout ?? default)).Message;
-    //
-    // public Task SendAsync<TMessage>(TMessage message) where TMessage : class, IMessage
-    //     => _messageBus.Send(message);
-    //
-    // public Task PublishAsync<TEvent>(TEvent @event) where TEvent : class, IEvent
-    //     => _messageBus.Publish(@event);
-    
     private readonly IBus _messageBus;
     private readonly ServiceSettings _serviceSettings;
     private readonly RabbitMqSettings _rabbitMqSettings;

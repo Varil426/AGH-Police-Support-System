@@ -11,18 +11,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="MassTransit" Version="8.0.15" />
-      <PackageReference Include="MassTransit.Abstractions" Version="8.0.15" />
-      <PackageReference Include="MassTransit.RabbitMQ" Version="8.0.15" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
       <PackageReference Include="RabbitMQ.MessageBus" Version="4.0.103" />
-      <PackageReference Include="WolverineFx" Version="0.9.16" />
-      <PackageReference Include="WolverineFx.RabbitMQ" Version="0.9.16" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Subscribers\" />
     </ItemGroup>
 
 </Project>
