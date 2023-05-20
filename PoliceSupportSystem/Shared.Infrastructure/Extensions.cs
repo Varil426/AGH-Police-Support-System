@@ -759,6 +759,25 @@ public static class Extensions
 
         return result;
     }
+
+    public static IHost SubscribeHandlers(this IHost host, IList<Assembly> handlerAssemblies)
+    {
+        var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
+
+        if (rabbitMqSettings.QueryExchange is not null)
+            host.SubscribeQueryHandlers(handlerAssemblies);
+        
+        if (rabbitMqSettings.EventExchange is not null)
+            host.SubscribeEventHandlers(handlerAssemblies);
+        
+        if (rabbitMqSettings.CommandExchange is not null)
+            host.SubscribeCommandHandlers(handlerAssemblies);
+        
+        if (rabbitMqSettings.MessageExchange is not null)
+            host.SubscribeMessageService();
+
+        return host;
+    }
     
     public static IHost SubscribeQueryHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
     {
