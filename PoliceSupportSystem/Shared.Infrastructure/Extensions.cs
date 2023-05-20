@@ -791,6 +791,36 @@ public static class Extensions
         return host;
     }
     
+    public static IHost SubscribeEventHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
+    {
+        var bus = host.Services.GetRequiredService<IBus>();
+        var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
+        var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
+
+        var eventSubscriber = bus.CreateAsyncSubscriber(
+            x =>
+            
+                x.SetExchange(rabbitMqSettings.EventExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.EventExchange)))
+                    .SetRoutingKey(serviceSettings.Id)
+                    .SetConsumerTag(serviceSettings.Id)
+                    .SetReceiveSelfPublish() // TODO Add to config
+        );
+
+        // action.Invoke(querySubscriber, host.Services);
+
+        foreach (var handlerType in DiscoverEventHandlers(handlerAssemblies))
+        {
+            var queryHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEventHandler<>));
+            var eventType = queryHandlerInterface.GetGenericArguments()[0];
+            typeof(Extensions).GetMethod(nameof(AddEventHandler), BindingFlags.NonPublic | BindingFlags.Static)!
+                .MakeGenericMethod(handlerType, eventType).Invoke(null, new object[] { eventSubscriber, host.Services });
+        }
+        
+        eventSubscriber.Open();
+
+        return host;
+    }
+    
     public static IHost SubscribeCommandHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
     {
         var bus = host.Services.GetRequiredService<IBus>();
@@ -863,6 +893,19 @@ public static class Extensions
             {
                 await using var scope = serviceProvider.CreateAsyncScope();
                 return await scope.ServiceProvider.GetRequiredService<THandler>().Handle(x);
+            });
+        return subscriber;
+    }
+    
+    private static IAsyncSubscriber AddEventHandler<THandler, TEvent>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
+        where THandler : class, IEventHandler<TEvent>
+        where TEvent : class, IEvent
+    {
+        subscriber.Subscribe<TEvent>(
+            async x =>
+            {
+                await using var scope = serviceProvider.CreateAsyncScope();
+                await scope.ServiceProvider.GetRequiredService<THandler>().Handle(x);
             });
         return subscriber;
     }

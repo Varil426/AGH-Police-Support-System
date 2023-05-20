@@ -7,7 +7,7 @@ public class TestEventHandler : IEventHandler<TestEvent>
 {
     public Task Handle(TestEvent @event)
     {
-        Console.WriteLine(@event.Value);
+        Console.WriteLine($"From handler: {@event.Value}");
         return Task.CompletedTask;
     }
 }
