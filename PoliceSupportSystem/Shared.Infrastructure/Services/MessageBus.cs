@@ -68,7 +68,8 @@ internal class MessageBus : IMessageBus, IDisposable
     private readonly IBus _messageBus;
     private readonly ServiceSettings _serviceSettings;
     private readonly RabbitMqSettings _rabbitMqSettings;
-    private readonly IRpcAsyncPublisher? _eventPublisher;
+    private readonly ThreadLocal<IPublisher>? _eventPublisher;
+    private readonly ThreadLocal<IPublisher>? _messagePublisher;
     
     public MessageBus(IBus messageBus, ServiceSettings serviceSettings, RabbitMqSettings rabbitMqSettings)
     {
@@ -76,12 +77,18 @@ internal class MessageBus : IMessageBus, IDisposable
         _serviceSettings = serviceSettings;
         _rabbitMqSettings = rabbitMqSettings;
         if (rabbitMqSettings.EventExchange is not null)
-            _eventPublisher = _messageBus.CreateAsyncRpcPublisher(
+            _eventPublisher = new ThreadLocal<IPublisher>(
+                () => _messageBus.CreatePublisher(
+                    x =>
+                    {
+                        x.SetExchange(_rabbitMqSettings.EventExchange);
+                    }));
+        if (rabbitMqSettings.MessageExchange is not null)
+            _messagePublisher = new ThreadLocal<IPublisher>(() => _messageBus.CreatePublisher(
                 x =>
                 {
-                    x.SetConsumerTag(_serviceSettings.Id);
-                    x.SetExchange(_rabbitMqSettings.EventExchange);
-                });
+                    x.SetExchange(_rabbitMqSettings.MessageExchange);
+                }));
     }
 
     public Task InvokeAsync<TCommand>(TCommand command, CancellationToken cancellation = default) where TCommand : ICommand
@@ -89,8 +96,8 @@ internal class MessageBus : IMessageBus, IDisposable
         using var publisher = _messageBus.CreateAsyncRpcPublisher(
             x =>
             {
-                x.SetConsumerTag(_serviceSettings.Id);
                 x.SetRoutingKey(command.Receiver);
+                x.SetConsumerTag(_serviceSettings.Id);
                 x.SetExchange(_rabbitMqSettings.CommandExchange ?? throw new MissingConfigurationException(nameof(RabbitMqSettings.CommandExchange)));
             });
         return publisher.Send(command, cancellationToken: cancellation);
@@ -103,8 +110,8 @@ internal class MessageBus : IMessageBus, IDisposable
         using var publisher = _messageBus.CreateAsyncRpcPublisher(
             x =>
             {
-                x.SetConsumerTag(_serviceSettings.Id);
                 x.SetRoutingKey(command.Receiver);
+                x.SetConsumerTag(_serviceSettings.Id);
                 x.SetExchange(_rabbitMqSettings.CommandExchange ?? throw new MissingConfigurationException(nameof(RabbitMqSettings.CommandExchange)));
             });
         return await publisher.Send<TCommand, TResult>(command, cancellationToken: cancellation);
@@ -117,22 +124,49 @@ internal class MessageBus : IMessageBus, IDisposable
         using var publisher = _messageBus.CreateAsyncRpcPublisher(
             x =>
             {
-                x.SetConsumerTag(_serviceSettings.Id);
                 x.SetRoutingKey(query.Receiver);
+                x.SetConsumerTag(_serviceSettings.Id);
                 x.SetExchange(_rabbitMqSettings.QueryExchange ?? throw new MissingConfigurationException(nameof(RabbitMqSettings.QueryExchange)));
             });
         return await publisher.Send<TQuery, TResult>(query, cancellationToken: cancellation);
     }
-    
+
     public Task SendAsync<TMessage>(TMessage message) where TMessage : class, IMessage
-        => _eventPublisher.Send(message); // TODO
+    {
+        if (message.Receivers != null && message.Receivers.Any())
+        {
+            foreach (var receiver in message.Receivers)
+            {
+                using var publisher = _messageBus.CreatePublisher(
+                    x =>
+                    {
+                        x.SetRoutingKey(receiver.ToString());
+                        x.SetExchange(_rabbitMqSettings.DirectMessageExchange ?? throw new MissingConfigurationException(nameof(RabbitMqSettings.DirectMessageExchange)));
+                    });
+                publisher.Send(message);
+            }
+        }
+        else if (_messagePublisher is not null)
+            _messagePublisher.Value?.Send(message);
+        else
+            throw new InvalidOperationException("Missing config for messages.");
+        
+        return Task.CompletedTask;
+    }
     
     public Task PublishAsync<TEvent>(TEvent @event) where TEvent : class, IEvent
-        => _eventPublisher.Send(@event); // TODO
+    {
+        if (_eventPublisher is not null)
+            _eventPublisher.Value?.Send(@event);
+        else 
+            throw new InvalidOperationException("Missing config for events.");
+        return Task.CompletedTask;
+    }
 
     public void Dispose() // TODO Improve
     {
         _messageBus.Dispose();
         _eventPublisher?.Dispose();
+        _messagePublisher?.Dispose();
     }
 }

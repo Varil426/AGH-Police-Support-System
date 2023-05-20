@@ -6,6 +6,7 @@ public record RabbitMqSettings(
     string? Username = null,
     string? Password = null,
     string? MessageExchange = null,
+    string? DirectMessageExchange = null,
     string? EventExchange = null,
     string? QueryExchange = null,
     string? CommandExchange = null);

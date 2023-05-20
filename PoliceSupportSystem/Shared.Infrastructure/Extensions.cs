@@ -36,6 +36,7 @@ using IMessageBus = Shared.Application.IMessageBus;
 
 namespace Shared.Infrastructure;
 
+// TODO Split this file into many - specialized
 public static class Extensions
 {
     private const string RabbitMqConfigSectionName = "RabbitMq";
@@ -693,13 +694,25 @@ public static class Extensions
                     model.ExchangeDeclare(rabbitMqSettings.CommandExchange, ExchangeType.Direct, false, true);
                 if (rabbitMqSettings.EventExchange is not null)
                     model.ExchangeDeclare(rabbitMqSettings.EventExchange, ExchangeType.Fanout, false, true);
+                if (rabbitMqSettings.DirectMessageExchange is not null)
+                    model.ExchangeDeclare(rabbitMqSettings.DirectMessageExchange, ExchangeType.Direct, false, true);
                 if (rabbitMqSettings.MessageExchange is not null)
-                    model.ExchangeDeclare(rabbitMqSettings.MessageExchange, ExchangeType.Topic, false, true);
+                    model.ExchangeDeclare(rabbitMqSettings.MessageExchange, ExchangeType.Fanout, false, true);
             });
         
         return hostBuilder;
     }
 
+    internal static IEnumerable<Type> DiscoverMessageTypes(IEnumerable<Assembly> assemblies)
+    {
+        var messageTypes = new List<Type>();
+        foreach (var assembly in assemblies)
+            messageTypes.AddRange(
+                assembly.GetTypes().Where(
+                    x => !x.IsAbstract && x.IsAssignableTo(typeof(IMessage))));
+        return messageTypes;
+    }
+    
     private static IEnumerable<Type> DiscoverQueryHandlers(IEnumerable<Assembly> assemblies)
     {
         var queryHandlers = new List<Type>();
@@ -769,7 +782,7 @@ public static class Extensions
             var queryHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IQueryHandler<,>));
             var queryType = queryHandlerInterface.GetGenericArguments()[0];
             var resultType = queryHandlerInterface.GetGenericArguments()[1];
-            typeof(Extensions).GetMethod(nameof(AddQueryHandler))!
+            typeof(Extensions).GetMethod(nameof(AddQueryHandler), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(handlerType, queryType, resultType).Invoke(null, new object[] { querySubscriber, host.Services });
         }
         
@@ -802,11 +815,11 @@ public static class Extensions
             if (commandHandlerInterface.GetGenericArguments().Length == 2)
             {
                 var resultType = commandHandlerInterface.GetGenericArguments()[1];
-                typeof(Extensions).GetMethods().First(x => x.Name == nameof(AddCommandHandler) && x.GetGenericArguments().Length == 3)
+                typeof(Extensions).GetMethods(BindingFlags.Static | BindingFlags.NonPublic).First(x => x.Name == nameof(AddCommandHandler) && x.GetGenericArguments().Length == 3)
                     .MakeGenericMethod(handlerType, commandType, resultType).Invoke(null, new object[] { commandSubscriber, host.Services });
             }
             else
-                typeof(Extensions).GetMethods().First(x => x.Name == nameof(AddCommandHandler) && x.GetGenericArguments().Length == 2)
+                typeof(Extensions).GetMethods(BindingFlags.Static | BindingFlags.NonPublic).First(x => x.Name == nameof(AddCommandHandler) && x.GetGenericArguments().Length == 2)
                     .MakeGenericMethod(handlerType, commandType).Invoke(null, new object[] { commandSubscriber, host.Services });
         }
         
@@ -814,10 +827,36 @@ public static class Extensions
 
         return host;
     }
-    
-    public static IAsyncSubscriber AddQueryHandler<THandler, TQuery, TResult>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
-    where THandler : class, IQueryHandler<TQuery, TResult>
-    where TQuery : class, IQuery<TResult>
+
+    public static IHost SubscribeMessageService(this IHost host)
+    {
+        var bus = host.Services.GetRequiredService<IBus>();
+        var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
+        var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
+
+        var messageSubscriber = bus.CreateAsyncSubscriber(
+            x =>
+                x.SetExchange(rabbitMqSettings.MessageExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.MessageExchange)))
+                    .SetRoutingKey(serviceSettings.Id)
+                    .SetConsumerTag(serviceSettings.Id)
+                    .SetReceiveSelfPublish() // TODO Add to config
+        );
+
+        foreach (var messageType in DiscoverMessageTypes(new[] { typeof(IMessage).Assembly }))
+            typeof(Extensions).GetMethod(nameof(AddMessageHandler), BindingFlags.Static | BindingFlags.NonPublic)!.MakeGenericMethod(messageType)
+                .Invoke(null, new object[] { messageSubscriber, host.Services });
+
+        // foreach (var messageType in DiscoverMessageTypes(new[] { typeof(IMessage).Assembly }))
+        //     messageSubscriber.AddMessageHandler(host.Services, messageType);
+
+        messageSubscriber.Open();
+        
+        return host;
+    }
+
+    private static IAsyncSubscriber AddQueryHandler<THandler, TQuery, TResult>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
+        where THandler : class, IQueryHandler<TQuery, TResult>
+        where TQuery : class, IQuery<TResult>
     {
         subscriber.Subscribe<TQuery, TResult>(
             async x =>
@@ -828,7 +867,7 @@ public static class Extensions
         return subscriber;
     }
 
-    public static IAsyncSubscriber AddCommandHandler<THandler, TCommand, TResult>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
+    private static IAsyncSubscriber AddCommandHandler<THandler, TCommand, TResult>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
         where THandler : class, ICommandHandler<TCommand, TResult>
         where TCommand : class, ICommand<TResult>
     {
@@ -841,7 +880,7 @@ public static class Extensions
         return subscriber;
     }
     
-    public static IAsyncSubscriber AddCommandHandler<THandler, TCommand>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
+    private static IAsyncSubscriber AddCommandHandler<THandler, TCommand>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
         where THandler : class, ICommandHandler<TCommand>
         where TCommand : class, ICommand
     {
@@ -853,11 +892,24 @@ public static class Extensions
             });
         return subscriber;
     }
-    
+
     // private static IEnumerable<T> GetAll<T> (this IServiceProvider provider)
     // {
     //     var site = typeof(ServiceProvider).GetProperty("CallSiteFactory", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(provider);
     //     var desc = site.GetType().GetField("_descriptors", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(site) as ServiceDescriptor[];
     //     return desc.Select(s => provider.GetRequiredService(s.ServiceType)).OfType<T>();
+    // }
+    
+    internal static IAsyncSubscriber AddMessageHandler<TMessage>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
+        where TMessage : class, IMessage
+    {
+        subscriber.Subscribe<TMessage>(x => serviceProvider.GetRequiredService<IMessageHandler>().Handle(x));
+        return subscriber;
+    }
+    
+    // private static IAsyncSubscriber AddMessageHandler(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider, Type messageType)
+    // {
+    //     subscriber.Subscribe(messageType, o => serviceProvider.GetRequiredService<IMessageHandler>().Handle((IMessage)o));
+    //     return subscriber;
     // }
 }
