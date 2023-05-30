@@ -203,12 +203,11 @@ FROM osm2pgrouting-stage AS db-init-stage
 
 COPY ./setup.sql /docker-entrypoint-initdb.d/
 
-FROM db-init-stage AS map-import-stage
+FROM db-init-stage AS map-config-stage
 
 COPY ./mapconfig.xml /mapconfig.xml
-COPY ./maps/*.osm /maps/
 
-FROM map-import-stage AS script-import-stage
+FROM map-config-stage AS script-import-stage
 
 # RUN apt update \
 #     && apt install -y sudo

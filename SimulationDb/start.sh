@@ -9,13 +9,13 @@ set -m
 # postgres &
 docker-entrypoint.sh -c 'shared_buffers=256MB' -c 'max_connections=200' &
 
-# Import map data
-sleep 10
+# Wait for DB to start
+# https://github.com/docker-library/postgres/issues/146
+until pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}; do sleep 1; done
+sleep 4
+until pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}; do sleep 1; done
 
-FILES="/maps/*"
-for f in $FILES
-do
-  osm2pgrouting --f $f --conf /mapconfig.xml --dbname ${POSTGRES_DB} --username ${POSTGRES_USER} --password ${POSTGRES_PASSWORD} --addnodes --clean
-done
+# Import map data
+osm2pgrouting --f /maps/${MAP_FILE} --conf /mapconfig.xml --dbname ${POSTGRES_DB} --username ${POSTGRES_USER} --password ${POSTGRES_PASSWORD} --addnodes --clean
 
 fg %1

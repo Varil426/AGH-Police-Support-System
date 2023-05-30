@@ -22,6 +22,9 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=SimulationDb
+      - MAP_FILE=krakow.osm
+    volumes:
+      - ./SimulationDb/maps:/maps
 networks: 
   rabbitmq_go_net:
     driver: bridge
