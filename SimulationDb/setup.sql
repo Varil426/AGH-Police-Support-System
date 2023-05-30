@@ -1,0 +1,18 @@
+
+-- DbName CONSTANT VARCHAR := 'PostGisDb';
+-- SchemaName CONSTANT VARCHAR := 'maps';
+
+-- CREATE DATABASE SimulationDb;
+
+-- CREATE SCHEMA maps;
+-- CREATE EXTENSION postgis SCHEMA maps;
+-- CREATE EXTENSION pgrouting SCHEMA maps;
+
+-- CREATE SCHEMA maps;
+-- CREATE EXTENSION postgis SCHEMA maps CASCADE;
+-- CREATE EXTENSION pgrouting SCHEMA maps CASCADE;
+-- SET SEARCH_PATH = maps;
+
+CREATE EXTENSION postgis;
+CREATE EXTENSION pgrouting;
+CREATE EXTENSION hstore;

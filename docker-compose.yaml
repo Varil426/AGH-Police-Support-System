@@ -9,10 +9,19 @@ services:
     volumes:
         - ./rabbitmq/data/:/var/lib/rabbitmq/
         - ./rabbitmq/log/:/var/log/rabbitmq/
-        - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
-        - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+#        - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+#        - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     networks:
         - rabbitmq_go_net
-networks:
+  simulationdb:
+    build: ./SimulationDb
+    # command: postgres
+    ports:
+      - "5432:5432"
+    environment: # TODO Remove secrets
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=SimulationDb
+networks: 
   rabbitmq_go_net:
     driver: bridge

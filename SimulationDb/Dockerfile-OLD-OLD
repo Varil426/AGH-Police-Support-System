@@ -1,0 +1,88 @@
+FROM debian
+# FROM postgres:13
+# FROM pgrouting/pgrouting
+
+# Variables
+ENV PG_MAJOR 13
+ENV POSTGIS_MAJOR 3
+ENV POSTGIS_USER postgis_admin
+# TODO Password - Move outside of this file
+ENV POSTGIS_PASSWORD postgis_admin
+ENV POSTGIS_DB postgisdb
+ENV POSTGIS_SCHEMA maps
+ENV MAP_FILENAME krakow.osm
+
+RUN apt upgrade \ 
+    && apt update
+
+# RUN apt -y install sudo \
+#     && apt -y install systemctl
+
+RUN apt -y install sudo
+
+# PostgreSQL
+RUN apt install -y postgresql-${PG_MAJOR} postgresql-contrib \
+    && apt install -y postgis postgresql-${PG_MAJOR}-postgis-${POSTGIS_MAJOR} \
+    && apt install -y  postgresql-${PG_MAJOR}-pgrouting \
+    && apt install -y  osm2pgrouting
+
+# RUN apt install -y postgis postgresql-${PG_MAJOR}-postgis-${POSTGIS_MAJOR} \
+#     && apt install -y  postgresql-${PG_MAJOR}-pgrouting \
+#     && apt install -y  osm2pgrouting
+
+# RUN sudo -i -u postgres
+# RUN service postgresql start
+# RUN systemctl start postgresql
+# RUN systemctl status postgresql
+# RUN /etc/init.d/postgresql start
+# RUN systemctl enable postgresql
+# RUN systemctl start postgresql.service
+# RUN systemctl enable postgresql
+# RUN createuser ${POSTGIS_USER}
+# RUN createdb ${POSTGIS_DB} -O ${POSTGIS_USER}
+
+# RUN service postgresql start \
+#     && sudo -u postgres createuser ${POSTGIS_USER} \
+#     && sudo -u postgres createdb ${POSTGIS_DB} -O ${POSTGIS_USER} \
+#     && psql "postgresql://${POSTGIS_USER}:test@localhost/${POSTGIS_DB}}" \
+#     && CREATE EXTENSION postgis;
+
+# RUN service postgresql start \
+#     && sudo -u postgres psql \
+#     && CREATE DATABASE ${POSTGIS_DB}; \
+#     && CREATE SCHEMA postgis; \
+#     && CREATE EXTENSION postgis SCHEMA postgis;
+
+RUN service postgresql start \
+    && sudo -u postgres psql -c "CREATE USER ${POSTGIS_USER} WITH SUPERUSER PASSWORD '${POSTGIS_PASSWORD}';" \
+    && sudo -u postgres psql -c "CREATE DATABASE ${POSTGIS_DB} OWNER ${POSTGIS_USER};" \
+    && sudo -u postgres psql "postgresql://${POSTGIS_USER}:${POSTGIS_PASSWORD}@localhost:5432/${POSTGIS_DB}" -c "CREATE SCHEMA ${POSTGIS_SCHEMA};" \
+    && sudo -u postgres psql "postgresql://${POSTGIS_USER}:${POSTGIS_PASSWORD}@localhost:5432/${POSTGIS_DB}" -c "CREATE EXTENSION postgis SCHEMA ${POSTGIS_SCHEMA};" \
+    && sudo -u postgres psql "postgresql://${POSTGIS_USER}:${POSTGIS_PASSWORD}@localhost:5432/${POSTGIS_DB}" -c "CREATE EXTENSION pgrouting SCHEMA ${POSTGIS_SCHEMA};"
+
+# Map Import
+COPY maps/${MAP_FILENAME} /maps
+RUN service postgresql start \
+    && osm2pgrouting --f /maps/${MAP_FILENAME} --dbname ${POSTGIS_DB} --schema ${POSTGIS_SCHEMA} --username ${POSTGIS_USER} -W ${POSTGIS_PASSWORD} --clean
+
+# RUN psql -d ${POSTGIS_DB}
+
+# RUN CREATE EXTENSION postgis;
+
+# TODO Remove
+ENV POSTGRES_HOST_AUTH_METHOD trust
+
+# TODO Improve https://stackoverflow.com/questions/40454470/how-can-i-use-a-variable-inside-a-dockerfile-cmd
+COPY start.sh /
+
+# COPY *.sql /docker-entrypoint-initdb.d/
+
+# CMD [ postgres ]
+EXPOSE 5432
+# CMD ["service", "postgresql", "start"]
+# CMD "/usr/lib/postgresql/${PG_MAJOR}/bin/postgres"
+# CMD ["sudo", "-u", "postgres", "/usr/lib/postgresql/13/bin/postgres", "-D"]
+# CMD service postgresql start && tail -F /var/log/mysql/error.log
+CMD sudo -u postgres /start.sh
+# CMD psql 
+# CMD ["sleep","3600"]
