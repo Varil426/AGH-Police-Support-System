@@ -16,4 +16,13 @@
       <PackageReference Include="RabbitMQ.MessageBus" Version="4.0.103" />
     </ItemGroup>
 
+    <ItemGroup>
+        <AdditionalFiles Include="sharedsettings.*.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </AdditionalFiles>
+      <AdditionalFiles Include="sharedsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AdditionalFiles>
+    </ItemGroup>
+
 </Project>

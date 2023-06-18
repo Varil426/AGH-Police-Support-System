@@ -5,6 +5,7 @@ using Shared.Application.Agents;
 using Shared.Infrastructure;
 
 var host = Host.CreateDefaultBuilder(args)
+    .AddSharedAppSettings()
     .AddRabbitMqSettings()
     .AddServiceSettings()
     .AddRabbitMqBus(new[] { typeof(TestCommandHandler).Assembly })

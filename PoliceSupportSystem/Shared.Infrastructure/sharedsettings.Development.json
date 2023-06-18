@@ -1,0 +1,13 @@
+﻿{
+  "RabbitMq": {
+    "Host": "localhost",
+    "Port": "5672",
+    "Username": "guest",
+    "Password": "guest", // TODO Remove password from repo
+    "MessageExchange": "Messages",
+    "DirectMessageExchange": "DirectMessages",
+    "EventExchange": "Events",
+    "QueryExchange": "Queries",
+    "CommandExchange": "Commands"
+  }
+}

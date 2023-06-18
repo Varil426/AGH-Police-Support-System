@@ -26,6 +26,24 @@ public static class Extensions
 {
     private const string RabbitMqConfigSectionName = "RabbitMq";
 
+    public static IHostBuilder AddSharedAppSettings(this IHostBuilder hostBuilder) =>
+        hostBuilder.ConfigureAppConfiguration(
+            (context, config) =>
+            {
+                var env = context.HostingEnvironment;
+                
+                string sharedSettingsDirectoryPath = Path.Combine(Path.GetDirectoryName(Assembly.GetAssembly(typeof(Extensions))!.Location)!);
+                
+                config
+                    .AddJsonFile(Path.Combine(sharedSettingsDirectoryPath, "sharedsettings.json"), optional: true)
+                    .AddJsonFile(Path.Combine(sharedSettingsDirectoryPath, $"sharedsettings.{env.EnvironmentName}.json"), optional: true)
+                    .AddJsonFile("appsettings.json", optional: true)
+                    .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+
+                config.AddEnvironmentVariables();
+                
+            });
+
     public static IServiceCollection AddMessageService(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddSingleton<MessageService>();
@@ -64,7 +82,7 @@ public static class Extensions
         return builder;
     }
 
-    public static TSettings GetSettings<TSettings>(this IConfiguration configuration, string sectionName) /*where TSettings : new()*/ // TODO Remove commented code
+    public static TSettings GetSettings<TSettings>(this IConfiguration configuration, string sectionName)
     {
         var configSection = configuration.GetRequiredSection(sectionName);
         var settings = configSection.Get<TSettings>() ?? throw new Exception(); // TODO Change exception type
@@ -79,7 +97,6 @@ public static class Extensions
             (ctx, s) =>
             {
                 var rabbitMqSettings = ctx.Configuration.GetSettings<RabbitMqSettings>(RabbitMqConfigSectionName);
-                var serviceSettings = ctx.Configuration.GetSettings<ServiceSettings>(nameof(ServiceSettings));
                 
                 var bus = new RabbitMQBus(
                     configurator =>
@@ -91,35 +108,13 @@ public static class Extensions
                 var handlerAssembliesList = handlerAssemblies.ToList();
                 if (rabbitMqSettings.QueryExchange is not null)
                 {
-                    // var querySubscriber = bus.CreateAsyncSubscriber(
-                    //     x =>
-                    //     {
-                    //         x.SetExchange(rabbitMqSettings.QueryExchange);
-                    //         x.SetRoutingKey(serviceSettings.Id);
-                    //     });
-
-
                     // Register Query Handlers
                     var queryHandlers = DiscoverQueryHandlers(handlerAssembliesList).ToList();
                     queryHandlers.ForEach(x => s.AddScoped(x));
-                    
-                    
-                    // Discover Handled Queries
-                    // var handledQueries = DiscoverHandledQueries(queryHandlers);
-                    // foreach (var handledQueryType in handledQueries.Keys)
-                    // {
-                    //     querySubscriber.Subscribe(
-                    //         handledQueryType,
-                    //         x => (Task)handledQueries[handledQueryType].GetMethod(nameof(IQueryHandler<IQuery<object>, object>.Handle))!
-                    //             .Invoke(s.BuildServiceProvider().GetRequiredService(handledQueries[handledQueryType]), new[] { x })!);
-                    // }
-                    //
-                    // querySubscriber.Open();
                 }
 
                 if (rabbitMqSettings.CommandExchange is not null)
                 {
-                    // TODO
                     // Register Command Handlers
                     var commandHandlers = DiscoverCommandHandlers(handlerAssembliesList).ToList();
                     commandHandlers.ForEach(x => s.AddScoped(x));
@@ -130,7 +125,6 @@ public static class Extensions
 
                 if (rabbitMqSettings.EventExchange is not null)
                 {
-                    // TODO
                     // Register Event Handlers
                     var eventHandlers = DiscoverEventHandlers(handlerAssembliesList).ToList();
                     eventHandlers.ForEach(x => s.AddScoped(x));
@@ -251,7 +245,7 @@ public static class Extensions
             typeof(Extensions).GetMethod(nameof(AddQueryHandler), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(handlerType, queryType, resultType).Invoke(null, new object[] { querySubscriber, host.Services });
         }
-        
+
         querySubscriber.Open();
 
         return host;
