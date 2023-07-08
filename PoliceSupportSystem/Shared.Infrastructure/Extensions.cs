@@ -4,7 +4,11 @@ using MessageBus.Core.API;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.Grafana.Loki;
 using Shared.Application;
 using Shared.Application.Agents;
 using Shared.Application.Integration.Commands;
@@ -25,6 +29,7 @@ namespace Shared.Infrastructure;
 public static class Extensions
 {
     private const string RabbitMqConfigSectionName = "RabbitMq";
+    private const string LokiConfigSectionName = "Loki";
 
     public static IHostBuilder AddSharedAppSettings(this IHostBuilder hostBuilder) =>
         hostBuilder.ConfigureAppConfiguration(
@@ -44,6 +49,35 @@ public static class Extensions
                 
             });
 
+    public static IHostBuilder AddSerilog(this IHostBuilder hostBuilder) => hostBuilder
+        .ConfigureLogging((_, loggingBuilder) => loggingBuilder.ClearProviders())
+        .UseSerilog(
+        (ctx, config) =>
+        {
+            var serviceSettings = ctx.Configuration.GetSettings<ServiceSettings>(nameof(ServiceSettings));
+            var lokiSettings = ctx.Configuration.GetSettings<LokiSettings>(LokiConfigSectionName);
+
+            var lokiCredentials = new LokiCredentials { Login = lokiSettings.Login, Password = lokiSettings.Password };
+            var labels = new[] { new LokiLabel { Key = nameof(serviceSettings.Id), Value = serviceSettings.Id } };
+            var propertiesAsLabels = new[] { nameof(serviceSettings.Id) }; // TODO Is it needed?
+            
+            // var lokiCredentials = new BasicAuthCredentials(lokiSettings.Uri, lokiSettings.Login, lokiSettings.Password);
+            // var labels = new LogLabelProvider(new List<LokiLabel> { new LokiLabel(nameof(serviceSettings.Id), serviceSettings.Id) });
+            
+            // TODO Add logging middleware - log exceptions and so on
+
+            config.MinimumLevel.Verbose();
+            
+            config.WriteTo.Console();
+            config.WriteTo.GrafanaLoki(
+                lokiSettings.Uri,
+                credentials: lokiCredentials,
+                labels: labels,
+                propertiesAsLabels: propertiesAsLabels,
+                restrictedToMinimumLevel: LogEventLevel.Verbose);
+            // config.WriteTo.LokiHttp(lokiCredentials, labels);
+        });
+    
     public static IServiceCollection AddMessageService(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddSingleton<MessageService>();

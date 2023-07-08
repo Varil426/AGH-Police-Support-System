@@ -21,6 +21,7 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            _logger.LogInformation("TEST1");
             // await _messageBus.SendAsync(new TestMessage { Receivers = new [] { Guid.Parse("0f8fad5b-d9cb-469f-a165-70867728950e")  }});
             await _messageBus.PublishAsync(new TestEvent("TEST"));
             // var commandResult = await _messageBus.InvokeAsync<TestCommand, string>(new TestCommand(123, "hq-service"));

@@ -5,6 +5,7 @@ using Shared.Application.Agents;
 using Shared.Infrastructure;
 
 var host = Host.CreateDefaultBuilder(args)
+    .AddSerilog()
     .AddSharedAppSettings()
     .AddRabbitMqSettings()
     .AddServiceSettings()

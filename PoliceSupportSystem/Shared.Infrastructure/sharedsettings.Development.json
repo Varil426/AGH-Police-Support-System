@@ -9,5 +9,10 @@
     "EventExchange": "Events",
     "QueryExchange": "Queries",
     "CommandExchange": "Commands"
+  },
+  "Loki": {
+    "Uri": "http://localhost:3100",
+    "Login": "",
+    "Password": ""
   }
 }
