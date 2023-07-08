@@ -7,15 +7,12 @@ services:
         - 5672:5672
         - 15672:15672
     volumes:
-        - ./rabbitmq/data/:/var/lib/rabbitmq/
-        - ./rabbitmq/log/:/var/log/rabbitmq/
-#        - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
-#        - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+        - ./RabbitMQ/data/:/var/lib/rabbitmq/
+        - ./RabbitMQ/log/:/var/log/rabbitmq/
     networks:
         - rabbitmq_go_net
   simulationdb:
     build: ./SimulationDb
-    # command: postgres
     ports:
       - "5432:5432"
     environment: # TODO Remove secrets
