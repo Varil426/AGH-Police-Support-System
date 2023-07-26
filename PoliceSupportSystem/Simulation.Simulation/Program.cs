@@ -8,6 +8,7 @@ var host = Host.CreateDefaultBuilder(args)
     .AddRabbitMqBus()
     .AddHandlers(typeof(ISimulation).Assembly)
     .AddMessageSubscriber()
+    .AddMessageService()
     // TODO Add logging
     .ConfigureServices(
         x =>

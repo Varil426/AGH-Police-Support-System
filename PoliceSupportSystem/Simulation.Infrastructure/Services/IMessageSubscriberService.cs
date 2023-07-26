@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Simulation.Shared.Communication;
+﻿using Simulation.Shared.Communication;
 
 namespace Simulation.Infrastructure.Services;
 

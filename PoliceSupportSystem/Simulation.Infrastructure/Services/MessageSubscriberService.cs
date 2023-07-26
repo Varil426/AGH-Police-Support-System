@@ -1,15 +1,13 @@
-﻿
-using System.Collections.Concurrent;
+﻿using Simulation.Application.Services;
 using Simulation.Shared.Communication;
 
 namespace Simulation.Infrastructure.Services;
 
-public class MessageSubscriberService : IMessageSubscriberService
+internal class MessageSubscriberService : IMessageSubscriberService
 {
     private SemaphoreSlim _queueSemaphore = new(1, 1);
     
     private Queue<ISimulationMessage> _messageQueue = new();
-
 
     public async Task<IEnumerable<ISimulationMessage>> GetUnhandledMessages()
     {

@@ -44,7 +44,7 @@ internal class MessageBus : IMessageBus, IDisposable
             x =>
             {
                 x.SetRoutingKey(command.Receiver);
-                x.SetConsumerTag(_serviceSettings.Id);
+                x.SetConsumerTag(_serviceSettings.Id); // TODO Do I need it?
                 x.SetExchange(_rabbitMqSettings.CommandExchange ?? throw new MissingConfigurationException(nameof(RabbitMqSettings.CommandExchange)));
             });
         return publisher.Send(command, cancellationToken: cancellation);

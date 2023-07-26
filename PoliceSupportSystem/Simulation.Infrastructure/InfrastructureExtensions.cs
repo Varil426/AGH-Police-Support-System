@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using Simulation.Application;
+using Simulation.Application.Services;
 using Simulation.Infrastructure.Exceptions;
 using Simulation.Infrastructure.Services;
 using Simulation.Infrastructure.Settings;
@@ -64,7 +65,7 @@ public static class InfrastructureExtensions
     {
 
         hostBuilder.ConfigureServices(
-            (ctx, s) =>
+            (_, s) =>
             {
                 var messageHandlers = DiscoverHandlers(handlerAssembly).ToList();
                 messageHandlers.ForEach(x => s.AddScoped(x));
@@ -76,6 +77,10 @@ public static class InfrastructureExtensions
     public static IHostBuilder AddMessageSubscriber(this IHostBuilder hostBuilder) =>
         hostBuilder.ConfigureServices(
             s => s.AddSingleton<IMessageSubscriberService, MessageSubscriberService>());
+    
+    public static IHostBuilder AddMessageService(this IHostBuilder hostBuilder) =>
+        hostBuilder.ConfigureServices(
+            s => s.AddSingleton<IMessageService, MessageService>());
 
     public static IHostBuilder ConfigureRabbitMq(this IHostBuilder hostBuilder)
     {
