@@ -123,7 +123,7 @@ public static class Extensions
         return settings;
     }
 
-    public static IHostBuilder AddRabbitMqBus(this IHostBuilder hostBuilder, IEnumerable<Assembly> handlerAssemblies, Assembly? integrationAssembly = null, Assembly? agentCommunicationAssembly = null)
+    public static IHostBuilder AddRabbitMqBus(this IHostBuilder hostBuilder, IEnumerable<Assembly> handlerAssemblies/*, Assembly? integrationAssembly = null, Assembly? agentCommunicationAssembly = null*/)
     {
         hostBuilder.ConfigureRabbitMq();
         
@@ -288,6 +288,7 @@ public static class Extensions
     public static IHost SubscribeEventHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
     {
         var bus = host.Services.GetRequiredService<IBus>();
+
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
         var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
 
