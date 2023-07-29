@@ -1,3 +1,3 @@
 ﻿namespace Simulation.Infrastructure.Settings;
 
-public record SimulationSettings();
+public record SimulationSettings(double TimeRate);
