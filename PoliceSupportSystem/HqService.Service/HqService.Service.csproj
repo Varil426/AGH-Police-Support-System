@@ -13,7 +13,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HqService.Application\HqService.Application.csproj" />
       <ProjectReference Include="..\HqService.Infrastructure\HqService.Infrastructure.csproj" />
     </ItemGroup>
 </Project>
