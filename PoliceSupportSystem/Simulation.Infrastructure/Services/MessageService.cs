@@ -68,7 +68,7 @@ internal class MessageService : IMessageService, IDisposable
 
     public void Dispose() // TODO Improve
     {
-        _bus.Dispose();
+        // _bus.Dispose();
         _messagePublisher.Dispose();
     }
 }

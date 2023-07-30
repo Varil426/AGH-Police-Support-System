@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Autofac.Extensions.DependencyInjection;
 using MessageBus.Core;
 using MessageBus.Core.API;
 using Microsoft.Extensions.Configuration;
@@ -49,6 +50,8 @@ public static class Extensions
                 
             });
 
+    public static IHostBuilder UseAutofac(this IHostBuilder hostBuilder) => hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+    
     public static IHostBuilder AddSerilog(this IHostBuilder hostBuilder) => hostBuilder
         .ConfigureLogging((_, loggingBuilder) => loggingBuilder.ClearProviders())
         .UseSerilog(
@@ -138,6 +141,12 @@ public static class Extensions
                         configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
                     });
                 s.AddSingleton<IBus>(bus);
+                // s.AddTransient<IBus>(
+                //     _ => new RabbitMQBus(
+                //         configurator =>
+                //         {
+                //             configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
+                //         }));
 
                 var handlerAssembliesList = handlerAssemblies.ToList();
                 if (rabbitMqSettings.QueryExchange is not null)

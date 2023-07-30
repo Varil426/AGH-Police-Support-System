@@ -112,7 +112,7 @@ internal class MessageBus : IMessageBus, IDisposable
 
     public void Dispose() // TODO Improve
     {
-        _messageBus.Dispose();
+        // _messageBus.Dispose();
         _eventPublisher?.Dispose();
         _messagePublisher?.Dispose();
     }
