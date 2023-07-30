@@ -11,4 +11,9 @@
       <ProjectReference Include="..\Simulation.Shared\Simulation.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Autofac" Version="7.0.1" />
+      <PackageReference Include="RabbitMQ.MessageBus" Version="4.0.103" />
+    </ItemGroup>
+
 </Project>

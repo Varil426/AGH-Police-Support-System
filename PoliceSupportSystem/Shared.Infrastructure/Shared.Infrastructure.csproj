@@ -7,11 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Shared.Application.Simulation\Shared.Application.Simulation.csproj" />
+      <ProjectReference Include="..\Shared.Simulation\Shared.Simulation.csproj" />
       <ProjectReference Include="..\Shared.Application\Shared.Application.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
       <PackageReference Include="RabbitMQ.MessageBus" Version="4.0.103" />

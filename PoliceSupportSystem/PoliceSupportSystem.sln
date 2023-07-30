@@ -34,7 +34,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation.Infrastructure",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation.Simulation", "Simulation.Simulation\Simulation.Simulation.csproj", "{1C226D45-8E23-4280-B23F-A96F95E70CE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Application.Simulation", "Shared.Application.Simulation\Shared.Application.Simulation.csproj", "{F33606BC-6EE3-4D64-94E1-F0875346BB1F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Simulation", "Shared.Simulation\Shared.Simulation.csproj", "{F33606BC-6EE3-4D64-94E1-F0875346BB1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

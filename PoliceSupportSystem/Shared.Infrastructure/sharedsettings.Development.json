@@ -14,5 +14,11 @@
     "Uri": "http://localhost:3100",
     "Login": "",
     "Password": ""
+  },
+  "SimulationCommunicationSettings": {
+    "Host": "localhost",
+    "Port": "5672",
+    "Username": "guest",
+    "Password": "guest"  // TODO Remove password from repo
   }
 }
