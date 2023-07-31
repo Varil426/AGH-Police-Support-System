@@ -5,6 +5,7 @@ using MessageBus.Core.API;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Shared.Application.Services;
 using Shared.Simulation.Services;
 using Shared.Simulation.Settings;
 
@@ -14,7 +15,8 @@ public static class Extensions
 {
     public static IHostBuilder AddSimulation(this IHostBuilder hostBuilder) => hostBuilder
         .AddRabbitMqSimulationBus()
-        .AddInternalServices();
+        .AddInternalServices()
+        .AddSimulatedServices();
 
     private static IHostBuilder AddRabbitMqSimulationBus(this IHostBuilder hostBuilder)
     {
@@ -48,13 +50,31 @@ public static class Extensions
         hostBuilder.ConfigureServices(
             (ctx, s) =>
             {
-                s.AddSingleton(ctx.Configuration.GetSettings<SimulationCommunicationSettings>(nameof(SimulationCommunicationSettings)));
+                s.AddSingleton(_ => ctx.Configuration.GetSettings<SimulationCommunicationSettings>(nameof(SimulationCommunicationSettings)));
+                s.AddTransient<ITypeMapper, TypeMapper>();
             });
         
         hostBuilder.ConfigureContainer<ContainerBuilder>(
             (ctx, builder) =>
             {
                 builder.RegisterType<SimulationMessageBus>().As<ISimulationMessageBus>().WithAttributeFiltering();
+            });
+
+        return hostBuilder;
+    }
+    
+    private static IHostBuilder AddSimulatedServices(this IHostBuilder hostBuilder)
+    {
+        hostBuilder.ConfigureServices(
+            (ctx, s) =>
+            {
+                s.AddScoped<IStatusService, SimulationStatusService>();
+            });
+        
+        hostBuilder.ConfigureContainer<ContainerBuilder>(
+            (ctx, builder) =>
+            {
+                
             });
 
         return hostBuilder;

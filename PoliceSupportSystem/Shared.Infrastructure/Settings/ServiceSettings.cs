@@ -1,3 +1,6 @@
-﻿namespace Shared.Infrastructure.Settings;
+﻿using Shared.Application.Common;
+using Shared.Application.Services;
 
-public record ServiceSettings(string Id);
+namespace Shared.Infrastructure.Settings;
+
+public record ServiceSettings(string Id, ServiceTypeEnum ServiceType) : IServiceInfoService;

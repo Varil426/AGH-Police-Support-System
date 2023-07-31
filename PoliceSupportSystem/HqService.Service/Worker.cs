@@ -11,11 +11,13 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IMessageBus _messageBus;
+    private readonly IStatusService _statusService;
 
-    public Worker(ILogger<Worker> logger, IMessageBus messageBus)
+    public Worker(ILogger<Worker> logger, IMessageBus messageBus, IStatusService statusService)
     {
         _logger = logger;
         _messageBus = messageBus;
+        _statusService = statusService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,6 +32,8 @@ public class Worker : BackgroundService
             // Console.WriteLine($"Worker: {queryResult}");
             // Console.WriteLine($"Worker: {commandResult}");
             await Task.Delay(1000, stoppingToken);
+
+            await _statusService.AnnounceOnline();
         }
     }
 }

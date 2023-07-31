@@ -16,6 +16,7 @@ using Shared.Application.Handlers;
 using Shared.Application.Integration.Commands;
 using Shared.Infrastructure.Exceptions;
 using Shared.Application.Integration.Queries;
+using Shared.Application.Services;
 using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Settings;
 using ExchangeType = RabbitMQ.Client.ExchangeType;
@@ -113,8 +114,9 @@ public static class Extensions
         builder.ConfigureServices(
             (context, services) =>
             {
-                var rabbitMqSettings = context.Configuration.GetSettings<ServiceSettings>(nameof(ServiceSettings));
-                services.AddSingleton(rabbitMqSettings);
+                var serviceSettings = context.Configuration.GetSettings<ServiceSettings>(nameof(ServiceSettings));
+                services.AddSingleton(serviceSettings);
+                services.AddSingleton<IServiceInfoService>(serviceSettings);
             });
     
         return builder;
