@@ -22,13 +22,14 @@ public static class Extensions
             (ctx, builder) =>
             {
                 var simulationCommunicationSettings = ctx.Configuration.GetSettings<SimulationCommunicationSettings>(nameof(SimulationCommunicationSettings));
-                
-                var bus = new RabbitMQBus(
-                    configurator =>
-                    {
-                        configurator.UseConnectionString($"amqp://{simulationCommunicationSettings.Username}:{simulationCommunicationSettings.Password}@{simulationCommunicationSettings.Host}:{simulationCommunicationSettings.Port}/");
-                    });
-                builder.RegisterInstance(bus).As<IBus>().Keyed<IBus>(Constants.SimulationBusKey).SingleInstance();
+
+                builder.Register(
+                    _ => new RabbitMQBus(
+                        configurator =>
+                        {
+                            configurator.UseConnectionString(
+                                $"amqp://{simulationCommunicationSettings.Username}:{simulationCommunicationSettings.Password}@{simulationCommunicationSettings.Host}:{simulationCommunicationSettings.Port}/");
+                        })).As<IBus>().Keyed<IBus>(Constants.SimulationBusKey).SingleInstance();
                 
                 // builder.Register(
                 //     _ => new RabbitMQBus(

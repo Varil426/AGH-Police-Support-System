@@ -48,13 +48,12 @@ public static class InfrastructureExtensions
             (ctx, s) =>
             {
                 var rabbitMqSettings = ctx.Configuration.GetSettings<RabbitMqSettings>(nameof(RabbitMqSettings));
-                
-                var bus = new RabbitMQBus(
-                    configurator =>
-                    {
-                        configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
-                    });
-                s.AddSingleton<IBus>(bus);
+                s.AddSingleton<IBus>(
+                    _ => new RabbitMQBus(
+                        configurator =>
+                        {
+                            configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
+                        }));
             });
         
         

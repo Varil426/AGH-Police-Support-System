@@ -134,13 +134,13 @@ public static class Extensions
             (ctx, s) =>
             {
                 var rabbitMqSettings = ctx.Configuration.GetSettings<RabbitMqSettings>(RabbitMqConfigSectionName);
-                
-                var bus = new RabbitMQBus(
-                    configurator =>
-                    {
-                        configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
-                    });
-                s.AddSingleton<IBus>(bus);
+
+                s.AddSingleton<IBus>(
+                    _ => new RabbitMQBus(
+                        configurator =>
+                        {
+                            configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
+                        }));
                 // s.AddTransient<IBus>(
                 //     _ => new RabbitMQBus(
                 //         configurator =>
