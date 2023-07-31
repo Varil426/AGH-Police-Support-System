@@ -99,7 +99,7 @@ public static class InfrastructureExtensions
         return hostBuilder;
     }
     
-    public static IHost SubscribeMessageSubscriber(this IHost host, Assembly handlerAssembly)
+    public static IHost SubscribeMessageSubscriber(this IHost host, Assembly messageAssembly)
     {
         var bus = host.Services.GetRequiredService<IBus>();
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
@@ -107,29 +107,34 @@ public static class InfrastructureExtensions
         var exchangeName = rabbitMqSettings.SimulationExchangeName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.SimulationExchangeName));
         var queueName = rabbitMqSettings.IncomingMessageQueueName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.IncomingMessageQueueName));
         
+        // TODO What about disposing of this? Create a service which keeps an eye on them
         var messageSubscriber = bus.CreateAsyncSubscriber(
             x =>
-            
                 x.SetExchange(exchangeName)
                     .SetRoutingKey(queueName)
                     .SetConsumerTag(queueName)
                     .SetReceiveSelfPublish(false)
         );
         
-        foreach (var handlerType in DiscoverHandlers(handlerAssembly))
-        {
-            var messageHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IMessageHandler<>));
-            var messageType = messageHandlerInterface.GetGenericArguments()[0];
-            typeof(InfrastructureExtensions).GetMethod(nameof(AddHandler), BindingFlags.NonPublic | BindingFlags.Static)!
+        // foreach (var handlerType in DiscoverHandlers(handlerAssembly))
+        // {
+        //     var messageHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IMessageHandler<>));
+        //     var messageType = messageHandlerInterface.GetGenericArguments()[0];
+        //     typeof(InfrastructureExtensions).GetMethod(nameof(AddHandler), BindingFlags.NonPublic | BindingFlags.Static)!
+        //         .MakeGenericMethod(messageType).Invoke(null, new object[] { messageSubscriber, host.Services });
+        // }
+        
+        foreach (var messageType in DiscoverMessageTypes(new [] { messageAssembly }))
+            typeof(InfrastructureExtensions).GetMethod(nameof(SubscribeForMessage), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(messageType).Invoke(null, new object[] { messageSubscriber, host.Services });
-        }
+        
 
         messageSubscriber.Open();
 
         return host;
     }
     
-    private static IAsyncSubscriber AddHandler<TMessage>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
+    private static IAsyncSubscriber SubscribeForMessage<TMessage>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
         where TMessage : class, ISimulationMessage
     {
         subscriber.Subscribe<TMessage>(
@@ -143,4 +148,14 @@ public static class InfrastructureExtensions
     
     private static IEnumerable<Type> DiscoverHandlers(Assembly assembly) => assembly.GetTypes().Where(
         x => x.GetInterfaces().Any(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(IMessageHandler<>)));
+
+    private static IEnumerable<Type> DiscoverMessageTypes(IEnumerable<Assembly> assemblies)
+    {
+        var messageTypes = new List<Type>();
+        foreach (var assembly in assemblies)
+            messageTypes.AddRange(
+                assembly.GetTypes().Where(
+                    x => !x.IsAbstract && x.IsAssignableTo(typeof(ISimulationMessage))));
+        return messageTypes;
+    }
 }

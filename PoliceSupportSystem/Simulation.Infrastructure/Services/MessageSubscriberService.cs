@@ -1,5 +1,4 @@
-﻿using Simulation.Application.Services;
-using Simulation.Shared.Communication;
+﻿using Simulation.Shared.Communication;
 
 namespace Simulation.Infrastructure.Services;
 

@@ -52,6 +52,7 @@ internal class MessageService : IMessageService, IMessageHandler, IDisposable
 
     private void SubscribeForDirectMessages(IAgent agent)
     {
+        // TODO What about disposing of this? Create a service which keeps an eye on them
         var messageSubscriber = _bus.CreateAsyncSubscriber(
             x =>
                 x.SetExchange(_rabbitMqSettings.DirectMessageExchange ?? throw new MissingConfigurationException(nameof(_rabbitMqSettings.DirectMessageExchange)))

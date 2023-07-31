@@ -10,7 +10,6 @@ using RabbitMQ.Client;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
-using Shared.Application;
 using Shared.Application.Agents;
 using Shared.Application.Handlers;
 using Shared.Application.Integration.Commands;
@@ -274,6 +273,7 @@ public static class Extensions
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
         var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
 
+        // TODO What about disposing of this? Create a service which keeps an eye on them
         var querySubscriber = bus.CreateAsyncSubscriber(
             x =>
             
@@ -304,6 +304,7 @@ public static class Extensions
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
         var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
 
+        // TODO What about disposing of this? Create a service which keeps an eye on them
         var eventSubscriber = bus.CreateAsyncSubscriber(
             x =>
             
@@ -332,6 +333,7 @@ public static class Extensions
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
         var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
 
+        // TODO What about disposing of this? Create a service which keeps an eye on them
         var commandSubscriber = bus.CreateAsyncSubscriber(
             x =>
             
@@ -369,6 +371,7 @@ public static class Extensions
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
         var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
 
+        // TODO What about disposing of this? Create a service which keeps an eye on them
         var messageSubscriber = bus.CreateAsyncSubscriber(
             x =>
                 x.SetExchange(rabbitMqSettings.MessageExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.MessageExchange)))

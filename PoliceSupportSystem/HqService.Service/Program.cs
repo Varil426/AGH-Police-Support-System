@@ -25,5 +25,6 @@ var host = Host.CreateDefaultBuilder(args)
     .Build();
 
 host.SubscribeHandlers(new [] { typeof(TestEventHandler).Assembly });
-    
+host.SubscribeSimulationMessageHandler();
+
 host.Run();

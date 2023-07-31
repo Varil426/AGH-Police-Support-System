@@ -8,11 +8,11 @@ namespace Shared.Simulation.Services;
 internal sealed class SimulationMessageBus : ISimulationMessageBus, IDisposable
 {
     // private readonly IBus _bus;
-    private readonly IRpcAsyncPublisher _publisher;
+    private readonly IPublisher _publisher;
 
     public SimulationMessageBus([KeyFilter(Constants.SimulationBusKey)] IBus bus, SimulationCommunicationSettings simulationCommunicationSettings)
     {
-        _publisher = bus.CreateAsyncRpcPublisher(
+        _publisher = bus.CreatePublisher(
             x =>
             {
                 x.SetExchange(simulationCommunicationSettings.SimulationExchangeName);
@@ -20,7 +20,11 @@ internal sealed class SimulationMessageBus : ISimulationMessageBus, IDisposable
             });
     }
 
-    public Task SendSimulationMessage(ISimulationMessage simulationMessage) => _publisher.Send(simulationMessage);
+    public Task SendSimulationMessage(ISimulationMessage simulationMessage)
+    {
+        _publisher.Send(simulationMessage);
+        return Task.CompletedTask;
+    }
 
     public void Dispose()
     {

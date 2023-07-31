@@ -1,12 +1,13 @@
 using Simulation.Application;
 using Simulation.Infrastructure;
+using Simulation.Shared.Communication;
 using Simulation.Simulation;
 
 var host = Host.CreateDefaultBuilder(args)
     .UseAutofac()
     .AddSettings()
     .AddRabbitMqBus()
-    .AddHandlers(typeof(ISimulation).Assembly)
+    .AddHandlers(typeof(ISimulation).Assembly) // TODO Is it necessary? Remove it or refactor it
     .AddMessageSubscriber()
     .AddMessageService()
     // TODO Add logging
@@ -19,6 +20,6 @@ var host = Host.CreateDefaultBuilder(args)
         })
     .Build();
 
-host.SubscribeMessageSubscriber(typeof(ISimulation).Assembly);
+host.SubscribeMessageSubscriber(typeof(ISimulationMessage).Assembly);
 
 host.Run();

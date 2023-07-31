@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Autofac.Features.AttributeFilters;
 using MessageBus.Core;
 using MessageBus.Core.API;
@@ -17,6 +18,15 @@ public static class Extensions
         .AddRabbitMqSimulationBus()
         .AddInternalServices()
         .AddSimulatedServices();
+
+    public static IHost SubscribeSimulationMessageHandler(this IHost host)
+    {
+        using var scope = host.Services.GetAutofacRoot().BeginLifetimeScope();
+        var bus = scope.ResolveKeyed<IBus>(Constants.SimulationBusKey);
+        // TODO Rest
+
+        return host;
+    }
 
     private static IHostBuilder AddRabbitMqSimulationBus(this IHostBuilder hostBuilder)
     {
