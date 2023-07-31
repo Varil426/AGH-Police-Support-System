@@ -3,6 +3,7 @@ using Shared.Application.Agents.Communication.Messages;
 using Shared.Application.Integration.Commands;
 using Shared.Application.Integration.Events;
 using Shared.Application.Integration.Queries;
+using Shared.Application.Services;
 
 namespace HqService.Service;
 

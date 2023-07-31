@@ -1,6 +1,6 @@
 ﻿using Shared.Application.Integration.Queries;
 
-namespace Shared.Application;
+namespace Shared.Application.Handlers;
 
 public interface IQueryHandler<in TQuery, TResult> /*: IConsumer<TQuery>*/ where TQuery : /*class /* class - required by MassTransit #1#,*/ IQuery<TResult>
 {

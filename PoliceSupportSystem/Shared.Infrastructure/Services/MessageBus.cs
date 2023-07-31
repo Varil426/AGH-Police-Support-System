@@ -4,6 +4,7 @@ using Shared.Application.Agents.Communication.Messages;
 using Shared.Application.Integration.Commands;
 using Shared.Application.Integration.Events;
 using Shared.Application.Integration.Queries;
+using Shared.Application.Services;
 using Shared.Infrastructure.Exceptions;
 using Shared.Infrastructure.Settings;
 using IBus = MessageBus.Core.API.IBus;

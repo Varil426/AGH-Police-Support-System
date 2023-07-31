@@ -1,6 +1,6 @@
 ﻿using Shared.Application.Agents.Communication.Messages;
 
-namespace Shared.Application;
+namespace Shared.Application.Handlers;
 
 public interface IMessageHandler
 {

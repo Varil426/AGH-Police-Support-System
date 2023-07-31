@@ -1,4 +1,5 @@
 ﻿using Shared.Application;
+using Shared.Application.Handlers;
 using Shared.Application.Integration.Commands;
 
 namespace HqService.Application.Handlers; // TODO Remove whole file

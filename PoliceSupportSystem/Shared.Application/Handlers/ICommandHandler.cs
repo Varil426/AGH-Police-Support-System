@@ -1,6 +1,6 @@
 ﻿using Shared.Application.Integration.Commands;
 
-namespace Shared.Application;
+namespace Shared.Application.Handlers;
 
 public interface ICommandHandler<in TCommand> /*: IConsumer<TCommand>*/ where TCommand : /*class /* class - required by MassTransit #1#,*/ ICommand
 {

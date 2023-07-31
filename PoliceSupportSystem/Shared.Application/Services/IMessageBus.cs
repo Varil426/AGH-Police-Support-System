@@ -3,7 +3,7 @@ using Shared.Application.Integration.Commands;
 using Shared.Application.Integration.Events;
 using Shared.Application.Integration.Queries;
 
-namespace Shared.Application;
+namespace Shared.Application.Services;
 
 public interface IMessageBus
 {

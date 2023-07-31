@@ -12,6 +12,7 @@ using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
 using Shared.Application;
 using Shared.Application.Agents;
+using Shared.Application.Handlers;
 using Shared.Application.Integration.Commands;
 using Shared.Infrastructure.Exceptions;
 using Shared.Application.Integration.Queries;
@@ -22,7 +23,7 @@ using IBus = MessageBus.Core.API.IBus;
 using ICommand = Shared.Application.Integration.Commands.ICommand;
 using IEvent = Shared.Application.Integration.Events.IEvent;
 using IMessage = Shared.Application.Agents.Communication.Messages.IMessage;
-using IMessageBus = Shared.Application.IMessageBus;
+using IMessageBus = Shared.Application.Services.IMessageBus;
 
 namespace Shared.Infrastructure;
 
