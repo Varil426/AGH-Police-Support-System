@@ -54,8 +54,23 @@ public static class InfrastructureExtensions
                         {
                             configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
                         }));
-            });
+
+                s.AddSingleton<IAsyncSubscriber>(
+                    sp =>
+                    {
+                        var bus = sp.GetRequiredService<IBus>();
+                        var exchangeName = rabbitMqSettings.SimulationExchangeName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.SimulationExchangeName));
+                        var queueName = rabbitMqSettings.IncomingMessageQueueName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.IncomingMessageQueueName));
         
+                        return bus.CreateAsyncSubscriber(
+                            x =>
+                                x.SetExchange(exchangeName)
+                                    .SetRoutingKey(queueName)
+                                    .SetConsumerTag(queueName)
+                                    .SetReceiveSelfPublish(false)
+                        );
+                    });
+            });
         
         return hostBuilder;
     }
@@ -101,20 +116,19 @@ public static class InfrastructureExtensions
     
     public static IHost SubscribeMessageSubscriber(this IHost host, Assembly messageAssembly)
     {
-        var bus = host.Services.GetRequiredService<IBus>();
-        var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
-
-        var exchangeName = rabbitMqSettings.SimulationExchangeName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.SimulationExchangeName));
-        var queueName = rabbitMqSettings.IncomingMessageQueueName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.IncomingMessageQueueName));
+        // var bus = host.Services.GetRequiredService<IBus>();
+        // var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
+        //
+        // var exchangeName = rabbitMqSettings.SimulationExchangeName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.SimulationExchangeName));
+        // var queueName = rabbitMqSettings.IncomingMessageQueueName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.IncomingMessageQueueName));
         
-        // TODO What about disposing of this? Create a service which keeps an eye on them
-        var messageSubscriber = bus.CreateAsyncSubscriber(
-            x =>
-                x.SetExchange(exchangeName)
-                    .SetRoutingKey(queueName)
-                    .SetConsumerTag(queueName)
-                    .SetReceiveSelfPublish(false)
-        );
+        // var messageSubscriber = bus.CreateAsyncSubscriber(
+        //     x =>
+        //         x.SetExchange(exchangeName)
+        //             .SetRoutingKey(queueName)
+        //             .SetConsumerTag(queueName)
+        //             .SetReceiveSelfPublish(false)
+        // );
         
         // foreach (var handlerType in DiscoverHandlers(handlerAssembly))
         // {
@@ -123,6 +137,8 @@ public static class InfrastructureExtensions
         //     typeof(InfrastructureExtensions).GetMethod(nameof(AddHandler), BindingFlags.NonPublic | BindingFlags.Static)!
         //         .MakeGenericMethod(messageType).Invoke(null, new object[] { messageSubscriber, host.Services });
         // }
+
+        var messageSubscriber = host.Services.GetRequiredService<IAsyncSubscriber>();
         
         foreach (var messageType in DiscoverMessageTypes(new [] { messageAssembly }))
             typeof(InfrastructureExtensions).GetMethod(nameof(SubscribeForMessage), BindingFlags.NonPublic | BindingFlags.Static)!
