@@ -10,7 +10,7 @@ var host = Host.CreateDefaultBuilder(args)
     .AddHandlers(typeof(ISimulation).Assembly) // TODO Is it necessary? Remove it or refactor it
     .AddMessageSubscriber()
     .AddMessageService()
-    // TODO Add logging
+    .AddSerilog()
     .ConfigureServices(
         x =>
         {

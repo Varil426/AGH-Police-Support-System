@@ -5,7 +5,11 @@ using MessageBus.Core.API;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.Grafana.Loki;
 using Simulation.Application;
 using Simulation.Application.Services;
 using Simulation.Infrastructure.Exceptions;
@@ -149,6 +153,34 @@ public static class InfrastructureExtensions
 
         return host;
     }
+    
+    public static IHostBuilder AddSerilog(this IHostBuilder hostBuilder) => hostBuilder
+        .ConfigureLogging((_, loggingBuilder) => loggingBuilder.ClearProviders())
+        .UseSerilog(
+            (ctx, config) =>
+            {
+                var lokiSettings = ctx.Configuration.GetSettings<LokiSettings>(nameof(LokiSettings));
+
+                var lokiCredentials = new LokiCredentials { Login = lokiSettings.Login, Password = lokiSettings.Password };
+                var labels = new[] { new LokiLabel { Key = nameof(lokiSettings.Label), Value = lokiSettings.Label } };
+                var propertiesAsLabels = new[] { nameof(lokiSettings.Label) }; // TODO Is it needed?
+            
+                // var lokiCredentials = new BasicAuthCredentials(lokiSettings.Uri, lokiSettings.Login, lokiSettings.Password);
+                // var labels = new LogLabelProvider(new List<LokiLabel> { new LokiLabel(nameof(serviceSettings.Id), serviceSettings.Id) });
+            
+                // TODO Add logging middleware - log exceptions and so on
+
+                config.MinimumLevel.Verbose();
+            
+                config.WriteTo.Console();
+                config.WriteTo.GrafanaLoki(
+                    lokiSettings.Uri,
+                    credentials: lokiCredentials,
+                    labels: labels,
+                    propertiesAsLabels: propertiesAsLabels,
+                    restrictedToMinimumLevel: LogEventLevel.Verbose);
+                // config.WriteTo.LokiHttp(lokiCredentials, labels);
+            });
     
     private static IAsyncSubscriber SubscribeForMessage<TMessage>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
         where TMessage : class, ISimulationMessage
