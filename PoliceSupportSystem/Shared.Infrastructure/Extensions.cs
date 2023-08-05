@@ -63,7 +63,7 @@ public static class Extensions
 
             var lokiCredentials = new LokiCredentials { Login = lokiSettings.Login, Password = lokiSettings.Password };
             var labels = new[] { new LokiLabel { Key = nameof(serviceSettings.Id), Value = serviceSettings.Id } };
-            var propertiesAsLabels = new[] { nameof(serviceSettings.Id) }; // TODO Is it needed?
+            var propertiesAsLabels = Enumerable.Empty<string>();
             
             // var lokiCredentials = new BasicAuthCredentials(lokiSettings.Uri, lokiSettings.Login, lokiSettings.Password);
             // var labels = new LogLabelProvider(new List<LokiLabel> { new LokiLabel(nameof(serviceSettings.Id), serviceSettings.Id) });

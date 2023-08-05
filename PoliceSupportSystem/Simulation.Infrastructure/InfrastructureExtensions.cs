@@ -162,8 +162,8 @@ public static class InfrastructureExtensions
                 var lokiSettings = ctx.Configuration.GetSettings<LokiSettings>(nameof(LokiSettings));
 
                 var lokiCredentials = new LokiCredentials { Login = lokiSettings.Login, Password = lokiSettings.Password };
-                var labels = new[] { new LokiLabel { Key = nameof(lokiSettings.Label), Value = lokiSettings.Label } };
-                var propertiesAsLabels = new[] { nameof(lokiSettings.Label) }; // TODO Is it needed?
+                var labels = new[] { new LokiLabel { Key = "Id", Value = lokiSettings.Label } };
+                var propertiesAsLabels = Enumerable.Empty<string>();
             
                 // var lokiCredentials = new BasicAuthCredentials(lokiSettings.Uri, lokiSettings.Login, lokiSettings.Password);
                 // var labels = new LogLabelProvider(new List<LokiLabel> { new LokiLabel(nameof(serviceSettings.Id), serviceSettings.Id) });
