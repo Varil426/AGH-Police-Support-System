@@ -143,6 +143,9 @@ public static class Extensions
                         {
                             configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
                         }));
+
+                s.AddSingleton<IBusSubscriberManager, BusSubscriberManager>();
+                
                 // s.AddTransient<IBus>(
                 //     _ => new RabbitMQBus(
                 //         configurator =>
@@ -269,12 +272,11 @@ public static class Extensions
     
     public static IHost SubscribeQueryHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
     {
-        var bus = host.Services.GetRequiredService<IBus>();
+        var subscriberManager = host.Services.GetRequiredService<IBusSubscriberManager>();
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
         var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
 
-        // TODO What about disposing of this? Create a service which keeps an eye on them
-        var querySubscriber = bus.CreateAsyncSubscriber(
+        var querySubscriber = subscriberManager.CreateSubscriber(
             x =>
             
                 x.SetExchange(rabbitMqSettings.QueryExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.QueryExchange)))
@@ -299,13 +301,12 @@ public static class Extensions
     
     public static IHost SubscribeEventHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
     {
-        var bus = host.Services.GetRequiredService<IBus>();
+        var subscriberManager = host.Services.GetRequiredService<IBusSubscriberManager>();
 
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
         var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
-
-        // TODO What about disposing of this? Create a service which keeps an eye on them
-        var eventSubscriber = bus.CreateAsyncSubscriber(
+        
+        var eventSubscriber = subscriberManager.CreateSubscriber(
             x =>
             
                 x.SetExchange(rabbitMqSettings.EventExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.EventExchange)))
@@ -329,12 +330,11 @@ public static class Extensions
     
     public static IHost SubscribeCommandHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
     {
-        var bus = host.Services.GetRequiredService<IBus>();
+        var subscriberManager = host.Services.GetRequiredService<IBusSubscriberManager>();
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
         var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
 
-        // TODO What about disposing of this? Create a service which keeps an eye on them
-        var commandSubscriber = bus.CreateAsyncSubscriber(
+        var commandSubscriber = subscriberManager.CreateSubscriber(
             x =>
             
                 x.SetExchange(rabbitMqSettings.CommandExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.CommandExchange)))
@@ -367,12 +367,11 @@ public static class Extensions
 
     public static IHost SubscribeMessageService(this IHost host)
     {
-        var bus = host.Services.GetRequiredService<IBus>();
+        var subscriberManager = host.Services.GetRequiredService<IBusSubscriberManager>();
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
         var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
 
-        // TODO What about disposing of this? Create a service which keeps an eye on them
-        var messageSubscriber = bus.CreateAsyncSubscriber(
+        var messageSubscriber = subscriberManager.CreateSubscriber(
             x =>
                 x.SetExchange(rabbitMqSettings.MessageExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.MessageExchange)))
                     .SetRoutingKey(serviceSettings.Id)

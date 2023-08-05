@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using MessageBus.Core.API;
-using Shared.Application;
 using Shared.Application.Agents;
 using Shared.Application.Handlers;
 using Shared.Application.Services;
@@ -13,16 +12,16 @@ namespace Shared.Infrastructure.Services;
 internal class MessageService : IMessageService, IMessageHandler, IDisposable
 {
     private readonly IMessageBus _messageBus;
-    private readonly IBus _bus;
+    private readonly IBusSubscriberManager _subscriberManager;
     private readonly RabbitMqSettings _rabbitMqSettings;
     private readonly IServiceProvider _serviceProvider;
     private readonly ISet<IAgent> _subscribedAgents = new HashSet<IAgent>();
     private readonly SemaphoreSlim _subscribeSemaphore = new(1);
 
-    public MessageService(IMessageBus messageBus, IBus bus, RabbitMqSettings rabbitMqSettings, IServiceProvider serviceProvider)
+    public MessageService(IMessageBus messageBus, IBusSubscriberManager subscriberManager, RabbitMqSettings rabbitMqSettings, IServiceProvider serviceProvider)
     {
         _messageBus = messageBus;
-        _bus = bus;
+        _subscriberManager = subscriberManager;
         _rabbitMqSettings = rabbitMqSettings;
         _serviceProvider = serviceProvider;
     }
@@ -52,8 +51,7 @@ internal class MessageService : IMessageService, IMessageHandler, IDisposable
 
     private void SubscribeForDirectMessages(IAgent agent)
     {
-        // TODO What about disposing of this? Create a service which keeps an eye on them
-        var messageSubscriber = _bus.CreateAsyncSubscriber(
+        var messageSubscriber = _subscriberManager.CreateSubscriber(
             x =>
                 x.SetExchange(_rabbitMqSettings.DirectMessageExchange ?? throw new MissingConfigurationException(nameof(_rabbitMqSettings.DirectMessageExchange)))
                     .SetRoutingKey(agent.Id.ToString())
