@@ -48,7 +48,7 @@ public class Simulation : ISimulation
 
     public void AddService(IService service)
     {
-        if (!_services.Select(x => x.Id).Contains(service.Id))
+        if (!_services.Select(x => x.Id).Any(x => x.Equals(service.Id, StringComparison.InvariantCultureIgnoreCase)))
             _services.Add(service);
         else
             _logger.LogWarning($"Attempted to add a duplicated service with ID: {service.Id}");
