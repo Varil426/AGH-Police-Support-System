@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Simulation.Application.Entities;
 using Simulation.Application.Services;
-using Simulation.Shared.Common;
-using Simulation.Shared.Communication;
 
 namespace Simulation.Application;
 
@@ -46,5 +44,22 @@ public class Simulation : ISimulation
             // TODO Send updates
             await Task.Delay(30);
         }
+    }
+
+    public void AddService(IService service)
+    {
+        if (!_services.Select(x => x.Id).Contains(service.Id))
+            _services.Add(service);
+        else
+            _logger.LogWarning($"Attempted to add a duplicated service with ID: {service.Id}");
+    }
+
+    public void RemoveService(string serviceId)
+    {
+        var s = _services.FirstOrDefault(x => x.Id.Equals(serviceId, StringComparison.InvariantCultureIgnoreCase));
+        if (s is not null)
+            _services.Remove(s);
+        else
+            _logger.LogWarning($"Attempted to remove not existing service with ID: {serviceId}");
     }
 }
