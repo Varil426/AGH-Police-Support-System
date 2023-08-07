@@ -95,17 +95,15 @@ public static class InfrastructureExtensions
         return hostBuilder;
     }
 
-    public static IHostBuilder AddMessageSubscriber(this IHostBuilder hostBuilder) =>
-        hostBuilder.ConfigureServices(
-            s => s.AddSingleton<IMessageSubscriberService, MessageSubscriberService>());
-    
-    public static IHostBuilder AddMessageService(this IHostBuilder hostBuilder) =>
-        hostBuilder.ConfigureServices(
-            s => s.AddSingleton<IMessageService, MessageService>());
-    
-    public static IHostBuilder AddSimulationMessageProcessor(this IHostBuilder hostBuilder) =>
-        hostBuilder.ConfigureServices(
-            s => s.AddSingleton<ISimulationMessageProcessor, SimulationMessageProcessor>());
+    public static IHostBuilder AddSimulationServices(this IHostBuilder hostBuilder) => hostBuilder.ConfigureServices(
+        s =>
+        {
+            s.AddSingleton<ISimulationMessageProcessor, SimulationMessageProcessor>();
+            s.AddSingleton<IMessageService, MessageService>();
+            s.AddSingleton<IMessageSubscriberService, MessageSubscriberService>();
+            s.AddTransient<IServiceFactory, ServiceFactory>();
+            s.AddTransient<IEntityFactory, EntityFactory>();
+        });
 
     public static IHostBuilder ConfigureRabbitMq(this IHostBuilder hostBuilder)
     {

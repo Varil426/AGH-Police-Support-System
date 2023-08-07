@@ -8,10 +8,8 @@ var host = Host.CreateDefaultBuilder(args)
     .AddSettings()
     .AddRabbitMqBus()
     .AddHandlers(typeof(ISimulation).Assembly)
-    .AddMessageSubscriber()
-    .AddMessageService()
-    .AddSimulationMessageProcessor()
     .AddSerilog()
+    .AddSimulationServices()
     .ConfigureServices(
         x =>
         {
