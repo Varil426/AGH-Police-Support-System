@@ -11,6 +11,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
 using Simulation.Application;
+using Simulation.Application.Handlers;
 using Simulation.Application.Services;
 using Simulation.Infrastructure.Exceptions;
 using Simulation.Infrastructure.Services;
@@ -81,12 +82,14 @@ public static class InfrastructureExtensions
 
     public static IHostBuilder AddHandlers(this IHostBuilder hostBuilder, Assembly handlerAssembly)
     {
-
         hostBuilder.ConfigureServices(
             (_, s) =>
             {
                 var messageHandlers = DiscoverHandlers(handlerAssembly).ToList();
-                messageHandlers.ForEach(x => s.AddScoped(x));
+                messageHandlers.ForEach(
+                    x => s.AddScoped(
+                        x.GetInterfaces().First(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationMessageHandler<>)),
+                        x));
             });
         
         return hostBuilder;
@@ -99,6 +102,10 @@ public static class InfrastructureExtensions
     public static IHostBuilder AddMessageService(this IHostBuilder hostBuilder) =>
         hostBuilder.ConfigureServices(
             s => s.AddSingleton<IMessageService, MessageService>());
+    
+    public static IHostBuilder AddSimulationMessageProcessor(this IHostBuilder hostBuilder) =>
+        hostBuilder.ConfigureServices(
+            s => s.AddSingleton<ISimulationMessageProcessor, SimulationMessageProcessor>());
 
     public static IHostBuilder ConfigureRabbitMq(this IHostBuilder hostBuilder)
     {
@@ -195,7 +202,7 @@ public static class InfrastructureExtensions
     }
     
     private static IEnumerable<Type> DiscoverHandlers(Assembly assembly) => assembly.GetTypes().Where(
-        x => x.GetInterfaces().Any(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(IMessageHandler<>)));
+        x => !x.IsAbstract && x.GetInterfaces().Any(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationMessageHandler<>)));
 
     private static IEnumerable<Type> DiscoverMessageTypes(IEnumerable<Assembly> assemblies)
     {

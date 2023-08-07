@@ -7,14 +7,14 @@ var host = Host.CreateDefaultBuilder(args)
     .UseAutofac()
     .AddSettings()
     .AddRabbitMqBus()
-    .AddHandlers(typeof(ISimulation).Assembly) // TODO Is it necessary? Remove it or refactor it
+    .AddHandlers(typeof(ISimulation).Assembly)
     .AddMessageSubscriber()
     .AddMessageService()
+    .AddSimulationMessageProcessor()
     .AddSerilog()
     .ConfigureServices(
         x =>
         {
-            
             x.AddSingleton<ISimulation, Simulation.Application.Simulation>();
             x.AddHostedService<SimulationRunner>();
         })
