@@ -2,4 +2,5 @@
 
 public interface IEvent
 {
+    DateTimeOffset CreatedAt { get; }
 }
