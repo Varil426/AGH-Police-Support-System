@@ -34,9 +34,9 @@ public class Simulation : ISimulation
         _logger.LogInformation("Simulation has started");
         while (cancellationToken is { IsCancellationRequested: false } or null)
         {
-            // TODO Receive messages
+            // Receive messages
             var messages = (await _messageService.GetMessagesAsync()).OrderBy(x => x.CreatedAt);
-            // TODO Process messages - Update state
+            // Process messages - Update state
             await _simulationMessageProcessor.ProcessAsync(this, messages);
             // TODO Perform actions
             _lastActionTime = DateTimeOffset.Now;
