@@ -2,4 +2,7 @@
 
 namespace Simulation.Shared.Communication;
 
-public record ServiceOnlineMessage(string ServiceId, ServiceTypeEnum ServiceType) : ISimulationMessage;
+public record ServiceOnlineMessage(string ServiceId, ServiceTypeEnum ServiceType) : ISimulationMessage
+{
+    public DateTimeOffset CreatedAt { get; } = DateTimeOffset.Now;
+}

@@ -35,7 +35,7 @@ public class Simulation : ISimulation
         while (cancellationToken is { IsCancellationRequested: false } or null)
         {
             // TODO Receive messages
-            var messages = await _messageService.GetMessagesAsync();
+            var messages = (await _messageService.GetMessagesAsync()).OrderBy(x => x.CreatedAt);
             // TODO Process messages - Update state
             await _simulationMessageProcessor.ProcessAsync(this, messages);
             // TODO Perform actions

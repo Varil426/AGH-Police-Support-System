@@ -2,5 +2,5 @@
 
 public interface ISimulationMessage
 {
-    
+    DateTimeOffset CreatedAt { get; }
 }
