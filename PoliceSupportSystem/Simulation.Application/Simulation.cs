@@ -17,7 +17,7 @@ public class Simulation : ISimulation
 
     private TimeSpan TimeSinceLastAction => DateTimeOffset.Now - _lastActionTime;
 
-    private TimeSpan SimulationTimeSinceLastAction => TimeSinceLastAction * _simulationSettings.TimeRate;
+    public TimeSpan SimulationTimeSinceLastAction => TimeSinceLastAction * _simulationSettings.TimeRate;
 
     public Simulation(ILogger<Simulation> logger, SimulationSettings simulationSettings, IMessageService messageService, ISimulationMessageProcessor simulationMessageProcessor)
     {

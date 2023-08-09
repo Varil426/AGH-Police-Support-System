@@ -2,5 +2,8 @@
 
 public enum ServiceTypeEnum
 {
-    HqService
+    HqService,
+    PatrolService,
+    GunService,
+    NavigationService
 }
