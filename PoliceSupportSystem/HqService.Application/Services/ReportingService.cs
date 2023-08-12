@@ -17,23 +17,19 @@ public class ReportingService : IReportingService
         _incidentMonitoringService = incidentMonitoringService;
     }
 
-    public Task ReportNewIncident(NewIncidentDto newIncidentDto)
+    public async Task ReportNewIncident(NewIncidentDto newIncidentDto)
     {
         _logger.LogInformation($"Received a new incident info: {newIncidentDto}");
         
-        _incidentMonitoringService.AddIncident(new Incident(newIncidentDto.Id, newIncidentDto.Location, newIncidentDto.Status, newIncidentDto.Type));
+        await _incidentMonitoringService.AddIncident(new Incident(newIncidentDto.Id, newIncidentDto.Location, newIncidentDto.Status, newIncidentDto.Type));
         // TODO Notify HQ Agent
-
-        return Task.CompletedTask;
     }
 
-    public Task UpdateStatus(UpdateIncidentDto updateIncidentDto)
+    public async Task UpdateStatus(UpdateIncidentDto updateIncidentDto)
     {
         _logger.LogInformation($"Received an incident update info: {updateIncidentDto}");
 
-        _incidentMonitoringService.UpdatedIncident(updateIncidentDto);
+        await _incidentMonitoringService.UpdatedIncident(updateIncidentDto);
         // TODO Notify HQ Agent
-
-        return Task.CompletedTask;
     }
 }

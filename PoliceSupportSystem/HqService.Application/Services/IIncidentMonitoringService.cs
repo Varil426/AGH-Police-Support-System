@@ -5,13 +5,13 @@ namespace HqService.Application.Services;
 
 public interface IIncidentMonitoringService
 {
-    IReadOnlySet<Incident> OnGoingIncidents { get; }
+    Task<IReadOnlySet<Incident>> GetOnGoingIncidents();
     
-    IReadOnlySet<Incident> Incidents { get; }
+    Task<IReadOnlySet<Incident>> GetIncidents();
         
-    void AddIncident(Incident incident);
+    Task AddIncident(Incident incident);
 
-    Incident? GetIncidentById(Guid id);
+    Task<Incident?> GetIncidentById(Guid id);
 
-    void UpdatedIncident(UpdateIncidentDto updateIncidentDto);
+    Task UpdatedIncident(UpdateIncidentDto updateIncidentDto);
 }
