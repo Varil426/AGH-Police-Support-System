@@ -153,6 +153,7 @@ public static class Extensions
                 //             configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
                 //         }));
 
+                // TODO Can be improved - multiple handlers with Autofac
                 var handlerAssembliesList = handlerAssemblies.ToList();
                 if (rabbitMqSettings.QueryExchange is not null)
                 {
@@ -161,16 +162,15 @@ public static class Extensions
                     queryHandlers.ForEach(x => s.AddScoped(x));
                 }
 
+                // TODO Can be improved - multiple handlers with Autofac
                 if (rabbitMqSettings.CommandExchange is not null)
                 {
                     // Register Command Handlers
                     var commandHandlers = DiscoverCommandHandlers(handlerAssembliesList).ToList();
                     commandHandlers.ForEach(x => s.AddScoped(x));
                 }
-
-
-
-
+                
+                // TODO Can be improved - multiple handlers with Autofac
                 if (rabbitMqSettings.EventExchange is not null)
                 {
                     // Register Event Handlers

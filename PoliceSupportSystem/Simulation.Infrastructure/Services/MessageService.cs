@@ -28,7 +28,7 @@ internal class MessageService : IMessageService, IDisposable
 
     public Task<IEnumerable<ISimulationMessage>> GetMessagesAsync() => _messageSubscriberService.GetUnhandledMessages();
 
-    public Task SendMessageAsync(ISimulationMessage message, string receiver)
+    public async Task SendMessageAsync(ISimulationMessage message, string receiver)
     {
         using var publisher = _bus.CreateAsyncRpcPublisher(
             x =>
@@ -37,7 +37,7 @@ internal class MessageService : IMessageService, IDisposable
                 x.SetRoutingKey(receiver);
             });
         
-        return publisher.Send(message);
+        await publisher.Send(message);
     }
 
     public Task SendMessageAsync(IDirectSimulationMessage message) => SendMessageAsync(message, message.Receiver);

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+using Shared.Domain.Geo;
 using Simulation.Application.Entities;
 using Simulation.Application.Services;
+using Simulation.Shared.Communication;
 
 namespace Simulation.Application;
 
@@ -40,6 +42,7 @@ public class Simulation : ISimulation
             await _simulationMessageProcessor.ProcessAsync(this, messages);
             // TODO Perform actions
             _lastActionTime = DateTimeOffset.Now;
+            await _messageService.PublishMessageAsync(new NewIncidentMessage(Guid.NewGuid(), new Position(0, 0))); // TODO THIS IS A TEST - REMOVE THIS LINE
             // TODO Director - Random events
             // TODO Send updates
             await Task.Delay(30);

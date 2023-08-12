@@ -8,8 +8,14 @@
 
     <ItemGroup>
       <ProjectReference Include="..\HqService.Application\HqService.Application.csproj" />
-      <ProjectReference Include="..\HqService.Simulation\HqService.Simulation.csproj" />
-      <ProjectReference Include="..\Shared.Infrastructure\Shared.Infrastructure.csproj" />
+      <ProjectReference Include="..\Shared.Simulation\Shared.Simulation.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Autofac" Version="7.0.1" />
+    </ItemGroup>
+
+
+
 
 </Project>

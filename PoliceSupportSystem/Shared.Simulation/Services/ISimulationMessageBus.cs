@@ -2,7 +2,7 @@
 
 namespace Shared.Simulation.Services;
 
-internal interface ISimulationMessageBus
+public interface ISimulationMessageBus
 {
     Task SendSimulationMessage(ISimulationMessage simulationMessage);
 }
