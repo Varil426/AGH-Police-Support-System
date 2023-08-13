@@ -16,6 +16,8 @@ sleep 4
 until pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}; do sleep 1; done
 
 # Import map data
+# osm2pgrouting --f /maps/${MAP_FILE} --conf /mapconfig.xml --dbname ${POSTGRES_DB} --username ${POSTGRES_USER} --password ${POSTGRES_PASSWORD} --addnodes --tags --attributes --clean
 osm2pgrouting --f /maps/${MAP_FILE} --conf /mapconfig.xml --dbname ${POSTGRES_DB} --username ${POSTGRES_USER} --password ${POSTGRES_PASSWORD} --addnodes --clean
+osm2pgsql -d postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/${POSTGRES_DB} -k /maps/${DISTRICTS_FILE}
 
 fg %1

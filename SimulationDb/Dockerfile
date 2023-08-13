@@ -104,7 +104,7 @@ RUN rm /docker-entrypoint-initdb.d/10_postgis.sh
 #     && rm -rf /var/lib/apt/lists/*
 # RUN rm /docker-entrypoint-initdb.d/10_postgis.sh
 
-FROM pgrouting-stage as osm2pgrouting-stage
+FROM pgrouting-stage AS osm2pgrouting-stage
 
 ENV OSM2PGROUTING_VERSION 2.3.8
 
@@ -199,7 +199,12 @@ RUN apt update \
 #     && apt autoremove -y \
 #     && rm -rf /var/lib/apt/lists/*
 
-FROM osm2pgrouting-stage AS db-init-stage
+FROM osm2pgrouting-stage AS osm2pgsql-stage
+
+RUN apt update \
+    && apt install -y osm2pgsql
+
+FROM osm2pgsql-stage AS db-init-stage
 
 COPY ./setup.sql /docker-entrypoint-initdb.d/
 

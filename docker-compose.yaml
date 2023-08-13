@@ -2,15 +2,15 @@ version: "3.8"
 services:
   rabbitmq:
     image: rabbitmq:management-alpine
-    container_name: 'rabbitmq'
+    container_name: "rabbitmq"
     ports:
-        - 5672:5672
-        - 15672:15672
+      - 5672:5672
+      - 15672:15672
     volumes:
-        - ./RabbitMQ/data/:/var/lib/rabbitmq/
-        - ./RabbitMQ/log/:/var/log/rabbitmq/
+      - ./RabbitMQ/data/:/var/lib/rabbitmq/
+      - ./RabbitMQ/log/:/var/log/rabbitmq/
     networks:
-        - rabbitmq_net
+      - rabbitmq_net
   simulationdb:
     build: ./SimulationDb
     ports:
@@ -20,6 +20,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=SimulationDb
       - MAP_FILE=krakow.osm
+      - DISTRICTS_FILE=krakow-districts.osm
     volumes:
       - ./SimulationDb/maps:/maps
   loki:
@@ -34,11 +35,11 @@ services:
     # command: -config.file=/mnt/config/loki-config.yaml
     command: -config.file=/etc/loki/local-config.yaml
     healthcheck:
-        test: wget -q --tries=1 -O- http://localhost:3100/ready 
-        interval: 3s
-        timeout: 3s
-        retries: 10
-        start_period: 10s
+      test: wget -q --tries=1 -O- http://localhost:3100/ready
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
   grafana:
     image: grafana/grafana:latest
     depends_on:
@@ -51,7 +52,7 @@ services:
       - ./Grafana/Provisioning/:/etc/grafana/provisioning/
     networks:
       - loki_net
-networks: 
+networks:
   rabbitmq_net:
     driver: bridge
   loki_net:
