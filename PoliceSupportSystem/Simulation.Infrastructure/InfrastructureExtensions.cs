@@ -6,11 +6,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using RabbitMQ.Client;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
 using Simulation.Application;
+using Simulation.Application.Directors;
+using Simulation.Application.Directors.Settings;
 using Simulation.Application.Handlers;
 using Simulation.Application.Services;
 using Simulation.Infrastructure.Exceptions;
@@ -31,9 +34,13 @@ public static class InfrastructureExtensions
             {
                 var rabbitMqSettings = ctx.Configuration.GetSettings<RabbitMqSettings>(nameof(RabbitMqSettings));
                 var simulationSettings = ctx.Configuration.GetSettings<SimulationSettings>(nameof(SimulationSettings));
+                var incidentDirectorSettings = ctx.Configuration.GetSettings<IncidentDirectorSettings>(nameof(IncidentDirectorSettings));
+                var dbSettings = ctx.Configuration.GetSettings<DbSettings>(nameof(DbSettings));
 
                 serviceCollection.AddSingleton(rabbitMqSettings);
                 serviceCollection.AddSingleton(simulationSettings);
+                serviceCollection.AddSingleton(incidentDirectorSettings);
+                serviceCollection.AddSingleton(dbSettings);
             });
         return hostBuilder;
     }
@@ -43,6 +50,27 @@ public static class InfrastructureExtensions
         var configSection = configuration.GetRequiredSection(sectionName);
         var settings = configSection.Get<TSettings>() ?? throw new Exception(); // TODO Change exception type
         return settings;
+    }
+
+    public static IHostBuilder AddNpgsql(this IHostBuilder hostBuilder)
+    {
+        hostBuilder.ConfigureServices(
+            (ctx, s) =>
+            {
+                s.AddSingleton<NpgsqlDataSourceBuilder>(
+                    x =>
+                    {
+                        var settings = x.GetRequiredService<DbSettings>();
+                        return new NpgsqlDataSourceBuilder(
+                            $"Host={settings.Host};Port={settings.Port};Username={settings.Username};Password={settings.Password};Database={settings.DbName}");
+                    });
+                s.AddSingleton<NpgsqlDataSource>(
+                    x =>
+                        x.GetRequiredService<NpgsqlDataSourceBuilder>().Build()
+                );
+            });
+
+        return hostBuilder;
     }
     
     public static IHostBuilder AddRabbitMqBus(this IHostBuilder hostBuilder)
@@ -103,6 +131,9 @@ public static class InfrastructureExtensions
             s.AddSingleton<IMessageSubscriberService, MessageSubscriberService>();
             s.AddTransient<IServiceFactory, ServiceFactory>();
             s.AddTransient<IEntityFactory, EntityFactory>();
+            s.AddTransient<IMapService, MapService>();
+
+            s.AddSingleton<IDirector, IncidentDirector>();
         });
 
     public static IHostBuilder ConfigureRabbitMq(this IHostBuilder hostBuilder)
