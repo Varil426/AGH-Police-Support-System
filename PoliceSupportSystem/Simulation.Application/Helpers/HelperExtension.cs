@@ -1,4 +1,4 @@
-﻿namespace Shared.Application.Helpers;
+﻿namespace Simulation.Application.Helpers;
 
 public static class HelperExtension
 {
@@ -7,6 +7,5 @@ public static class HelperExtension
         dictionary.TryGetValue(key, out var result);
         return result;
     }
-
     public static async Task<List<T>> ToListAsync<T>(this Task<IEnumerable<T>> x) => (await x).ToList();
 }
