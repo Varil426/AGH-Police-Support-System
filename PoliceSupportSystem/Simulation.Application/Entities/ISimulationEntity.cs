@@ -1,14 +1,16 @@
-﻿namespace Simulation.Application.Entities;
+﻿using Shared.Domain.Geo;
+
+namespace Simulation.Application.Entities;
 
 public interface ISimulationEntity
 {
     Guid Id { get; }
     
-    (double, double) Position { get; }
-    
+    Position Position { get; }
+
     IReadOnlyCollection<IService> RelatedServices { get; }
 
     void AddRelatedService(IService service);
 
-    void RemoveRelatedService(IService service);
+    void RemoveRelatedService(string relatedServiceId);
 }

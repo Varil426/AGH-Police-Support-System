@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using Shared.Domain.Geo;
+using Simulation.Application.Directors;
 using Simulation.Application.Entities;
 using Simulation.Application.Services;
-using Simulation.Shared.Communication;
 
 namespace Simulation.Application;
 
@@ -12,21 +11,24 @@ public class Simulation : ISimulation
     private readonly SimulationSettings _simulationSettings;
     private readonly IMessageService _messageService;
     private readonly ISimulationMessageProcessor _simulationMessageProcessor;
+    private readonly IReadOnlyCollection<IDirector> _directors;
 
     private readonly List<IService> _services = new();
     private DateTimeOffset _lastActionTime;
     private DateTimeOffset _simulationStartTime;
 
     private TimeSpan TimeSinceLastAction => DateTimeOffset.Now - _lastActionTime;
-
+    private TimeSpan TimeSinceStart => DateTimeOffset.Now - _simulationStartTime;
+    public TimeSpan SimulationTimeSinceStart => TimeSinceStart * _simulationSettings.TimeRate;
     public TimeSpan SimulationTimeSinceLastAction => TimeSinceLastAction * _simulationSettings.TimeRate;
 
-    public Simulation(ILogger<Simulation> logger, SimulationSettings simulationSettings, IMessageService messageService, ISimulationMessageProcessor simulationMessageProcessor)
+    public Simulation(ILogger<Simulation> logger, SimulationSettings simulationSettings, IMessageService messageService, ISimulationMessageProcessor simulationMessageProcessor, IReadOnlyCollection<IDirector> directors)
     {
         _logger = logger;
         _simulationSettings = simulationSettings;
         _messageService = messageService;
         _simulationMessageProcessor = simulationMessageProcessor;
+        _directors = directors;
     }
 
     public async Task RunAsync(CancellationToken? cancellationToken = null)
@@ -42,8 +44,7 @@ public class Simulation : ISimulation
             await _simulationMessageProcessor.ProcessAsync(this, messages);
             // TODO Perform actions
             _lastActionTime = DateTimeOffset.Now;
-            await _messageService.PublishMessageAsync(new NewIncidentMessage(Guid.NewGuid(), new Position(0, 0))); // TODO THIS IS A TEST - REMOVE THIS LINE
-            // TODO Director - Random events
+            await Task.WhenAll(_directors.Select(x => x.InvokeAsync(this)));
             // TODO Send updates
             await Task.Delay(30);
         }
@@ -65,4 +66,6 @@ public class Simulation : ISimulation
         else
             _logger.LogWarning($"Attempted to remove not existing service with ID: {serviceId}");
     }
+
+    public TimeSpan TranslateToSimulationTime(DateTimeOffset moment) => (moment - _simulationStartTime) * _simulationSettings.TimeRate;
 }

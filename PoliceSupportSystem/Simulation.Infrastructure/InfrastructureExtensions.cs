@@ -13,6 +13,7 @@ using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
 using Simulation.Application;
 using Simulation.Application.Directors;
+using Simulation.Application.Directors.IncidentDirector;
 using Simulation.Application.Directors.Settings;
 using Simulation.Application.Handlers;
 using Simulation.Application.Services;

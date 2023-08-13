@@ -3,6 +3,8 @@
 public enum IncidentStatusEnum
 {
     WaitingForResponse,
-    OnGoing,
+    OnGoingNormal,
+    AwaitingBackup,
+    OnGoingShooting,
     Resolved
 }
