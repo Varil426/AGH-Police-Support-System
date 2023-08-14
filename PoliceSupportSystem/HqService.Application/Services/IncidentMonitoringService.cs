@@ -69,8 +69,8 @@ public class IncidentMonitoringService : IIncidentMonitoringService
     public async Task UpdatedIncident(UpdateIncidentDto updateIncidentDto)
     {
         var incident = await GetIncidentById(updateIncidentDto.Id) ?? throw new Exception($"Incident with id: {updateIncidentDto.Id} not found");
-        incident.Status = updateIncidentDto.NewIncidentStatus;
-        incident.Location = updateIncidentDto.NewLocation ?? incident.Location;
-        incident.Type = updateIncidentDto.NewIncidentType;
+        incident.UpdateStatus(updateIncidentDto.NewIncidentStatus);
+        incident.UpdateLocation(updateIncidentDto.NewLocation ?? incident.Location);
+        incident.UpdateType(updateIncidentDto.NewIncidentType);
     }
 }
