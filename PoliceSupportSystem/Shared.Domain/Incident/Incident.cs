@@ -2,7 +2,7 @@
 
 namespace Shared.Domain.Incident;
 
-public class Incident
+public class Incident : BaseRootDomainEntity
 {
     public Guid Id { get; }
     public Position Location { get; private set; }
