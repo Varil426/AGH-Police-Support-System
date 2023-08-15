@@ -12,29 +12,29 @@ internal class Simulation : ISimulation
     private readonly IMessageService _messageService;
     private readonly ISimulationMessageProcessor _simulationMessageProcessor;
     private readonly IReadOnlyCollection<IDirector> _directors;
+    private readonly ISimulationTimeService _simulationTimeService;
 
     private readonly List<IService> _services = new();
-    private DateTimeOffset _lastActionTime;
-    private DateTimeOffset _simulationStartTime;
 
-    private TimeSpan TimeSinceLastAction => DateTimeOffset.Now - _lastActionTime;
-    private TimeSpan TimeSinceStart => DateTimeOffset.Now - _simulationStartTime;
-    public TimeSpan SimulationTimeSinceStart => TimeSinceStart * _simulationSettings.TimeRate;
-    public TimeSpan SimulationTimeSinceLastAction => TimeSinceLastAction * _simulationSettings.TimeRate;
-
-    public Simulation(ILogger<Simulation> logger, SimulationSettings simulationSettings, IMessageService messageService, ISimulationMessageProcessor simulationMessageProcessor, IReadOnlyCollection<IDirector> directors)
+    public Simulation(
+        ILogger<Simulation> logger,
+        SimulationSettings simulationSettings,
+        IMessageService messageService,
+        ISimulationMessageProcessor simulationMessageProcessor,
+        IReadOnlyCollection<IDirector> directors,
+        ISimulationTimeService simulationTimeService)
     {
         _logger = logger;
         _simulationSettings = simulationSettings;
         _messageService = messageService;
         _simulationMessageProcessor = simulationMessageProcessor;
         _directors = directors;
+        _simulationTimeService = simulationTimeService;
     }
 
     public async Task RunAsync(CancellationToken? cancellationToken = null)
     {
-        _simulationStartTime = DateTimeOffset.Now;
-        _lastActionTime = _simulationStartTime;
+        _simulationTimeService.Start();
         _logger.LogInformation("Simulation has started");
         while (cancellationToken is { IsCancellationRequested: false } or null)
         {
@@ -43,8 +43,8 @@ internal class Simulation : ISimulation
             // Process messages - Update state
             await _simulationMessageProcessor.ProcessAsync(this, messages);
             // TODO Perform actions
-            _lastActionTime = DateTimeOffset.Now;
-            await Task.WhenAll(_directors.Select(x => x.InvokeAsync(this)));
+            _simulationTimeService.UpdateLastActionTime();
+            await Task.WhenAll(_directors.Select(x => x.Act(this)));
             // TODO Send updates
             await Task.Delay(30);
         }
@@ -66,6 +66,4 @@ internal class Simulation : ISimulation
         else
             _logger.LogWarning($"Attempted to remove not existing service with ID: {serviceId}");
     }
-
-    public TimeSpan TranslateToSimulationTime(DateTimeOffset moment) => (moment - _simulationStartTime) * _simulationSettings.TimeRate;
 }

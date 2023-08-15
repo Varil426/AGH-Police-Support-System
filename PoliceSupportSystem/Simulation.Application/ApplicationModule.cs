@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Microsoft.Extensions.Hosting;
 using Simulation.Application.Directors;
 using Simulation.Application.Directors.IncidentDirector;
 using Simulation.Application.Services;
@@ -12,8 +13,9 @@ public class ApplicationModule : Module
         base.Load(builder);
         
         builder.RegisterType<Simulation>().As<ISimulation>().SingleInstance();
+        builder.RegisterType<SimulationTimeService>().As<ISimulationTimeService>().SingleInstance();
         
-        builder.RegisterType<IncidentDirector>().As<IDirector>().SingleInstance();
+        builder.RegisterType<IncidentDirector>().As<IDirector>().As<IHostedService>().SingleInstance();
         
         builder.RegisterType<ServiceFactory>().As<IServiceFactory>();
         builder.RegisterType<EntityFactory>().As<IEntityFactory>();

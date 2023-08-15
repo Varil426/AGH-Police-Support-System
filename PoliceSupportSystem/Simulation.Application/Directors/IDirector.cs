@@ -2,5 +2,5 @@
 
 public interface IDirector
 {
-    Task InvokeAsync(ISimulation simulation);
+    Task Act(ISimulation simulation);
 }
