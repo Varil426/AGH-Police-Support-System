@@ -12,36 +12,52 @@ internal class IncidentDirector : IDirector
     private readonly IncidentDirectorSettings _incidentDirectorSettings;
     private readonly IMapService _mapService;
     private readonly ILogger<IncidentDirector> _logger;
-
+    private readonly IIncidentRandomizer _randomizer;
+    private readonly List<PlannedIncident> _plannedIncidents = new();
     private readonly List<District> _districts = new();
+    private readonly TimeSpan _planFor = TimeSpan.FromDays(1);
 
-    public IncidentDirector(IEntityFactory entityFactory, IncidentDirectorSettings incidentDirectorSettings, IMapService mapService, ILogger<IncidentDirector> logger)
+    private TimeSpan _lastPlannedAt;
+
+    public IncidentDirector(
+        IEntityFactory entityFactory,
+        IncidentDirectorSettings incidentDirectorSettings,
+        IMapService mapService,
+        ILogger<IncidentDirector> logger,
+        IIncidentRandomizer randomizer)
     {
         _entityFactory = entityFactory;
         _incidentDirectorSettings = incidentDirectorSettings;
         _mapService = mapService;
         _logger = logger;
+        _randomizer = randomizer;
     }
 
     public async Task InvokeAsync(ISimulation simulation)
     {
         if (!_districts.Any())
             await PopulateDistricts();
-        PlanIncidents(simulation);
+        if (_lastPlannedAt + _planFor < simulation.SimulationTimeSinceStart || _lastPlannedAt == default)
+            await PlanIncidents(simulation);
         CreateIncidents(simulation);
         UpdateIncidents(simulation);
     }
-    
-    private void PlanIncidents(ISimulation simulation)
+
+    private async Task PlanIncidents(ISimulation simulation)
     {
-        // TODO
+        // TODO Optimize?
+        var simulationTimeSinceStart = simulation.SimulationTimeSinceStart;
+        foreach (var district in _districts)
+            _plannedIncidents.AddRange(await _randomizer.PlanIncidents(district, simulationTimeSinceStart, _planFor));
+
+        _lastPlannedAt = simulationTimeSinceStart;
     }
 
     private void CreateIncidents(ISimulation simulation)
     {
         // TODO
     }
-    
+
     private void UpdateIncidents(ISimulation simulation)
     {
         // TODO
@@ -50,8 +66,7 @@ internal class IncidentDirector : IDirector
     private async Task PopulateDistricts()
     {
         var districtNames = await _mapService.GetDistrictNames().ToListAsync();
-        _districts.AddRange(districtNames.Select(x => new District(x, _incidentDirectorSettings.DistrictDangerLevels.TryGet(x))));
+        _districts.AddRange(districtNames.Select(x => new District(x, _incidentDirectorSettings.DistrictDangerLevels.TryGetNullable(x) ?? DistrictDangerLevelEnum.Normal)));
         _logger.LogInformation($"Retrieved district list with {districtNames.Count} element(s)");
     }
-
 }
