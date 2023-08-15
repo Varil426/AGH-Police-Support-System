@@ -5,7 +5,7 @@ using Simulation.Application.Services;
 
 namespace Simulation.Application;
 
-public class Simulation : ISimulation
+internal class Simulation : ISimulation
 {
     private readonly ILogger<Simulation> _logger;
     private readonly SimulationSettings _simulationSettings;

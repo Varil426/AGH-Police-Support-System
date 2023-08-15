@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using MessageBus.Core;
 using MessageBus.Core.API;
@@ -12,8 +13,6 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
 using Simulation.Application;
-using Simulation.Application.Directors;
-using Simulation.Application.Directors.IncidentDirector;
 using Simulation.Application.Directors.Settings;
 using Simulation.Application.Handlers;
 using Simulation.Application.Services;
@@ -104,6 +103,8 @@ public static class InfrastructureExtensions
                                     .SetReceiveSelfPublish(false)
                         );
                     });
+                
+                s.AddSingleton<IMessageSubscriberService, MessageSubscriberService>();
             });
         
         return hostBuilder;
@@ -124,17 +125,15 @@ public static class InfrastructureExtensions
         return hostBuilder;
     }
 
-    public static IHostBuilder AddSimulationServices(this IHostBuilder hostBuilder) => hostBuilder.ConfigureServices(
-        s =>
+    public static IHostBuilder AddSimulationServices(this IHostBuilder hostBuilder) => hostBuilder.ConfigureContainer<ContainerBuilder>(
+        (_, builder) =>
         {
-            s.AddSingleton<ISimulationMessageProcessor, SimulationMessageProcessor>();
-            s.AddSingleton<IMessageService, MessageService>();
-            s.AddSingleton<IMessageSubscriberService, MessageSubscriberService>();
-            s.AddTransient<IServiceFactory, ServiceFactory>();
-            s.AddTransient<IEntityFactory, EntityFactory>();
-            s.AddTransient<IMapService, MapService>();
-
-            s.AddSingleton<IDirector, IncidentDirector>();
+            builder.RegisterModule<ApplicationModule>();
+            
+            builder.RegisterType<SimulationMessageProcessor>().As<ISimulationMessageProcessor>().SingleInstance();
+            builder.RegisterType<MessageService>().As<IMessageService>().SingleInstance();
+            
+            builder.RegisterType<MapService>().As<IMapService>();
         });
 
     public static IHostBuilder ConfigureRabbitMq(this IHostBuilder hostBuilder)

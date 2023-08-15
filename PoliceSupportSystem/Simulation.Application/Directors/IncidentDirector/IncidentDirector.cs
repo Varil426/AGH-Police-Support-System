@@ -6,7 +6,7 @@ using Simulation.Application.Services;
 
 namespace Simulation.Application.Directors.IncidentDirector;
 
-public class IncidentDirector : IDirector
+internal class IncidentDirector : IDirector
 {
     private readonly IEntityFactory _entityFactory;
     private readonly IncidentDirectorSettings _incidentDirectorSettings;

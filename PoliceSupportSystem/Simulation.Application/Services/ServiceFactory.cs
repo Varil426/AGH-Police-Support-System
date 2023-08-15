@@ -1,6 +1,6 @@
 ﻿namespace Simulation.Application.Services;
 
-public class ServiceFactory : IServiceFactory
+internal class ServiceFactory : IServiceFactory
 {
     
 }

@@ -14,7 +14,6 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(
         x =>
         {
-            x.AddSingleton<ISimulation, Simulation.Application.Simulation>();
             x.AddHostedService<SimulationRunner>();
         })
     .Build();
