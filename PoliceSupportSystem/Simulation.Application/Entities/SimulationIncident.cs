@@ -18,6 +18,7 @@ public class SimulationIncident : Incident, ISimulationEntity
         IncidentStatusEnum status,
         IncidentTypeEnum type) : base(id, location, status, type)
     {
+        _history.Add(new IncidentAuditEntry(null, status, DateTimeOffset.UtcNow));
     }
 
     public void AddRelatedService(IService service) => _relatedServices.Add(service);

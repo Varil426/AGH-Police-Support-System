@@ -7,4 +7,5 @@ public interface ISimulationTimeService
     void Start();
     void UpdateLastActionTime();
     TimeSpan TranslateToSimulationTime(DateTimeOffset moment);
+    DateTimeOffset TranslateFromSimulationTime(TimeSpan simulationTime);
 }

@@ -10,10 +10,27 @@ public interface IEntityFactory
         double latitude,
         double longitude,
         IncidentTypeEnum incidentType = IncidentTypeEnum.NormalIncident,
-        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse);
+        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse,
+        DateTimeOffset? cratedAt = null);
 
     SimulationIncident CreateIncident(
         Position location,
         IncidentTypeEnum incidentType = IncidentTypeEnum.NormalIncident,
-        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse);
+        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse,
+        DateTimeOffset? cratedAt = null);
+
+    SimulationIncident CreateIncident(
+        Guid incidentId,
+        Position location,
+        IncidentTypeEnum incidentType = IncidentTypeEnum.NormalIncident,
+        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse,
+        DateTimeOffset? cratedAt = null);
+
+    SimulationIncident CreateIncident(
+        Guid incidentId,
+        double latitude,
+        double longitude,
+        IncidentTypeEnum incidentType = IncidentTypeEnum.NormalIncident,
+        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse,
+        DateTimeOffset? cratedAt = null);
 }

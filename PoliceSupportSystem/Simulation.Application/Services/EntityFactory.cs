@@ -10,11 +10,27 @@ internal class EntityFactory : IEntityFactory
         double latitude,
         double longitude,
         IncidentTypeEnum incidentType = IncidentTypeEnum.NormalIncident,
-        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse) => CreateIncident(new Position(latitude, longitude), incidentType, status);
+        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse,
+        DateTimeOffset? createdAt = null) => CreateIncident(new Position(latitude, longitude), incidentType, status, createdAt);
+    
+    public SimulationIncident CreateIncident(
+        Guid incidentId,
+        double latitude,
+        double longitude,
+        IncidentTypeEnum incidentType = IncidentTypeEnum.NormalIncident,
+        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse,
+        DateTimeOffset? createdAt = null) => CreateIncident(incidentId, new Position(latitude, longitude), incidentType, status, createdAt);
 
     public SimulationIncident CreateIncident(
         Position location,
         IncidentTypeEnum incidentType = IncidentTypeEnum.NormalIncident,
-        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse) =>
-        new(Guid.NewGuid(), location, status, incidentType);
+        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse,
+        DateTimeOffset? createdAt = null) => CreateIncident(Guid.NewGuid(), location, incidentType, status, createdAt);
+
+    public SimulationIncident CreateIncident(
+        Guid incidentId,
+        Position location,
+        IncidentTypeEnum incidentType = IncidentTypeEnum.NormalIncident,
+        IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse,
+        DateTimeOffset? createdAt = null) => new(incidentId, location, status, incidentType) { CreatedAt = createdAt ?? DateTimeOffset.UtcNow };
 }
