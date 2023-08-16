@@ -29,6 +29,6 @@ public class SimulationIncident : Incident, ISimulationEntity
     {
         var previousStatus = Status;
         base.UpdateStatus(newStatus);
-        _history.Add(item: new IncidentAuditEntry(previousStatus, newStatus, DateTimeOffset.Now));
+        _history.Add(new IncidentAuditEntry(previousStatus, newStatus, DateTimeOffset.UtcNow));
     }
 }

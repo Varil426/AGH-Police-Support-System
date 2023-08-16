@@ -2,5 +2,5 @@
 
 public record ServiceOfflineMessage(string ServiceId) : ISimulationMessage
 {
-    public DateTimeOffset CreatedAt { get; } = DateTimeOffset.Now;
+    public DateTimeOffset CreatedAt { get; } = DateTimeOffset.UtcNow;
 }
