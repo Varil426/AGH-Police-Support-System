@@ -5,5 +5,6 @@ public enum ServiceTypeEnum
     HqService,
     PatrolService,
     GunService,
-    NavigationService
+    NavigationService,
+    WebApi
 }
