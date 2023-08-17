@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Shared.Domain.Incident;
 using Simulation.Application.Directors.Settings;
 using Simulation.Application.Entities;
 using Simulation.Application.Helpers;
@@ -44,10 +45,17 @@ internal class IncidentDirector : BackgroundService, IDirector
 
     public async Task Act(ISimulation simulation)
     {
-        await _plannedIncidentsSemaphore.WaitAsync();
-        CreateIncidents(simulation);
-        UpdateIncidents(simulation);
-        _plannedIncidentsSemaphore.Release();
+        try
+        {
+            await _plannedIncidentsSemaphore.WaitAsync();
+            await StartIncidents(simulation);
+            await UpdateIncidents(simulation);
+            RemoveResolved();
+        }
+        finally
+        {
+            _plannedIncidentsSemaphore.Release();
+        }
     }
 
     private async Task PlanIncidents()
@@ -57,23 +65,70 @@ internal class IncidentDirector : BackgroundService, IDirector
         foreach (var district in _districts)
             plannedIncidents.AddRange(await _randomizer.PlanIncidents(district, simulationTimeSinceStart, _planForSimulationTime));
 
-        await _plannedIncidentsSemaphore.WaitAsync();
-        _plannedIncidents.AddRange(plannedIncidents);
-        _plannedIncidentsSemaphore.Release();
+        try
+        {
+            await _plannedIncidentsSemaphore.WaitAsync();
+            _plannedIncidents.AddRange(plannedIncidents);
+        }
+        finally
+        {
+            _plannedIncidentsSemaphore.Release();
+        }
         
         _lastPlannedAt = simulationTimeSinceStart;
     }
 
-    private void CreateIncidents(ISimulation simulation)
+    private async Task StartIncidents(ISimulation simulation)
     {
-        // TODO
+        var incidentsThatShouldStart = _plannedIncidents.Where(x => !x.HasStarted && x.ShouldStartAfter <= _simulationTimeService.SimulationTimeSinceStart);
+        foreach (var plannedIncident in incidentsThatShouldStart)
+        {
+            var incident = _entityFactory.CreateIncident(
+                plannedIncident.IncidentId,
+                plannedIncident.IncidentLocation,
+                plannedIncident.InitialIncidentType,
+                IncidentStatusEnum.WaitingForResponse,
+                _simulationTimeService.TranslateFromSimulationTime(plannedIncident.ShouldStartAfter));
+
+            await simulation.AddIncident(incident);
+            plannedIncident.HasStarted = true;
+        }
     }
 
-    private void UpdateIncidents(ISimulation simulation)
+    private async Task UpdateIncidents(ISimulation simulation)
     {
-        // TODO
+        foreach (var incident in simulation.Incidents)
+        {
+            var plannedIncident = _plannedIncidents.FirstOrDefault(x => x.IncidentId == incident.Id) ?? throw new Exception("Missing planned incident");
+            var isInCurrentStateFromSimulationTime = _simulationTimeService.TranslateToSimulationTime(incident.UpdatedAt);
+            
+            switch (incident.Status)
+            {
+                case IncidentStatusEnum.OnGoingNormal when plannedIncident.ShouldChangeIntoShootingAfter != null:
+                    if (isInCurrentStateFromSimulationTime + plannedIncident.ShouldChangeIntoShootingAfter <= _simulationTimeService.SimulationTimeSinceStart)
+                    {
+                        incident.UpdateStatus(IncidentStatusEnum.AwaitingBackup);
+                        incident.UpdateType(IncidentTypeEnum.Shooting);
+                    }
+                    break;
+                case IncidentStatusEnum.OnGoingNormal when plannedIncident.ShouldChangeIntoShootingAfter == null:
+                    // TODO
+                    break;
+                case IncidentStatusEnum.OnGoingShooting:
+                    // TODO
+                    break;
+            }
+            
+        }
     }
 
+    private void RemoveResolved()
+    {
+        var resolvedIncidents = _plannedIncidents.Where(x => x.IsResolved).ToList();
+        foreach (var resolvedIncident in resolvedIncidents)
+            _plannedIncidents.Remove(resolvedIncident);
+    }
+    
     private async Task PopulateDistricts()
     {
         var districtNames = await _mapService.GetDistrictNames().ToListAsync();
