@@ -3,7 +3,7 @@ using Shared.Domain.Incident;
 
 namespace Simulation.Application.Entities;
 
-public class SimulationIncident : Incident, ISimulationEntity
+public class SimulationIncident : Incident, ISimulationRootEntity
 {
     private readonly List<IService> _relatedServices = new();
     private readonly List<IncidentAuditEntry> _history = new();
@@ -25,6 +25,8 @@ public class SimulationIncident : Incident, ISimulationEntity
 
     public void RemoveRelatedService(string relatedServiceId) =>
         _relatedServices.Remove(_relatedServices.First(x => x.Id.Equals(relatedServiceId, StringComparison.InvariantCultureIgnoreCase)));
+
+    public new void ClearDomainEvents() => base.ClearDomainEvents();
 
     public override void UpdateStatus(IncidentStatusEnum newStatus)
     {

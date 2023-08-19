@@ -48,8 +48,8 @@ internal class IncidentDirector : BackgroundService, IDirector
         try
         {
             await _plannedIncidentsSemaphore.WaitAsync();
-            await StartIncidents(simulation);
-            await UpdateIncidents(simulation);
+            StartIncidents(simulation);
+            UpdateIncidents(simulation);
             RemoveResolved();
         }
         finally
@@ -78,7 +78,7 @@ internal class IncidentDirector : BackgroundService, IDirector
         _lastPlannedAt = simulationTimeSinceStart;
     }
 
-    private async Task StartIncidents(ISimulation simulation)
+    private void StartIncidents(ISimulation simulation)
     {
         var incidentsThatShouldStart = _plannedIncidents.Where(x => !x.HasStarted && x.ShouldStartAfter <= _simulationTimeService.SimulationTimeSinceStart);
         foreach (var plannedIncident in incidentsThatShouldStart)
@@ -90,12 +90,12 @@ internal class IncidentDirector : BackgroundService, IDirector
                 IncidentStatusEnum.WaitingForResponse,
                 _simulationTimeService.TranslateFromSimulationTime(plannedIncident.ShouldStartAfter));
 
-            await simulation.AddIncident(incident);
+            simulation.AddIncident(incident);
             plannedIncident.HasStarted = true;
         }
     }
 
-    private async Task UpdateIncidents(ISimulation simulation)
+    private void UpdateIncidents(ISimulation simulation)
     {
         foreach (var incident in simulation.Incidents)
         {

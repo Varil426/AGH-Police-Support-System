@@ -20,5 +20,7 @@ public class ApplicationModule : Module
         builder.RegisterType<ServiceFactory>().As<IServiceFactory>();
         builder.RegisterType<EntityFactory>().As<IEntityFactory>();
         builder.RegisterType<IncidentRandomizer>().As<IIncidentRandomizer>();
+        builder.RegisterType<DomainEventProcessor>().As<IDomainEventProcessor>();
+        builder.RegisterType<DomainEventMapper>().As<IDomainEventMapper>();
     }
 }

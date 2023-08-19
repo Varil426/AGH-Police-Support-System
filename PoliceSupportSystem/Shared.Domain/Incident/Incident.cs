@@ -16,6 +16,7 @@ public class Incident : BaseRootDomainEntity
         Status = status;
         Type = type;
         Id = id;
+        AddDomainEvent(new IncidentCreated(Id, Location, Status, Type));
     }
 
     public virtual void UpdateLocation(Position newLocation)

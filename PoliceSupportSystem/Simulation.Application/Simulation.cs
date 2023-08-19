@@ -2,7 +2,6 @@
 using Simulation.Application.Directors;
 using Simulation.Application.Entities;
 using Simulation.Application.Services;
-using Simulation.Shared.Communication;
 
 namespace Simulation.Application;
 
@@ -13,6 +12,7 @@ internal class Simulation : ISimulation
     private readonly ISimulationMessageProcessor _simulationMessageProcessor;
     private readonly IReadOnlyCollection<IDirector> _directors;
     private readonly ISimulationTimeService _simulationTimeService;
+    private readonly IDomainEventProcessor _domainEventProcessor;
 
     private readonly List<IService> _services = new();
     private readonly List<SimulationIncident> _incidents = new();
@@ -22,16 +22,20 @@ internal class Simulation : ISimulation
         IMessageService messageService,
         ISimulationMessageProcessor simulationMessageProcessor,
         IReadOnlyCollection<IDirector> directors,
-        ISimulationTimeService simulationTimeService)
+        ISimulationTimeService simulationTimeService,
+        IDomainEventProcessor domainEventProcessor)
     {
         _logger = logger;
         _messageService = messageService;
         _simulationMessageProcessor = simulationMessageProcessor;
         _directors = directors;
         _simulationTimeService = simulationTimeService;
+        _domainEventProcessor = domainEventProcessor;
     }
 
     public IReadOnlyCollection<SimulationIncident> Incidents => _incidents.AsReadOnly();
+
+    private IReadOnlyCollection<ISimulationRootEntity> SimulationRootEntities => Incidents;
 
     public async Task RunAsync(CancellationToken? cancellationToken = null)
     {
@@ -43,10 +47,11 @@ internal class Simulation : ISimulation
             var messages = (await _messageService.GetMessagesAsync()).OrderBy(x => x.CreatedAt);
             // Process messages - Update state
             await _simulationMessageProcessor.ProcessAsync(this, messages);
-            // TODO Perform actions
-            await Task.WhenAll(_directors.Select(x => x.Act(this)));
+            // Perform actions
+            await Task.WhenAll(_directors.Select(x => x.Act(this))); // TODO Add Patrol Director
             _simulationTimeService.UpdateLastActionTime();
-            // TODO Send updates - Handle Domain Events
+            // Send updates - Handle Domain Events
+            await HandleDomainEvents();
             await Task.Delay(30);
         }
     }
@@ -68,13 +73,18 @@ internal class Simulation : ISimulation
             _logger.LogWarning($"Attempted to remove not existing service with ID: {serviceId}");
     }
 
-    public async Task AddIncident(SimulationIncident newIncident)
+    public void AddIncident(SimulationIncident newIncident)
     {
         if (_incidents.Any(x => x.Id == newIncident.Id))
             throw new Exception("Duplicated incident");
 
         _incidents.Add(newIncident);
-        await _messageService.PublishMessageAsync(new NewIncidentMessage(newIncident.Id, newIncident.Position, newIncident.Type, newIncident.Status));
         _logger.LogInformation($"Added a new incident with ID: {newIncident.Id}");
+    }
+    
+    private async Task HandleDomainEvents()
+    {
+        await _domainEventProcessor.ProcessDomainEvents(SimulationRootEntities.SelectMany(x => x.Events));
+        SimulationRootEntities.ToList().ForEach(x => x.ClearDomainEvents());
     }
 }

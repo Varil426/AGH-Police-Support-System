@@ -12,5 +12,5 @@ public interface ISimulation
 
     void RemoveService(string serviceId);
 
-    Task AddIncident(SimulationIncident newIncident);
+    void AddIncident(SimulationIncident newIncident);
 }

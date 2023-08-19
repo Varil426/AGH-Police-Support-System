@@ -1,8 +1,9 @@
-﻿using Shared.Domain.Geo;
+﻿using Shared.Domain;
+using Shared.Domain.Geo;
 
 namespace Simulation.Application.Entities;
 
-public interface ISimulationEntity
+public interface ISimulationEntity : IDomainEntity
 {
     Guid Id { get; }
     
