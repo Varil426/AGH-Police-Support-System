@@ -1,3 +1,5 @@
+import RootStore from "../stores/root-store";
+import { RootStorePrivider } from "../utils/root-store-provider";
 import "./globals.css";
 import type { Metadata } from "next";
 
@@ -11,9 +13,13 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const rootStore = new RootStore();
+
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <RootStorePrivider store={rootStore}>
+      <html lang="en">
+        <body>{children}</body>
+      </html>
+    </RootStorePrivider>
   );
 }
