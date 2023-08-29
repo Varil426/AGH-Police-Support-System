@@ -1,7 +1,7 @@
 "use client";
 
 import RootStore from "../stores/root-store";
-import { IsClientCtxProvider } from "../utils/is-client-ctx";
+// import { IsClientCtxProvider } from "../utils/is-client-ctx";
 import { RootStorePrivider } from "../utils/root-store-provider";
 import "./globals.css";
 import type { Metadata } from "next";
@@ -19,12 +19,12 @@ export default function RootLayout({
   const rootStore = new RootStore();
 
   return (
-    <IsClientCtxProvider>
-      <RootStorePrivider store={rootStore}>
-        <html lang="en">
-          <body>{children}</body>
-        </html>
-      </RootStorePrivider>
-    </IsClientCtxProvider>
+    // <IsClientCtxProvider>
+    <RootStorePrivider store={rootStore}>
+      <html lang="en">
+        <body>{children}</body>
+      </html>
+    </RootStorePrivider>
+    // </IsClientCtxProvider>
   );
 }

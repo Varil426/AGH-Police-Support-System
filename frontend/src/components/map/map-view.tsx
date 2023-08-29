@@ -1,9 +1,27 @@
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import { useIsClient } from "../../utils/is-client-ctx";
+// import { useIsClient } from "../../utils/is-client-ctx";
+
+// export const MapView = () => {
+//   const isClient = useIsClient();
+//   return isClient ? (
+//     <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
+//       <TileLayer
+//         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+//         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+//       />
+//       <Marker position={[51.505, -0.09]}>
+//         <Popup>
+//           A pretty CSS3 popup. <br /> Easily customizable.
+//         </Popup>
+//       </Marker>
+//     </MapContainer>
+//   ) : (
+//     <></>
+//   );
+// };
 
 export const MapView = () => {
-  const isClient = useIsClient();
-  return isClient ? (
+  return (
     <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -15,7 +33,5 @@ export const MapView = () => {
         </Popup>
       </Marker>
     </MapContainer>
-  ) : (
-    <></>
   );
 };

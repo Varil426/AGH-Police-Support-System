@@ -1,6 +1,10 @@
 "use client";
 
-import { MapView } from "../../components/map/map-view";
+import dynamic from "next/dynamic";
+const DynamicMapView = dynamic(
+  () => import("../../components/map/map-view"),
+  {}
+);
 
 const MapPage = () => <MapView />;
 
