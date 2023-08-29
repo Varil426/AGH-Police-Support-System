@@ -1,3 +1,5 @@
+"use client";
+
 import RootStore from "../stores/root-store";
 import { RootStorePrivider } from "../utils/root-store-provider";
 import "./globals.css";
