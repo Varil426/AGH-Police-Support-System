@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Shared.Domain.Incident;
+using Shared.CommonTypes.Incident;
 using Simulation.Application.Directors.Settings;
 using Simulation.Application.Entities;
 using Simulation.Application.Helpers;

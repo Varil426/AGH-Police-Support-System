@@ -1,5 +1,6 @@
 ﻿using HqService.Application.DTOs;
 using Shared.Application.Helpers;
+using Shared.CommonTypes.Incident;
 using Shared.Domain.Incident;
 
 namespace HqService.Application.Services;

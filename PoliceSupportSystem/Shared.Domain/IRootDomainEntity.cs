@@ -5,4 +5,6 @@ namespace Shared.Domain;
 public interface IRootDomainEntity : IDomainEntity
 {
     IReadOnlyCollection<IDomainEvent> Events { get; }
+
+    // void ClearDomainEvents();
 }

@@ -18,6 +18,7 @@ var host = Host.CreateDefaultBuilder(args)
                 // .AddHostedService<HqAgent>(x => new HqAgent(/*Guid.NewGuid()*/Guid.Parse("0f8fad5b-d9cb-469f-a165-70867728950e"), x.GetRequiredService<IMessageService>()))
         // TODO Create agents
     )
+    .RegisterSharedApplicationModule()
     .AddSharedSimulation(new Assembly[] { }) // TODO
     .Build();
 

@@ -1,5 +1,5 @@
-﻿using Shared.Domain.Geo;
-using Shared.Domain.Incident;
+﻿using Shared.CommonTypes.Geo;
+using Shared.CommonTypes.Incident;
 
 namespace Simulation.Shared.Communication;
 

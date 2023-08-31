@@ -1,3 +1,2 @@
-﻿
-namespace Shared.Application;
+﻿namespace Shared.Application;
 

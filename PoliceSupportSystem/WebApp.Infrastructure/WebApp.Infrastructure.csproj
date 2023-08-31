@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Shared.Infrastructure\Shared.Infrastructure.csproj" />
+      <ProjectReference Include="..\WebApp.Application\WebApp.Application.csproj" />
     </ItemGroup>
 
 </Project>

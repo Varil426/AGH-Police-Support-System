@@ -1,5 +1,4 @@
-﻿using Shared.Application;
-using Shared.Application.Handlers;
+﻿using Shared.Application.Handlers;
 using Shared.Application.Integration.Events;
 
 namespace HqService.Application.Handlers;

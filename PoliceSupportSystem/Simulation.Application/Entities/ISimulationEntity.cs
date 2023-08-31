@@ -1,5 +1,5 @@
-﻿using Shared.Domain;
-using Shared.Domain.Geo;
+﻿using Shared.CommonTypes.Geo;
+using Shared.Domain;
 
 namespace Simulation.Application.Entities;
 

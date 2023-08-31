@@ -20,4 +20,10 @@ var host = Host.CreateDefaultBuilder(args)
 
 host.SubscribeMessageSubscriber(typeof(ISimulationMessage).Assembly);
 
+if (host.Services.GetRequiredService<SimulationSettings>() is { } simulationSettings && simulationSettings.StartDelay != default)
+{
+    host.Services.GetRequiredService<ILogger<Program>>().LogInformation("Simulation start delayed by {DELAY}", simulationSettings.StartDelay);
+    await Task.Delay(simulationSettings.StartDelay);
+}
+
 host.Run();

@@ -1,4 +1,4 @@
-﻿using Shared.Domain.Incident;
+﻿using Shared.CommonTypes.Incident;
 
 namespace Simulation.Application.Entities;
 

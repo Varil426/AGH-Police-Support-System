@@ -84,7 +84,7 @@ internal class Simulation : ISimulation
     
     private async Task HandleDomainEvents()
     {
-        await _domainEventProcessor.ProcessDomainEvents(SimulationRootEntities.SelectMany(x => x.Events));
-        SimulationRootEntities.ToList().ForEach(x => x.ClearDomainEvents());
+        await _domainEventProcessor.ProcessDomainEvents(SimulationRootEntities/*.SelectMany(x => x.Events)*/);
+        // SimulationRootEntities.ToList().ForEach(x => x.ClearDomainEvents());
     }
 }

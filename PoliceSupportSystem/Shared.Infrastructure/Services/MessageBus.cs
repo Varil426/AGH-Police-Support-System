@@ -1,5 +1,4 @@
 ﻿using MessageBus.Core.API;
-using Shared.Application;
 using Shared.Application.Agents.Communication.Messages;
 using Shared.Application.Integration.Commands;
 using Shared.Application.Integration.Events;

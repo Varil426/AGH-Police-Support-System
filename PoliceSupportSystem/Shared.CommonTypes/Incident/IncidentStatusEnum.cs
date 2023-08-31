@@ -1,4 +1,4 @@
-﻿namespace Shared.Domain.Incident;
+﻿namespace Shared.CommonTypes.Incident;
 
 public enum IncidentStatusEnum
 {

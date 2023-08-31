@@ -1,4 +1,4 @@
-﻿using Shared.Domain.Geo;
+﻿using Shared.CommonTypes.Geo;
 
 namespace Simulation.Application.Services;
 

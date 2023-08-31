@@ -1,5 +1,6 @@
-﻿using Shared.Domain.DomainEvents.Incident;
-using Shared.Domain.Geo;
+﻿using Shared.CommonTypes.Geo;
+using Shared.CommonTypes.Incident;
+using Shared.Domain.DomainEvents.Incident;
 
 namespace Shared.Domain.Incident;
 

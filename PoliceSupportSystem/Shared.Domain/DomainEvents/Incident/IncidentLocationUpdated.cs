@@ -1,4 +1,4 @@
-﻿using Shared.Domain.Geo;
+﻿using Shared.CommonTypes.Geo;
 
 namespace Shared.Domain.DomainEvents.Incident;
 

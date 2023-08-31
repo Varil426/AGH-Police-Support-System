@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using Npgsql;
-using Shared.Domain.Geo;
+using Shared.CommonTypes.Geo;
 using Simulation.Application.Services;
 
 namespace Simulation.Infrastructure.Services;

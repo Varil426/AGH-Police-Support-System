@@ -1,5 +1,6 @@
 using System.Reflection;
 using Shared.Infrastructure;
+using WebApp.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +10,9 @@ builder.Host
     .AddSharedAppSettings()
     .AddRabbitMqSettings()
     .AddServiceSettings()
-    .AddRabbitMqBus(new Assembly[] { }) // TODO
+    .AddRabbitMqBus(new[] { typeof(ApplicationModule).Assembly }) // TODO
+    .RegisterSharedApplicationModule()
+    .RegisterModule<ApplicationModule>()
     .ConfigureServices(
         s =>
         {
@@ -19,6 +22,6 @@ builder.Host
 
 var app = builder.Build();
 
-app.SubscribeHandlers(new Assembly[] { }); // TODO
+app.SubscribeHandlers(new[] { typeof(ApplicationModule).Assembly }); // TODO
 
 app.Run();

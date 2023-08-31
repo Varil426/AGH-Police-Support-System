@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using Shared.Domain.Incident;
+﻿using Shared.CommonTypes.Incident;
 using Simulation.Application.Directors.Settings;
 using Simulation.Application.Entities;
 using Simulation.Application.Helpers;

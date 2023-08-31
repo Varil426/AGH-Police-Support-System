@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using Autofac;
+using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
 using MessageBus.Core;
 using MessageBus.Core.API;
@@ -10,6 +12,7 @@ using RabbitMQ.Client;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
+using Shared.Application;
 using Shared.Application.Agents;
 using Shared.Application.Handlers;
 using Shared.Application.Integration.Commands;
@@ -24,6 +27,7 @@ using ICommand = Shared.Application.Integration.Commands.ICommand;
 using IEvent = Shared.Application.Integration.Events.IEvent;
 using IMessage = Shared.Application.Agents.Communication.Messages.IMessage;
 using IMessageBus = Shared.Application.Services.IMessageBus;
+using Module = Autofac.Module;
 
 namespace Shared.Infrastructure;
 
@@ -89,6 +93,11 @@ public static class Extensions
         serviceCollection.AddSingleton<IMessageHandler>(x => x.GetRequiredService<MessageService>());
         return serviceCollection;
     }
+
+    public static IHostBuilder RegisterSharedApplicationModule(this IHostBuilder hostBuilder) => hostBuilder.RegisterModule<SharedApplicationModule>();
+
+    public static IHostBuilder RegisterModule<TModule>(this IHostBuilder hostBuilder) where TModule : IModule, new() => hostBuilder.ConfigureContainer<ContainerBuilder>(
+        builder => builder.RegisterModule<TModule>());
 
     public static IServiceCollection AddMessageBus(this IServiceCollection serviceCollection)
     {

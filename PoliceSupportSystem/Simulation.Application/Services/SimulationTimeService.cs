@@ -27,5 +27,19 @@ internal class SimulationTimeService : ISimulationTimeService
     public void UpdateLastActionTime() => _lastActionTime = DateTimeOffset.UtcNow;
     
     public TimeSpan TranslateToSimulationTime(DateTimeOffset moment) => (moment - _simulationStartTime) * _simulationSettings.TimeRate;
+    // public TimeSpan TranslateToSimulationTime(DateTimeOffset moment)
+    // {
+    //     TimeSpan result = default;
+    //     try
+    //     {
+    //         result = (moment - _simulationStartTime) * _simulationSettings.TimeRate;
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e.Message);
+    //     }
+    //
+    //     return result;
+    // }
     public DateTimeOffset TranslateFromSimulationTime(TimeSpan simulationTime) => _simulationStartTime + simulationTime;
 }
