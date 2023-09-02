@@ -1,7 +1,7 @@
-﻿using HqService.Application.DTOs;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Shared.Application.DTOs;
+using Shared.Application.Factories;
 using Shared.Application.Services;
-using Shared.Domain.Incident;
 
 namespace HqService.Application.Services;
 
@@ -10,22 +10,25 @@ public class ReportingService : IReportingService
     private readonly ILogger<ReportingService> _logger;
     private readonly IIncidentMonitoringService _incidentMonitoringService;
     private readonly IDomainEventProcessor _domainEventProcessor;
+    private readonly IIncidentFactory _incidentFactory;
 
     public ReportingService(
         ILogger<ReportingService> logger,
         IIncidentMonitoringService incidentMonitoringService,
-        IDomainEventProcessor domainEventProcessor)
+        IDomainEventProcessor domainEventProcessor,
+        IIncidentFactory incidentFactory)
     {
         _logger = logger;
         _incidentMonitoringService = incidentMonitoringService;
         _domainEventProcessor = domainEventProcessor;
+        _incidentFactory = incidentFactory;
     }
 
     public async Task ReportNewIncident(NewIncidentDto newIncidentDto)
     {
         _logger.LogInformation($"Received a new incident info: {newIncidentDto}");
 
-        var newIncident = new Incident(newIncidentDto.Id, newIncidentDto.Location, newIncidentDto.Status, newIncidentDto.Type);
+        var newIncident = _incidentFactory.CreateIncident(newIncidentDto);
         await _incidentMonitoringService.AddIncident(newIncident);
         // TODO Notify HQ Agent
 

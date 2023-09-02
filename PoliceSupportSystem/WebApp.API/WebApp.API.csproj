@@ -10,4 +10,17 @@
       <ProjectReference Include="..\WebApp.Infrastructure\WebApp.Infrastructure.csproj" />
     </ItemGroup>
 
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.9" />
+      <PackageReference Include="Reinforced.Typings" Version="1.6.2" />
+    </ItemGroup>
+
+
+
+
+    <ItemGroup>
+      <Folder Include="Handlers\" />
+    </ItemGroup>
+
 </Project>

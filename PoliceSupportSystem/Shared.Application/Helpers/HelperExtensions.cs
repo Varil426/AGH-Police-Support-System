@@ -1,6 +1,6 @@
 ﻿namespace Shared.Application.Helpers;
 
-public static class HelperExtension
+public static class HelperExtensions
 {
     public static TV? TryGet<TK, TV>(this IDictionary<TK, TV> dictionary, TK key)
     {

@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Shared.Application.Factories;
 using Shared.Application.Services;
 
 namespace Shared.Application;
@@ -11,5 +12,6 @@ public class SharedApplicationModule : Module
 
         builder.RegisterType<DomainEventMapper>().As<IDomainEventMapper>();
         builder.RegisterType<DomainEventProcessor>().As<IDomainEventProcessor>();
+        builder.RegisterType<EntityFactory>().As<IIncidentFactory>();
     }
 }

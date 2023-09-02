@@ -1,5 +1,5 @@
-﻿using HqService.Application.DTOs;
-using HqService.Application.Services;
+﻿using HqService.Application.Services;
+using Shared.Application.DTOs;
 using Shared.Simulation.Handlers;
 using Simulation.Shared.Communication;
 

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <PropertyGroup>
+        <RtTargetFile></RtTargetFile>
+        <RtConfigurationMethod>WebApp.API.ReinforcedTypingsConfiguration.Configure</RtConfigurationMethod>
+        
+        <RtDivideTypesAmongFiles>true</RtDivideTypesAmongFiles>
+        <RtTargetDirectory>$(ProjectDir)../../frontend/src/api/generated</RtTargetDirectory>
+
+        <RtBypassTypeScriptCompilation>false</RtBypassTypeScriptCompilation>
+        <RtDisable>false</RtDisable>
+        <RtSuppress>RTW0013;RTW0014</RtSuppress>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <RtAdditionalAssembly Include="WebApp.Application"/>
+        <RtAdditionalAssembly Include="Shared.Application"/>
+        <RtAdditionalAssembly Include="Shared.CommonTypes"/>
+    </ItemGroup>
+</Project>
