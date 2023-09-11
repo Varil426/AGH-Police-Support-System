@@ -6,6 +6,7 @@ using MessageBus.Core.API;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using RabbitMQ.Client;
 using Shared.Application.Services;
 using Shared.Simulation.Decorators;
 using Shared.Simulation.Handlers;
@@ -108,6 +109,8 @@ public static class Extensions
     
     private static IHostBuilder AddRabbitMqSimulationBus(this IHostBuilder hostBuilder)
     {
+        hostBuilder.ConfigureRabbitMq();
+        
         hostBuilder.ConfigureContainer<ContainerBuilder>(
             (ctx, builder) =>
             {
@@ -135,6 +138,28 @@ public static class Extensions
                 //         })).As<IBus>().Keyed<IBus>(Constants.SimulationBusKey);
             });
 
+        return hostBuilder;
+    }
+    
+    private static IHostBuilder ConfigureRabbitMq(this IHostBuilder hostBuilder)
+    {
+        hostBuilder.ConfigureServices(
+            (ctx, s) =>
+            {
+                var simulationCommunicationSettings = ctx.Configuration.GetSettings<SimulationCommunicationSettings>(nameof(SimulationCommunicationSettings));
+                var factory = new ConnectionFactory
+                    {
+                        HostName = simulationCommunicationSettings.Host,
+                        Password = simulationCommunicationSettings.Password,
+                        UserName = simulationCommunicationSettings.Username,
+                        Port = simulationCommunicationSettings.Port
+                    };
+                using var connection = factory.CreateConnection();
+                using var model = connection.CreateModel();
+
+                model.ExchangeDeclare(simulationCommunicationSettings.SimulationExchangeName, ExchangeType.Topic, false, true);
+            });
+        
         return hostBuilder;
     }
     
