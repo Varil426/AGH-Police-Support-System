@@ -113,13 +113,18 @@ public static class Extensions
             {
                 var simulationCommunicationSettings = ctx.Configuration.GetSettings<SimulationCommunicationSettings>(nameof(SimulationCommunicationSettings));
 
+                builder.RegisterType<SimulationSubscriberErrorService>().As<IErrorSubscriber>().Keyed<IErrorSubscriber>(Constants.SimulationSubscriberErrorServiceKey)
+                    .PreserveExistingDefaults();
+
                 builder.Register(
-                    _ => new RabbitMQBus(
+                    componentContext => new RabbitMQBus(
                         configurator =>
                         {
+                            configurator.SetConnectionProvidedName("SimulationRabbitMQ");
                             configurator.UseConnectionString(
                                 $"amqp://{simulationCommunicationSettings.Username}:{simulationCommunicationSettings.Password}@{simulationCommunicationSettings.Host}:{simulationCommunicationSettings.Port}/");
-                        })).As<IBus>().Keyed<IBus>(Constants.SimulationBusKey).SingleInstance();
+                            configurator.UseErrorSubscriber(componentContext.ResolveKeyed<IErrorSubscriber>(Constants.SimulationSubscriberErrorServiceKey));
+                        })).As<IBus>().Keyed<IBus>(Constants.SimulationBusKey).SingleInstance().PreserveExistingDefaults();
                 
                 // builder.Register(
                 //     _ => new RabbitMQBus(

@@ -27,7 +27,6 @@ using ICommand = Shared.Application.Integration.Commands.ICommand;
 using IEvent = Shared.Application.Integration.Events.IEvent;
 using IMessage = Shared.Application.Agents.Communication.Messages.IMessage;
 using IMessageBus = Shared.Application.Services.IMessageBus;
-using Module = Autofac.Module;
 
 namespace Shared.Infrastructure;
 
@@ -146,11 +145,14 @@ public static class Extensions
             {
                 var rabbitMqSettings = ctx.Configuration.GetSettings<RabbitMqSettings>(RabbitMqConfigSectionName);
 
+                s.AddTransient<IErrorSubscriber, SubscriberErrorService>();
                 s.AddSingleton<IBus>(
-                    _ => new RabbitMQBus(
+                    serviceProvider => new RabbitMQBus(
                         configurator =>
                         {
+                            configurator.SetConnectionProvidedName("RabbitMQ");
                             configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
+                            configurator.UseErrorSubscriber(serviceProvider.GetRequiredService<IErrorSubscriber>());
                         }));
 
                 s.AddSingleton<IBusSubscriberManager, BusSubscriberManager>();
