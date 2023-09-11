@@ -1,4 +1,8 @@
+using Shared.Application.Integration.DTOs;
+using Shared.Application.Integration.Events;
 using Shared.Application.Services;
+using Shared.CommonTypes.Geo;
+using Shared.CommonTypes.Incident;
 
 namespace HqService.Service;
 
@@ -27,6 +31,8 @@ public class Worker : BackgroundService
             // Console.WriteLine($"Worker: {queryResult}");
             // Console.WriteLine($"Worker: {commandResult}");
             await Task.Delay(1000, stoppingToken);
+            // await _messageBus.PublishAsync(new IncidentCreatedEvent(Guid.NewGuid(), new Position(0, 0), IncidentStatusEnum.WaitingForResponse, IncidentTypeEnum.NormalIncident));
+            // await _messageBus.PublishAsync(new IncidentCreatedEvent(new NewIncidentDto(Guid.NewGuid(), new Position(0, 0), IncidentTypeEnum.NormalIncident, IncidentStatusEnum.WaitingForResponse)));
 
             // await _statusService.AnnounceOnline();
         }

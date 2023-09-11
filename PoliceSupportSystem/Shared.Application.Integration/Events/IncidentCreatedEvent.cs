@@ -1,9 +1,8 @@
-﻿using Shared.CommonTypes.Geo;
-using Shared.CommonTypes.Incident;
+﻿using Shared.Application.Integration.DTOs;
 
 namespace Shared.Application.Integration.Events;
 
-public record IncidentCreatedEvent(Guid IncidentId, Position Location, IncidentStatusEnum Status, IncidentTypeEnum Type) : IEvent
+public record IncidentCreatedEvent(NewIncidentDto NewIncidentDto) : IEvent
 {
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
 }

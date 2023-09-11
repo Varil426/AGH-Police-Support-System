@@ -85,6 +85,7 @@ public static class InfrastructureExtensions
                     _ => new RabbitMQBus(
                         configurator =>
                         {
+                            configurator.SetConnectionProvidedName("SimulationRabbitMQ");
                             configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
                         }));
 

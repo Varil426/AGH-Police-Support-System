@@ -1,5 +1,5 @@
-﻿using Shared.Application.DTOs;
-using Shared.Application.Helpers;
+﻿using Shared.Application.Helpers;
+using Shared.Application.Integration.DTOs;
 using Shared.Domain.Incident;
 
 namespace WebApp.Application.Services;

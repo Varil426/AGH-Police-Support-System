@@ -1,4 +1,4 @@
-﻿using Shared.Application.DTOs;
+﻿using Shared.Application.Integration.DTOs;
 
 namespace HqService.Application.Services;
 

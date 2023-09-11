@@ -1,6 +1,5 @@
-﻿using Shared.Application.DTOs;
-using Shared.Application.Helpers;
-using Shared.Application.Services;
+﻿using Shared.Application.Helpers;
+using Shared.Application.Integration.DTOs;
 using Shared.CommonTypes.Incident;
 using Shared.Domain.Incident;
 

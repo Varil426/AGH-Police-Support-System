@@ -1,5 +1,5 @@
 ﻿using Reinforced.Typings.Attributes;
-using Shared.Application.DTOs;
+using Shared.Application.Integration.DTOs;
 
 namespace WebApp.API.Hubs.MonitoringHub;
 

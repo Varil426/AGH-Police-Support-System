@@ -266,6 +266,7 @@ public static class Extensions
     {
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
 
+        // TODO Can be improved - multiple handlers with Autofac
         if (rabbitMqSettings.QueryExchange is not null)
             host.SubscribeQueryHandlers(handlerAssemblies);
         
@@ -293,7 +294,7 @@ public static class Extensions
                 x.SetExchange(rabbitMqSettings.QueryExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.QueryExchange)))
                 .SetRoutingKey(serviceSettings.Id)
                 .SetConsumerTag(serviceSettings.Id)
-                .SetReceiveSelfPublish() // TODO Add to config
+                .SetReceiveSelfPublish(false)// TODO Add to config? Resign from it?
             );
         
         foreach (var handlerType in DiscoverQueryHandlers(handlerAssemblies))
@@ -323,13 +324,13 @@ public static class Extensions
                 x.SetExchange(rabbitMqSettings.EventExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.EventExchange)))
                     .SetRoutingKey(serviceSettings.Id)
                     .SetConsumerTag(serviceSettings.Id)
-                    .SetReceiveSelfPublish() // TODO Add to config
+                    .SetReceiveSelfPublish(false)// TODO Add to config? Resign from it?
         );
 
         foreach (var handlerType in DiscoverEventHandlers(handlerAssemblies))
         {
-            var queryHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEventHandler<>));
-            var eventType = queryHandlerInterface.GetGenericArguments()[0];
+            var eventHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEventHandler<>));
+            var eventType = eventHandlerInterface.GetGenericArguments()[0];
             typeof(Extensions).GetMethod(nameof(AddEventHandler), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(handlerType, eventType).Invoke(null, new object[] { eventSubscriber, host.Services });
         }
@@ -351,7 +352,7 @@ public static class Extensions
                 x.SetExchange(rabbitMqSettings.CommandExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.CommandExchange)))
                     .SetRoutingKey(serviceSettings.Id)
                     .SetConsumerTag(serviceSettings.Id)
-                    .SetReceiveSelfPublish() // TODO Add to config
+                    .SetReceiveSelfPublish(false)// TODO Add to config? Resign from it?
         );
         
         foreach (var handlerType in DiscoverCommandHandlers(handlerAssemblies))

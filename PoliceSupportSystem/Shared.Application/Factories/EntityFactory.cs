@@ -1,4 +1,4 @@
-﻿using Shared.Application.DTOs;
+﻿using Shared.Application.Integration.DTOs;
 using Shared.Domain.Incident;
 
 namespace Shared.Application.Factories;

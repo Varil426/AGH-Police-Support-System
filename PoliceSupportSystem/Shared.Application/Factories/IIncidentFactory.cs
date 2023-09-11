@@ -1,4 +1,4 @@
-﻿using Shared.Application.DTOs;
+﻿using Shared.Application.Integration.DTOs;
 using Shared.Domain.Incident;
 
 namespace Shared.Application.Factories;
@@ -6,4 +6,5 @@ namespace Shared.Application.Factories;
 public interface IIncidentFactory
 {
     Incident CreateIncident(NewIncidentDto newIncidentDto);
+    // Incident CreateIncident(IncidentCreatedEvent @event) => CreateIncident(new NewIncidentDto(@event.IncidentId, @event.Location, @event.Type, @event.Status)); // TODO Remove
 }

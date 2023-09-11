@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using Shared.Application.DTOs;
 using Shared.Application.Factories;
+using Shared.Application.Integration.DTOs;
 using Shared.Application.Services;
 
 namespace HqService.Application.Services;
