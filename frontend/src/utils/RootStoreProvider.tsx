@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useContext } from "react";
-import RootStore from "../stores/RootStore";
+import { RootStore } from "../stores/RootStore";
 
 export const StoreContext = createContext<RootStore | undefined>(undefined);
 
@@ -14,7 +14,7 @@ export function RootStorePrivider({ store, children }: RootStorePrividerProps) {
   );
 }
 
-function useRootStore() {
+export function useRootStore() {
   const context = useContext(StoreContext);
   if (context === undefined) {
     throw new Error("useRootStore must be used within RootStoreProvider");

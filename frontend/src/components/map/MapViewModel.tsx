@@ -1,6 +1,11 @@
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { MapModel } from "./MapModel";
 
-export const MapView = () => {
+export interface IMapViewProps {
+  model: MapModel;
+}
+
+export const MapViewModel = ({ model }: IMapViewProps) => {
   return (
     <MapContainer
       center={[51.505, -0.09]}

@@ -20,8 +20,8 @@ internal class SubscriberErrorService : IErrorSubscriber
 
     public void MessageFilteredOut(RawBusMessage busMessage) => _logger.LogInformation("Message filtered out: {messageId}", busMessage.Name);
 
-    public void UnregisteredMessageArrived(RawBusMessage busMessage) => _logger.LogInformation(
+    public void UnregisteredMessageArrived(RawBusMessage busMessage) { }/*=> _logger.LogInformation(
         "Unregistered message: {messageNamespace} {messageType}",
         busMessage.Namespace,
-        busMessage.Name);
+        busMessage.Name);*/
 }
