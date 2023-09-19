@@ -4,4 +4,4 @@ using Shared.Application.Integration.DTOs;
 namespace WebApp.API.Hubs.MonitoringHub;
 
 [TsInterface]
-public record CityStateMessage(IEnumerable<IncidentDto> Incidents);
+public record CityStateMessageDto(IEnumerable<IncidentDto> Incidents);

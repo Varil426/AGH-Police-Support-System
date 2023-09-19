@@ -2,9 +2,7 @@
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 
-import { ICityStateMessageDto } from './ICityStateMessageDto';
-
-export interface IMonitoringHubClient
+export interface ICityStateMessageDto
 {
-	ReceiveUpdate(cityStateMessageDto: ICityStateMessageDto) : void;
+	incidents: any[];
 }

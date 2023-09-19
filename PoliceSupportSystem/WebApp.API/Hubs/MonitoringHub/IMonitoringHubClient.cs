@@ -5,5 +5,5 @@ namespace WebApp.API.Hubs.MonitoringHub;
 [TsInterface]
 public interface IMonitoringHubClient
 {
-    Task ReceiveUpdate(CityStateMessage cityStateMessage);
+    Task ReceiveUpdate(CityStateMessageDto cityStateMessageDto);
 }
