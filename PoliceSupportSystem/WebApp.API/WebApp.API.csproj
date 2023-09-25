@@ -17,10 +17,13 @@
     </ItemGroup>
 
 
-
-
     <ItemGroup>
       <Folder Include="Handlers\" />
     </ItemGroup>
-
+    
+    <Target Name="CustomBeforeBuild" BeforeTargets="BeforeBuild">
+        <Message Text="Removing generated DTOs" />
+        <RemoveDir Directories="$(ProjectDir)../../frontend/src/api/generated" />
+    </Target>
+    
 </Project>
