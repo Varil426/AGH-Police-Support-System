@@ -7,7 +7,6 @@ export class IncidentStore {
 
   addIncident(dto: IIncidentDto) {
     if (this.incidents.find((x) => x.id === dto.id)) return;
-
     this.incidents.push();
   }
 
@@ -17,5 +16,19 @@ export class IncidentStore {
       const index = this.incidents.indexOf(f);
       this.incidents.splice(index, 1);
     }
+  }
+
+  updateIncident(dto: IIncidentDto) {
+    const u = this.incidents.find((x) => x.id === dto.id);
+    if (!u) return;
+    u.location = dto.location;
+    u.status = dto.status;
+    u.type = dto.type;
+  }
+
+  updateOrCreateIncident(dto: IIncidentDto) {
+    if (this.incidents.some((x) => x.id === dto.id))
+      return this.updateIncident(dto);
+    this.addIncident(dto);
   }
 }

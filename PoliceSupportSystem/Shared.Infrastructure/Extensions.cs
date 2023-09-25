@@ -97,6 +97,9 @@ public static class Extensions
 
     public static IHostBuilder RegisterModule<TModule>(this IHostBuilder hostBuilder) where TModule : IModule, new() => hostBuilder.ConfigureContainer<ContainerBuilder>(
         builder => builder.RegisterModule<TModule>());
+    
+    public static IHostBuilder RegisterModule<TModule>(this IHostBuilder hostBuilder, TModule module) where TModule : ConfigurationAwareModule => hostBuilder.ConfigureContainer<ContainerBuilder>(
+        builder => builder.RegisterModule(module));
 
     public static IServiceCollection AddMessageBus(this IServiceCollection serviceCollection)
     {

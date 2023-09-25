@@ -5,8 +5,10 @@ import { MapPage } from "./pages/MapPage";
 import { RootStore } from "./stores/RootStore";
 import { IncidentStore } from "./stores/IncidentStore";
 import { ToastContainer } from "react-toastify";
+import { observer } from "mobx-react-lite";
+import { TestPage } from "./pages/TestPage";
 
-export const App = () => {
+export const App = observer(() => {
   const incidentStore = new IncidentStore();
   const rootStore = new RootStore(incidentStore);
 
@@ -16,8 +18,9 @@ export const App = () => {
         <ToastContainer />
         <div>
           <MapPage />
+          <TestPage />
         </div>
       </RootStorePrivider>
     </Router>
   );
-};
+});

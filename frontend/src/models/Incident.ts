@@ -5,7 +5,7 @@ import { IncidentStatusEnum } from "../api/generated/Shared/CommonTypes/Incident
 
 export class Incident {
   readonly id: string;
-  @observable position: IPosition;
+  @observable location: IPosition;
   @observable type: IncidentTypeEnum;
   @observable status: IncidentStatusEnum;
 
@@ -16,7 +16,7 @@ export class Incident {
     status: IncidentStatusEnum
   ) {
     this.id = id;
-    this.position = position;
+    this.location = position;
     this.type = type;
     this.status = status;
   }

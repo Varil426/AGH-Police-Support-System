@@ -6,5 +6,5 @@ import { ICityStateMessageDto } from './ICityStateMessageDto';
 
 export interface IMonitoringHubClient
 {
-	ReceiveUpdate(cityStateMessageDto: ICityStateMessageDto) : void;
+	receiveUpdate(cityStateMessageDto: ICityStateMessageDto) : void;
 }

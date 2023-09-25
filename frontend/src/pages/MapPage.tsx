@@ -3,11 +3,12 @@ import { MapViewModel } from "../components/map/MapViewModel";
 import { MapModel } from "../components/map/MapModel";
 import { MonitoringHubClient } from "../api/MonitoringHubClient";
 import { useRootStore } from "../utils/RootStoreProvider";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { observer } from "mobx-react-lite";
 
-export const MapPage = () => {
+export const MapPage = observer(() => {
   const incidentStore = useRootStore().incidentStore;
-  const [hub] = useState(new MonitoringHubClient(incidentStore));
+  const hub = new MonitoringHubClient(incidentStore);
 
   useEffect(() => {
     hub.start();
@@ -18,4 +19,4 @@ export const MapPage = () => {
       <MapViewModel model={new MapModel(hub)} />
     </Route>
   );
-};
+});

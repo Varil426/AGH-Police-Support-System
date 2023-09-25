@@ -1,15 +1,19 @@
 import { HubConnectionBuilder } from "@microsoft/signalr";
-import { ICityStateMessage } from "./generated/WebApp/API/Hubs/MonitoringHub/ICityStateMessage";
+import { ICityStateMessageDto } from "./generated/WebApp/API/Hubs/MonitoringHub/ICityStateMessageDto";
 import { IMonitoringHubClient } from "./generated/WebApp/API/Hubs/MonitoringHub/IMonitoringHubClient";
 import { IncidentStore } from "../stores/IncidentStore";
 import { Routes } from "./ApiRoutes";
 import { toast } from "react-toastify";
+import { IPosition } from "./generated/Shared/CommonTypes/Geo/IPosition";
+import { action, computed, makeObservable, observable } from "mobx";
 
 // export type UpdateAction = (cityStateMessage: ICityStateMessage) => void;
 
 export class MonitoringHubClient implements IMonitoringHubClient {
   private readonly connection;
   //   private readonly updateActions: UpdateAction[] = [];
+
+  @observable private _hqLocation: IPosition | undefined;
 
   constructor(private readonly incidentStore: IncidentStore) {
     this.connection = new HubConnectionBuilder()
@@ -19,14 +23,22 @@ export class MonitoringHubClient implements IMonitoringHubClient {
       .build();
 
     this.connection.on(
-      this.ReceiveUpdate.name.toLowerCase(),
-      this.ReceiveUpdate
+      this.receiveUpdate.name.toLowerCase(),
+      (cityStateMessage: ICityStateMessageDto) =>
+        this.receiveUpdate(cityStateMessage)
     );
+
+    makeObservable(this);
   }
 
-  ReceiveUpdate(cityStateMessage: ICityStateMessage): void {
-    console.log(cityStateMessage); // TODO
-    console.log("TEST");
+  @action receiveUpdate(cityStateMessage: ICityStateMessageDto): void {
+    if (!this._hqLocation) {
+      this._hqLocation = cityStateMessage.hqLocation;
+    }
+  }
+
+  @computed get hqLocation(): IPosition | undefined {
+    return this._hqLocation;
   }
 
   async start() {

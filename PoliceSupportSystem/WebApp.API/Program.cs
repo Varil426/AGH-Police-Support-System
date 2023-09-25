@@ -14,7 +14,7 @@ builder.Host
     .AddServiceSettings()
     .AddRabbitMqBus(new[] { typeof(ApplicationModule).Assembly }) // TODO
     .RegisterSharedApplicationModule()
-    .RegisterModule<ApplicationModule>()
+    .RegisterModule(new ApplicationModule(builder.Configuration))
     .RegisterModule<InfrastructureModule>()
     .ConfigureServices(
         s =>

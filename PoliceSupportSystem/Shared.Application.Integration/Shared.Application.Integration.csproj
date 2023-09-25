@@ -10,4 +10,8 @@
       <ProjectReference Include="..\Shared.CommonTypes\Shared.CommonTypes.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Reinforced.Typings" Version="1.6.2" />
+    </ItemGroup>
+
 </Project>

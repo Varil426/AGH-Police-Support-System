@@ -1,19 +1,27 @@
 ﻿using Shared.Application.Factories;
 using Shared.Application.Helpers;
 using Shared.Application.Integration.DTOs;
+using Shared.CommonTypes.Geo;
 using Shared.Domain.Incident;
+using WebApp.Application.Settings;
 
 namespace WebApp.Application.Services;
 
 internal class CityStateMonitoringService : ICityStateMonitoringService
 {
     private readonly IIncidentFactory _incidentFactory;
+
+    private readonly MapSettings _mapSettings;
+
     // private readonly List<Func<ICityStateMonitoringService, Task>> _subscriptions = new();
     private readonly List<Incident> _incidents = new();
 
-    public CityStateMonitoringService(IIncidentFactory incidentFactory)
+    public Position HqLocation => _mapSettings.HqLocation; 
+
+    public CityStateMonitoringService(IIncidentFactory incidentFactory, MapSettings mapSettings)
     {
         _incidentFactory = incidentFactory;
+        _mapSettings = mapSettings;
     }
 
     // public void Subscribe(Func<ICityStateMonitoringService, Task> callback) => _subscriptions.Add(callback);
