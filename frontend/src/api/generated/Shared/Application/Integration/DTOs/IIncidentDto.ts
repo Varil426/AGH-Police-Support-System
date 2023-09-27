@@ -2,9 +2,9 @@
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 
-import { IPosition } from '../../CommonTypes/Geo/IPosition';
-import { IncidentStatusEnum } from '../../CommonTypes/Incident/IncidentStatusEnum';
-import { IncidentTypeEnum } from '../../CommonTypes/Incident/IncidentTypeEnum';
+import { IPosition } from '../../../CommonTypes/Geo/IPosition';
+import { IncidentStatusEnum } from '../../../CommonTypes/Incident/IncidentStatusEnum';
+import { IncidentTypeEnum } from '../../../CommonTypes/Incident/IncidentTypeEnum';
 
 export interface IIncidentDto
 {

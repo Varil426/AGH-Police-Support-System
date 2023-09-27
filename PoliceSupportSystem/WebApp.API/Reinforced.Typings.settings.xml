@@ -16,6 +16,7 @@
     <ItemGroup>
         <RtAdditionalAssembly Include="WebApp.Application"/>
         <RtAdditionalAssembly Include="Shared.Application"/>
+        <RtAdditionalAssembly Include="Shared.Application.Integration"/>
         <RtAdditionalAssembly Include="Shared.CommonTypes"/>
     </ItemGroup>
 </Project>

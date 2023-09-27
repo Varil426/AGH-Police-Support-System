@@ -3,9 +3,10 @@
 //     the code is regenerated.
 
 import { IPosition } from '../../../../Shared/CommonTypes/Geo/IPosition';
+import { IIncidentDto } from '../../../../Shared/Application/Integration/DTOs/IIncidentDto';
 
 export interface ICityStateMessageDto
 {
 	hqLocation: IPosition;
-	incidents: any[];
+	incidents: IIncidentDto[];
 }
