@@ -20,8 +20,8 @@
     <ItemGroup>
       <Folder Include="Handlers\" />
     </ItemGroup>
-    
-    <Target Name="CustomBeforeBuild" BeforeTargets="Build">
+
+    <Target Name="BeforeReinforcedTypingsGenerate" BeforeTargets="ReinforcedTypingsGenerate">
         <Message Text="Removing generated DTOs" />
         <RemoveDir Directories="$(ProjectDir)../../frontend/src/api/generated" />
     </Target>
