@@ -1,8 +1,9 @@
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer } from "react-leaflet";
 import { MapModel } from "./MapModel";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { IncidentMarker } from "./markers/IncidentMarker";
 
 export interface IMapViewModelProps {
   model: MapModel;
@@ -26,11 +27,9 @@ export const MapViewModel = observer(({ model }: IMapViewModelProps) => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker position={[51.505, -0.09]}>
-        <Popup>
-          A pretty CSS3 popup. <br /> Easily customizable.
-        </Popup>
-      </Marker>
+      {model.incidents.map((x) => (
+        <IncidentMarker incident={x} />
+      ))}
     </MapContainer>
   );
 });

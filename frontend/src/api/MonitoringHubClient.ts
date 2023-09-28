@@ -35,6 +35,10 @@ export class MonitoringHubClient implements IMonitoringHubClient {
     if (!this._hqLocation) {
       this._hqLocation = cityStateMessage.hqLocation;
     }
+
+    cityStateMessage.incidents.map((x) =>
+      this.incidentStore.updateOrCreateIncident(x)
+    );
   }
 
   @computed get hqLocation(): IPosition | undefined {

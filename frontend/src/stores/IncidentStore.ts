@@ -1,13 +1,13 @@
 import { observable } from "mobx";
 import { Incident } from "../models/Incident";
-import { IIncidentDto } from "../api/generated/Shared/Application/DTOs/IIncidentDto";
+import { IIncidentDto } from "../api/generated/Shared/Application/Integration/DTOs/IIncidentDto";
 
 export class IncidentStore {
   @observable readonly incidents: Incident[] = [];
 
   addIncident(dto: IIncidentDto) {
     if (this.incidents.find((x) => x.id === dto.id)) return;
-    this.incidents.push();
+    this.incidents.push(dto);
   }
 
   removeIncident(id: string) {
