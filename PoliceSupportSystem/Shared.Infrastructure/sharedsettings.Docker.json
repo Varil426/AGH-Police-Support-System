@@ -1,0 +1,24 @@
+{
+  "RabbitMq": {
+    "Host": "rabbitmq",
+    "Port": "5672",
+    "Username": "guest",
+    "Password": "guest", // TODO Remove password from repo
+    "MessageExchange": "Messages",
+    "DirectMessageExchange": "DirectMessages",
+    "EventExchange": "Events",
+    "QueryExchange": "Queries",
+    "CommandExchange": "Commands"
+  },
+  "Loki": {
+    "Uri": "http://loki:3100",
+    "Login": "",
+    "Password": ""
+  },
+  "SimulationCommunicationSettings": {
+    "Host": "rabbitmq",
+    "Port": "5672",
+    "Username": "guest",
+    "Password": "guest" // TODO Remove password from repo
+  }
+}
