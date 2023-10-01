@@ -1,0 +1,55 @@
+version: "3.8"
+services:
+  # Common
+  rabbitmq:
+    extends:
+      file: docker-compose.yaml
+      service: rabbitmq
+  simulationdb:
+    extends:
+      file: docker-compose.yaml
+      service: simulationdb
+  loki:
+    extends:
+      file: docker-compose.yaml
+      service: loki
+  grafana:
+    extends:
+      file: docker-compose.yaml
+      service: grafana
+  # Simulation
+  simulation:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      simulationdb:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    build:
+      context: ./PoliceSupportSystem
+      dockerfile: simulation-dockerfile
+    networks:
+      - rabbitmq_net
+      - loki_net
+  # HQ Service
+  hqservice:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      simulation:
+        condition: service_started
+    build:
+      context: ./PoliceSupportSystem
+      dockerfile: hq-service-dockerfile
+    networks:
+      - rabbitmq_net
+      - loki_net
+
+networks:
+  rabbitmq_net:
+    driver: bridge
+  loki_net:
+    driver: bridge
