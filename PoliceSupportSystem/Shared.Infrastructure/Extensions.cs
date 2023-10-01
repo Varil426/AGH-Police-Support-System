@@ -35,6 +35,7 @@ public static class Extensions
 {
     private const string RabbitMqConfigSectionName = "RabbitMq";
     private const string LokiConfigSectionName = "Loki";
+    private const string EnvironmentVariablePrefix = "PoliceSupportSystem";
 
     public static IHostBuilder AddSharedAppSettings(this IHostBuilder hostBuilder) =>
         hostBuilder.ConfigureAppConfiguration(
@@ -50,7 +51,7 @@ public static class Extensions
                     .AddJsonFile("appsettings.json", optional: true)
                     .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 
-                config.AddEnvironmentVariables();
+                config.AddEnvironmentVariables(EnvironmentVariablePrefix);
                 
             });
 
