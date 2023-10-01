@@ -55,7 +55,6 @@ public abstract class AgentBase : BackgroundService, IAgent
             
             if (EnvironmentSignalQueue.TryDequeue(out var signal) && AcceptedEnvironmentSignalTypes.Contains(signal.GetType()))
                 await HandleSignal(signal);
-                
             
             _semaphore.Release();
             Thread.Sleep(TimeSpan.FromMilliseconds(50));

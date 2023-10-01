@@ -1,4 +1,5 @@
 using System.Reflection;
+using PatrolService.Application;
 using Shared.Infrastructure;
 using Shared.Simulation;
 
@@ -19,6 +20,7 @@ var host = Host.CreateDefaultBuilder(args)
         // TODO Create agents
     )
     .RegisterSharedApplicationModule()
+    .RegisterModule<ApplicationModule>()
     .AddSharedSimulation(new Assembly[] { }) // TODO
     .Build();
 
