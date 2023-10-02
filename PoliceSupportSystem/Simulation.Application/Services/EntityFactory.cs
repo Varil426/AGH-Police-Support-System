@@ -4,7 +4,7 @@ using Simulation.Application.Entities;
 
 namespace Simulation.Application.Services;
 
-internal class EntityFactory : IEntityFactory
+internal class EntityFactory : ISimulationIncidentFactory
 {
     public SimulationIncident CreateIncident(
         double latitude,

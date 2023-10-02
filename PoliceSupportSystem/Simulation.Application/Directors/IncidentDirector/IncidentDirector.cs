@@ -10,7 +10,7 @@ namespace Simulation.Application.Directors.IncidentDirector;
 
 internal class IncidentDirector : BackgroundService, IDirector
 {
-    private readonly IEntityFactory _entityFactory;
+    private readonly ISimulationIncidentFactory _simulationIncidentFactory;
     private readonly IncidentDirectorSettings _incidentDirectorSettings;
     private readonly IMapService _mapService;
     private readonly ILogger<IncidentDirector> _logger;
@@ -26,7 +26,7 @@ internal class IncidentDirector : BackgroundService, IDirector
     private TimeSpan _lastPlannedAt;
 
     public IncidentDirector(
-        IEntityFactory entityFactory,
+        ISimulationIncidentFactory simulationIncidentFactory,
         IncidentDirectorSettings incidentDirectorSettings,
         IMapService mapService,
         ILogger<IncidentDirector> logger,
@@ -34,7 +34,7 @@ internal class IncidentDirector : BackgroundService, IDirector
         SimulationSettings simulationSettings,
         ISimulationTimeService simulationTimeService)
     {
-        _entityFactory = entityFactory;
+        _simulationIncidentFactory = simulationIncidentFactory;
         _incidentDirectorSettings = incidentDirectorSettings;
         _mapService = mapService;
         _logger = logger;
@@ -83,7 +83,7 @@ internal class IncidentDirector : BackgroundService, IDirector
         var incidentsThatShouldStart = _plannedIncidents.Where(x => !x.HasStarted && x.ShouldStartAfter <= _simulationTimeService.SimulationTimeSinceStart);
         foreach (var plannedIncident in incidentsThatShouldStart)
         {
-            var incident = _entityFactory.CreateIncident(
+            var incident = _simulationIncidentFactory.CreateIncident(
                 plannedIncident.IncidentId,
                 plannedIncident.IncidentLocation,
                 plannedIncident.InitialIncidentType,
