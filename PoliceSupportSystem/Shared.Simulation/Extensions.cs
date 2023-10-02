@@ -20,6 +20,7 @@ public static class Extensions
 {
     public static IHostBuilder AddSharedSimulation(this IHostBuilder hostBuilder, Assembly[] handlersAssemblies) => hostBuilder
         .AddRabbitMqSimulationBus()
+        .AddPatrolSettings()
         .AddInternalServices()
         .AddSimulatedServices()
         .AddSimulationMessageHandlers(handlersAssemblies.Append(typeof(Extensions).Assembly).ToArray())
@@ -161,6 +162,19 @@ public static class Extensions
             });
         
         return hostBuilder;
+    }
+    
+    private static IHostBuilder AddPatrolSettings(this IHostBuilder builder)
+    {
+        builder.ConfigureServices(
+            (context, services) =>
+            {
+                var patrolSettings = context.Configuration.GetSettings<PatrolSettings>(nameof(PatrolSettings));
+                services.AddSingleton(patrolSettings);
+                services.AddSingleton<IPatrolInfoService>(patrolSettings);
+            });
+    
+        return builder;
     }
     
     private static IHostBuilder AddInternalServices(this IHostBuilder hostBuilder)

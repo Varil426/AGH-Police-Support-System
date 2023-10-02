@@ -1,4 +1,4 @@
-﻿namespace Shared.Application.Services;
+﻿namespace Shared.Simulation.Services;
 
 public interface IPatrolInfoService
 {

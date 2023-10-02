@@ -132,19 +132,6 @@ public static class Extensions
     
         return builder;
     }
-    
-    public static IHostBuilder AddPatrolSettings(this IHostBuilder builder)
-    {
-        builder.ConfigureServices(
-            (context, services) =>
-            {
-                var patrolSettings = context.Configuration.GetSettings<PatrolSettings>(nameof(PatrolSettings));
-                services.AddSingleton(patrolSettings);
-                services.AddSingleton<IPatrolInfoService>(patrolSettings);
-            });
-    
-        return builder;
-    }
 
     public static TSettings GetSettings<TSettings>(this IConfiguration configuration, string sectionName)
     {

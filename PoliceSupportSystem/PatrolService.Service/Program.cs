@@ -9,7 +9,6 @@ var host = Host.CreateDefaultBuilder(args)
     .AddSharedAppSettings()
     .AddRabbitMqSettings()
     .AddServiceSettings()
-    .AddPatrolSettings()
     .AddRabbitMqBus(new Assembly[] { }) // TODO
     .ConfigureServices(
         services =>
