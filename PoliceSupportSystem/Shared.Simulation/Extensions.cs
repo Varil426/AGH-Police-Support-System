@@ -20,11 +20,14 @@ public static class Extensions
 {
     public static IHostBuilder AddSharedSimulation(this IHostBuilder hostBuilder, Assembly[] handlersAssemblies) => hostBuilder
         .AddRabbitMqSimulationBus()
-        .AddPatrolSettings()
         .AddInternalServices()
         .AddSimulatedServices()
         .AddSimulationMessageHandlers(handlersAssemblies.Append(typeof(Extensions).Assembly).ToArray())
         .Decorate();
+
+    public static IHostBuilder AddPatrolSpecificSimulationServices(this IHostBuilder hostBuilder) => hostBuilder
+        .AddPatrolSettings()
+        .AddPatrolServices();
 
     public static IHost SubscribeSimulationMessageHandlers(this IHost host, Assembly[] handlerAssemblies)
     {
@@ -193,6 +196,17 @@ public static class Extensions
                 builder.RegisterType<SimulationBusSubscriberManager>().As<ISimulationBusSubscriberManager>().WithAttributeFiltering().SingleInstance();
             });
 
+        return hostBuilder;
+    }
+    
+    private static IHostBuilder AddPatrolServices(this IHostBuilder hostBuilder)
+    {
+        hostBuilder.ConfigureServices(
+            (ctx, s) =>
+            {
+                s.AddScoped<IStatusService, PatrolSimulationStatusService>();
+            });
+        
         return hostBuilder;
     }
     

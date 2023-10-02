@@ -8,8 +8,9 @@ internal class SimulationStatusService : IStatusService
 {
     private readonly ILogger<SimulationStatusService> _logger;
     private readonly ISimulationMessageBus _simulationMessageBus;
-    private readonly IServiceInfoService _serviceInfoService;
-    private readonly ITypeMapper _typeMapper;
+    
+    protected IServiceInfoService ServiceInfoService { get; }
+    protected ITypeMapper TypeMapper { get; }
 
     public SimulationStatusService(
         ILogger<SimulationStatusService> logger,
@@ -19,19 +20,21 @@ internal class SimulationStatusService : IStatusService
     {
         _logger = logger;
         _simulationMessageBus = simulationMessageBus;
-        _serviceInfoService = serviceInfoService;
-        _typeMapper = typeMapper;
+        ServiceInfoService = serviceInfoService;
+        TypeMapper = typeMapper;
     }
-
+    
     public async Task AnnounceOnline()
     {
-        _logger.LogInformation($"Service: {_serviceInfoService.Id} of type: {_serviceInfoService.ServiceType} is online and ready.");
-        await _simulationMessageBus.SendSimulationMessage(new ServiceOnlineMessage(_serviceInfoService.Id, _typeMapper.Map(_serviceInfoService.ServiceType)));
+        _logger.LogInformation($"Service: {ServiceInfoService.Id} of type: {ServiceInfoService.ServiceType} is online and ready.");
+        await _simulationMessageBus.SendSimulationMessage(PrepareOnlineMessage());
     }
 
     public async Task AnnounceOffline()
     {
-        _logger.LogInformation($"Service: {_serviceInfoService.Id} goes offline.");
-        await _simulationMessageBus.SendSimulationMessage(new ServiceOfflineMessage(_serviceInfoService.Id));
+        _logger.LogInformation($"Service: {ServiceInfoService.Id} goes offline.");
+        await _simulationMessageBus.SendSimulationMessage(new ServiceOfflineMessage(ServiceInfoService.Id));
     }
+
+    protected virtual ISimulationMessage PrepareOnlineMessage() => new ServiceOnlineMessage(ServiceInfoService.Id, TypeMapper.Map(ServiceInfoService.ServiceType));
 }

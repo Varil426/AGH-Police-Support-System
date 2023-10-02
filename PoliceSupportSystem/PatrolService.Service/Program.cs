@@ -22,6 +22,7 @@ var host = Host.CreateDefaultBuilder(args)
     .RegisterSharedApplicationModule()
     .RegisterModule<ApplicationModule>()
     .AddSharedSimulation(new Assembly[] { }) // TODO
+    .AddPatrolSpecificSimulationServices()
     .Build();
 
 host.SubscribeHandlers(new Assembly[] { }); // TODO
