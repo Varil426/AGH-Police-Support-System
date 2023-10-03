@@ -4,8 +4,15 @@ using Simulation.Application.Entities;
 
 namespace Simulation.Application.Services;
 
-internal class EntityFactory : ISimulationIncidentFactory
+internal class EntityFactory : ISimulationIncidentFactory, ISimulationPatrolFactory
 {
+    private readonly SimulationSettings _simulationSettings;
+
+    public EntityFactory(SimulationSettings simulationSettings)
+    {
+        _simulationSettings = simulationSettings;
+    }
+
     public SimulationIncident CreateIncident(
         double latitude,
         double longitude,
@@ -33,4 +40,8 @@ internal class EntityFactory : ISimulationIncidentFactory
         IncidentTypeEnum incidentType = IncidentTypeEnum.NormalIncident,
         IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse,
         DateTimeOffset? createdAt = null) => new(incidentId, location, status, incidentType) { CreatedAt = createdAt ?? DateTimeOffset.UtcNow };
+
+    public SimulationPatrol CreatePatrol(Guid id, string patrolId, Position position) => new(id, patrolId, position);
+
+    public SimulationPatrol CreatePatrol(string patrolId) => CreatePatrol(Guid.NewGuid(), patrolId, _simulationSettings.HqLocation);
 }

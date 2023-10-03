@@ -16,6 +16,7 @@ internal class Simulation : ISimulation
 
     private readonly List<IService> _services = new();
     private readonly List<SimulationIncident> _incidents = new();
+    private readonly List<SimulationPatrol> _patrols = new();
 
     public Simulation(
         ILogger<Simulation> logger,
@@ -34,6 +35,7 @@ internal class Simulation : ISimulation
     }
 
     public IReadOnlyCollection<SimulationIncident> Incidents => _incidents.AsReadOnly();
+    public IReadOnlyCollection<SimulationPatrol> Patrols => _patrols.AsReadOnly();
 
     private IReadOnlyCollection<ISimulationRootEntity> SimulationRootEntities => Incidents;
 
@@ -64,13 +66,36 @@ internal class Simulation : ISimulation
             _logger.LogWarning($"Attempted to add a duplicated service with ID: {service.Id}");
     }
 
+    public void AddPatrol(SimulationPatrol patrol)
+    {
+        if (_patrols.Select(x => x.Id).All(x => x != patrol.Id))
+            _patrols.Add(patrol);
+        else
+            _logger.LogWarning($"Attempted to add a duplicated patrol with ID: {patrol.Id}");
+    }
+
     public void RemoveService(string serviceId)
     {
         var s = _services.FirstOrDefault(x => x.Id.Equals(serviceId, StringComparison.InvariantCultureIgnoreCase));
         if (s is not null)
+        {
+            RemoveServiceFromRelatedPatrols(s);
             _services.Remove(s);
+            RemovePatrolsWithoutRelatedService();
+        }
         else
             _logger.LogWarning($"Attempted to remove not existing service with ID: {serviceId}");
+    }
+
+    private void RemovePatrolsWithoutRelatedService() => _patrols.Where(x => x.RelatedServices.Count == 0).ToList().ForEach(x => RemovePatrol(x.PatrolId));
+
+    public void RemovePatrol(string patrolId)
+    {
+        var p = _patrols.FirstOrDefault(x => x.PatrolId.Equals(patrolId, StringComparison.InvariantCultureIgnoreCase));
+        if (p is not null)
+            _patrols.Remove(p);
+        else
+            _logger.LogWarning($"Attempted to remove not existing patrol with ID: {patrolId}");
     }
 
     public void AddIncident(SimulationIncident newIncident)
@@ -87,4 +112,6 @@ internal class Simulation : ISimulation
         await _domainEventProcessor.ProcessDomainEvents(SimulationRootEntities/*.SelectMany(x => x.Events)*/);
         // SimulationRootEntities.ToList().ForEach(x => x.ClearDomainEvents());
     }
+
+    private void RemoveServiceFromRelatedPatrols(IService service) => _patrols.Where(x => x.RelatedServices.Contains(service)).ToList().ForEach(x => x.RemoveRelatedService(service));
 }
