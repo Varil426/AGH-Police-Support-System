@@ -16,12 +16,12 @@ internal class PatrolAgent : AgentBase
         _statusService = statusService;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        await _statusService.AnnounceOnline();
-        await base.ExecuteAsync(stoppingToken);
-        await _statusService.AnnounceOffline();
-    }
+    // protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    // {
+    //     await _statusService.AnnounceOnline();
+    //     await base.ExecuteAsync(stoppingToken);
+    //     await _statusService.AnnounceOffline();
+    // }
 
     protected async override Task HandleMessage(IMessage message)
     {

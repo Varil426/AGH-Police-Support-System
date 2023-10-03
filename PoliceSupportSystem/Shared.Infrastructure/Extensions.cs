@@ -21,6 +21,7 @@ using Shared.Application.Integration.Queries;
 using Shared.Application.Services;
 using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Settings;
+using Shared.Infrastructure.Tasks;
 using ExchangeType = RabbitMQ.Client.ExchangeType;
 using IBus = MessageBus.Core.API.IBus;
 using ICommand = Shared.Application.Integration.Commands.ICommand;
@@ -56,7 +57,9 @@ public static class Extensions
             });
 
     public static IHostBuilder UseAutofac(this IHostBuilder hostBuilder) => hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
-    
+
+    public static IHostBuilder AddServiceStatusNotifier(this IHostBuilder hostBuilder) => hostBuilder.ConfigureServices(s => s.AddHostedService<AnnounceServiceOnlineOffline>());
+
     public static IHostBuilder AddSerilog(this IHostBuilder hostBuilder) => hostBuilder
         .ConfigureLogging((_, loggingBuilder) => loggingBuilder.ClearProviders())
         .UseSerilog(
