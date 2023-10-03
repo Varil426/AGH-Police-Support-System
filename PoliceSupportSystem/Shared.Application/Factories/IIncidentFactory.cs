@@ -5,6 +5,6 @@ namespace Shared.Application.Factories;
 
 public interface IIncidentFactory
 {
-    Incident CreateIncident(NewIncidentDto newIncidentDto);
+    public Incident CreateIncident(NewIncidentDto newIncidentDto);
     // Incident CreateIncident(IncidentCreatedEvent @event) => CreateIncident(new NewIncidentDto(@event.IncidentId, @event.Location, @event.Type, @event.Status)); // TODO Remove
 }
