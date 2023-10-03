@@ -26,7 +26,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Domain", "Shared.Dom
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Simulation", "Simulation", "{5BB8543B-81BF-4BA5-BDAA-BDF69B7A51D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation.Shared", "Simulation.Shared\Simulation.Shared.csproj", "{486D890B-03D8-4F1C-AAAF-A4FAF81FAC16}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation.Communication", "Simulation.Communication\Simulation.Communication.csproj", "{486D890B-03D8-4F1C-AAAF-A4FAF81FAC16}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation.Application", "Simulation.Application\Simulation.Application.csproj", "{981BD3F3-D0B7-4305-949F-7D33C123EC29}"
 EndProject

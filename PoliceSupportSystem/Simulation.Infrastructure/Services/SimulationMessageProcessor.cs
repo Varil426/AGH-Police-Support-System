@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Simulation.Application;
 using Simulation.Application.Handlers;
 using Simulation.Application.Services;
-using Simulation.Shared.Communication;
+using Simulation.Communication.Messages;
 
 namespace Simulation.Infrastructure.Services;
 

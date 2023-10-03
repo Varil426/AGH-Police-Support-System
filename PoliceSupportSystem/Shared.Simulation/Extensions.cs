@@ -12,7 +12,7 @@ using Shared.Simulation.Decorators;
 using Shared.Simulation.Handlers;
 using Shared.Simulation.Services;
 using Shared.Simulation.Settings;
-using Simulation.Shared.Communication;
+using Simulation.Communication.Messages;
 
 namespace Shared.Simulation;
 

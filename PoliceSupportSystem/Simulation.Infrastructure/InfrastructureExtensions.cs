@@ -16,10 +16,10 @@ using Simulation.Application;
 using Simulation.Application.Directors.Settings;
 using Simulation.Application.Handlers;
 using Simulation.Application.Services;
+using Simulation.Communication.Messages;
 using Simulation.Infrastructure.Exceptions;
 using Simulation.Infrastructure.Services;
 using Simulation.Infrastructure.Settings;
-using Simulation.Shared.Communication;
 
 namespace Simulation.Infrastructure;
 

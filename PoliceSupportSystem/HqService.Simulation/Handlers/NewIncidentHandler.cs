@@ -1,7 +1,7 @@
 ﻿using HqService.Application.Services;
 using Shared.Application.Integration.DTOs;
 using Shared.Simulation.Handlers;
-using Simulation.Shared.Communication;
+using Simulation.Communication.Messages;
 
 namespace HqService.Simulation.Handlers;
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Shared.Application.Services;
-using Simulation.Shared.Communication;
+using Simulation.Communication.Messages;
 
 namespace Shared.Simulation.Services;
 

@@ -1,6 +1,6 @@
-﻿using Simulation.Shared.Common;
+﻿using Simulation.Communication.Common;
 
-namespace Simulation.Shared.Communication;
+namespace Simulation.Communication.Messages;
 
 public record ServiceOnlineMessage(string ServiceId, ServiceTypeEnum ServiceType) : ISimulationMessage
 {

@@ -1,6 +1,6 @@
 using Simulation.Application;
+using Simulation.Communication.Messages;
 using Simulation.Infrastructure;
-using Simulation.Shared.Communication;
 using Simulation.Simulation;
 
 var host = Host.CreateDefaultBuilder(args)

@@ -1,4 +1,4 @@
-﻿using Simulation.Shared.Communication;
+﻿using Simulation.Communication.Messages;
 
 namespace Shared.Simulation.Services;
 

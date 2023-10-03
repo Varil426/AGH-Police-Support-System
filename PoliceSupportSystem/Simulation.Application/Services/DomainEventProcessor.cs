@@ -1,5 +1,5 @@
 ﻿using Shared.Domain.DomainEvents;
-using Simulation.Shared.Communication;
+using Simulation.Communication.Messages;
 
 namespace Simulation.Application.Services;
 

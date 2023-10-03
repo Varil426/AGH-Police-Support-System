@@ -1,4 +1,4 @@
-﻿namespace Simulation.Shared.Common;
+﻿namespace Simulation.Communication.Common;
 
 public enum ServiceTypeEnum
 {

@@ -1,5 +1,5 @@
 ﻿using Simulation.Application.Entities;
-using Simulation.Shared.Common;
+using Simulation.Communication.Common;
 
 namespace Simulation.Application.Services;
 

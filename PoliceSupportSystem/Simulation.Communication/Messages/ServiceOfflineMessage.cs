@@ -1,4 +1,4 @@
-﻿namespace Simulation.Shared.Communication;
+﻿namespace Simulation.Communication.Messages;
 
 public record ServiceOfflineMessage(string ServiceId) : ISimulationMessage
 {

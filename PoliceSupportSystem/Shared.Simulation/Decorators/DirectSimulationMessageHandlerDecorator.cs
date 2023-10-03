@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Shared.Application.Services;
 using Shared.Simulation.Handlers;
-using Simulation.Shared.Communication;
+using Simulation.Communication.Messages;
 
 namespace Shared.Simulation.Decorators;
 
