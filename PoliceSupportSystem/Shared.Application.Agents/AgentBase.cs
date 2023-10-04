@@ -14,6 +14,8 @@ public abstract class AgentBase : BackgroundService, IAgent
     protected Queue<IEnvironmentSignal> EnvironmentSignalQueue { get; } = new();
 
     private readonly SemaphoreSlim _semaphore = new( 1);
+
+    private readonly Dictionary<Guid, IMessage?> _awaitingResponse = new();
     
     protected AgentBase(Guid id, IEnumerable<Type> acceptedMessageTypes, IEnumerable<Type> acceptedEnvironmentSignalTypes, IMessageService messageService)
     {
@@ -26,7 +28,10 @@ public abstract class AgentBase : BackgroundService, IAgent
     public async Task PushMessageAsync(IMessage message)
     {
         await _semaphore.WaitAsync();
-        MessageQueue.Enqueue(message);
+        if (message.ResponseTo is not null && _awaitingResponse.ContainsKey(message.ResponseTo.Value))
+            _awaitingResponse[message.ResponseTo.Value] = message;
+        else
+            MessageQueue.Enqueue(message);
         _semaphore.Release();
     }
 
@@ -59,6 +64,29 @@ public abstract class AgentBase : BackgroundService, IAgent
             _semaphore.Release();
             Thread.Sleep(TimeSpan.FromMilliseconds(50));
         }
+    }
+
+    protected async Task<TResponseType> Ask<TResponseType>(IMessage message) where TResponseType : class, IMessage // TODO Whole messaging between agents should be reworked
+    {
+        if (message.Receivers is null || message.Receivers.Count() != 1)
+            throw new Exception($"{nameof(Ask)} can only handled messages with exactly 1 receiver.");
+
+        _awaitingResponse[message.Id] = null;
+        await MessageService.SendMessageAsync(message);
+
+        IMessage? response = null;
+        while (response is null)
+        {
+            await _semaphore.WaitAsync();
+            response = _awaitingResponse[message.Id];
+            _semaphore.Release();
+        }
+
+        await _semaphore.WaitAsync();
+        _awaitingResponse.Remove(message.Id);
+        _semaphore.Release();
+
+        return (TResponseType) response;
     }
 
     public override void Dispose()
