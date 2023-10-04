@@ -21,7 +21,11 @@
       <Folder Include="Handlers\" />
     </ItemGroup>
 
-    <Target Name="BeforeReinforcedTypingsGenerate" BeforeTargets="ReinforcedTypingsGenerate">
+    <PropertyGroup>
+        <ReinforcedTypingsRemoveOld>false</ReinforcedTypingsRemoveOld>
+    </PropertyGroup>
+    
+    <Target Name="BeforeReinforcedTypingsGenerate" BeforeTargets="ReinforcedTypingsGenerate" Condition="$(ReinforcedTypingsRemoveOld)">
         <Message Text="Removing generated DTOs" />
         <RemoveDir Directories="$(ProjectDir)../../frontend/src/api/generated" />
     </Target>
