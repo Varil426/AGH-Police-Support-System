@@ -11,6 +11,6 @@ public interface IMessage
     IEnumerable<Guid>? Receivers { get; }
 
     string MessageType { get; }
-    
+
     DateTimeOffset CreatedAt { get; }
 }

@@ -37,7 +37,7 @@ internal class Simulation : ISimulation
     public IReadOnlyCollection<SimulationIncident> Incidents => _incidents.AsReadOnly();
     public IReadOnlyCollection<SimulationPatrol> Patrols => _patrols.AsReadOnly();
 
-    private IReadOnlyCollection<ISimulationRootEntity> SimulationRootEntities => Incidents;
+    private IReadOnlyCollection<ISimulationRootEntity> SimulationRootEntities => Incidents.OfType<ISimulationRootEntity>().Concat(Patrols).ToList().AsReadOnly();
 
     public async Task RunAsync(CancellationToken? cancellationToken = null)
     {

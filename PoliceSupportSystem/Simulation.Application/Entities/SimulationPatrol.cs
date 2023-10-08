@@ -1,5 +1,7 @@
 ﻿using Shared.CommonTypes.Geo;
 using Shared.Domain;
+using Simulation.Application.DomainEvents;
+using Simulation.Communication.Common;
 
 namespace Simulation.Application.Entities;
 
@@ -16,12 +18,19 @@ public class SimulationPatrol : BaseRootDomainEntity, ISimulationRootEntity
         Id = id;
         PatrolId = patrolId;
         Position = position;
+        AddDomainEvent(new PatrolCreated(Id, PatrolId, Position));
     }
 
-    public void AddRelatedService(IService service) => _relatedServices.Add(service);
+    public void AddRelatedService(IService service)
+    {
+        _relatedServices.Add(service);
+        AddDomainEvent(new PatrolRelatedServiceAdded(this, service));
+    }
 
-    public void RemoveRelatedService(IService service) => RemoveRelatedService(service.Id); 
+    public void RemoveRelatedService(IService service) => RemoveRelatedService(service.Id);
 
     public void RemoveRelatedService(string relatedServiceId) => 
         _relatedServices.Remove(_relatedServices.First(x => x.Id.Equals(relatedServiceId, StringComparison.InvariantCultureIgnoreCase)));
+
+    public IEnumerable<IService> GetRelatedServicesOfType(ServiceTypeEnum serviceType) => RelatedServices.Where(x => x.ServiceType == serviceType);
 }

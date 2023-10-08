@@ -2,26 +2,30 @@
 using Shared.Application.Agents.Communication.Messages;
 using Shared.Application.Agents.Communication.Signals;
 using Shared.Application.Services;
+using Shared.CommonTypes.Geo;
 
 namespace PatrolService.Application;
 
 internal class PatrolAgent : AgentBase
 {
-    private readonly IStatusService _statusService;
-    private static readonly IEnumerable<Type> PatrolAgentAcceptedMessageTypes = Enumerable.Empty<Type>();
+    private readonly IPatrolInfoService _patrolInfoService;
+    private static readonly IEnumerable<Type> PatrolAgentAcceptedMessageTypes = new [] { typeof(CurrentLocationMessage) };
     private static readonly IEnumerable<Type> PatrolAgentAcceptedEnvironmentSignalTypes = Enumerable.Empty<Type>();
+
+    private Position? _lastKnowPosition;
     
-    public PatrolAgent(IMessageService messageService, IStatusService statusService) : base(Guid.NewGuid(), PatrolAgentAcceptedMessageTypes, PatrolAgentAcceptedEnvironmentSignalTypes, messageService)
+    public PatrolAgent(IMessageService messageService, IPatrolInfoService patrolInfoService) : base(patrolInfoService.PatrolAgentId, PatrolAgentAcceptedMessageTypes, PatrolAgentAcceptedEnvironmentSignalTypes, messageService)
     {
-        _statusService = statusService;
+        _patrolInfoService = patrolInfoService;
     }
 
-    // protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    // {
-    //     await _statusService.AnnounceOnline();
-    //     await base.ExecuteAsync(stoppingToken);
-    //     await _statusService.AnnounceOffline();
-    // }
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _lastKnowPosition ??= (await Ask<CurrentLocationMessage>(new AskPositionMessage(Id, _patrolInfoService.NavAgentId))).Position;
+        await MessageService.SendMessageAsync(new PatrolOnlineMessage(_patrolInfoService.PatrolId, _lastKnowPosition, Id));
+        await base.ExecuteAsync(stoppingToken);
+        await MessageService.SendMessageAsync(new PatrolOfflineMessage(_patrolInfoService.PatrolId, Id));
+    }
 
     protected async override Task HandleMessage(IMessage message)
     {
