@@ -1,4 +1,5 @@
-﻿using Shared.Application.Agents;
+﻿using HqService.Application.Services;
+using Shared.Application.Agents;
 using Shared.Application.Agents.Communication.Messages;
 using Shared.Application.Agents.Communication.Signals;
 
@@ -6,13 +7,12 @@ namespace HqService.Application.Agents;
 
 public class HqAgent : AgentBase
 {
-    private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[] { typeof(TestMessage) }.AsReadOnly();
+    private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[] { typeof(PatrolOnlineMessage), typeof(PatrolOfflineMessage) }.AsReadOnly();
     private static readonly IReadOnlyCollection<Type> HqAcceptedSignalTypes = new[] { typeof(TestSignal) }.AsReadOnly();
-
-
+    
     public HqAgent(
-        Guid id,
-        IMessageService messageService) : base(id, HqAcceptedMessageTypes, HqAcceptedSignalTypes, messageService)
+        IHqInfoService hqInfoService,
+        IMessageService messageService) : base(hqInfoService.HqAgentId, HqAcceptedMessageTypes, HqAcceptedSignalTypes, messageService)
     {
     }
 
