@@ -5,7 +5,7 @@ namespace Simulation.Application.Services;
 
 internal interface IDomainEventMapper
 {
-    ISimulationMessage Map(IDomainEvent domainEvent);
+    IEnumerable<ISimulationMessage> Map(IDomainEvent domainEvent);
 
-    IEnumerable<ISimulationMessage> Map(IEnumerable<IDomainEvent> domainEvents) => domainEvents.Select(Map);
+    IEnumerable<ISimulationMessage> Map(IEnumerable<IDomainEvent> domainEvents) => domainEvents.SelectMany(Map);
 }
