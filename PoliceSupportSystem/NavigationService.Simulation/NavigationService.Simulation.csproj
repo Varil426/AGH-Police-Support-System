@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NavigationService.Simulation\NavigationService.Simulation.csproj" />
-      <ProjectReference Include="..\Shared.Infrastructure\Shared.Infrastructure.csproj" />
+      <ProjectReference Include="..\NavigationService.Application\NavigationService.Application.csproj" />
+      <ProjectReference Include="..\Shared.Simulation\Shared.Simulation.csproj" />
     </ItemGroup>
 
 </Project>
