@@ -15,7 +15,7 @@ internal class MessageService : IMessageService, IMessageHandler, IDisposable
     private readonly RabbitMqSettings _rabbitMqSettings;
     private readonly IServiceProvider _serviceProvider;
     private readonly ISet<IAgent> _subscribedAgents = new HashSet<IAgent>();
-    private readonly SemaphoreSlim _subscribeSemaphore = new(1);
+    private readonly SemaphoreSlim _subscribeSemaphore = new(1,1);
 
     public MessageService(IMessageBus messageBus, IBusSubscriberManager subscriberManager, RabbitMqSettings rabbitMqSettings, IServiceProvider serviceProvider)
     {

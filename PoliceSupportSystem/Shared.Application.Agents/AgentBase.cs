@@ -15,7 +15,7 @@ public abstract class AgentBase : BackgroundService, IAgent
     
     protected Queue<IEnvironmentSignal> EnvironmentSignalQueue { get; } = new();
 
-    private readonly SemaphoreSlim _semaphore = new( 1);
+    private readonly SemaphoreSlim _semaphore = new( 1,1);
 
     private readonly Dictionary<Guid, IMessage?> _awaitingResponse = new();
     
