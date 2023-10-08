@@ -27,10 +27,10 @@ internal class PatrolAgent : AgentBase
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _lastKnowPosition ??= (await Ask<CurrentLocationMessage>(new AskPositionMessage(Id, _patrolInfoService.NavAgentId))).Position;
-        await MessageService.SendMessageAsync(new PatrolOnlineMessage(_patrolInfoService.PatrolId, _lastKnowPosition, Id));
+        _lastKnowPosition ??= (await Ask<CurrentLocationMessage>(new AskPositionMessage(Id, Guid.NewGuid(), _patrolInfoService.NavAgentId))).Position;
+        await MessageService.SendMessageAsync(new PatrolOnlineMessage(_patrolInfoService.PatrolId, _lastKnowPosition, Guid.NewGuid(), Id));
         await base.ExecuteAsync(stoppingToken);
-        await MessageService.SendMessageAsync(new PatrolOfflineMessage(_patrolInfoService.PatrolId, Id));
+        await MessageService.SendMessageAsync(new PatrolOfflineMessage(_patrolInfoService.PatrolId, Guid.NewGuid(), Id));
     }
 
     protected override Task HandleMessage(IMessage message) => message switch

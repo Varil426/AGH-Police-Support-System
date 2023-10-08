@@ -2,7 +2,7 @@
 
 public record BaseMessageWithSingleReceiver : BaseMessage
 {
-    public BaseMessageWithSingleReceiver(Guid sender, Guid receiver, Guid? responseTo = null) : base(sender, new[] { receiver }, responseTo)
+    public BaseMessageWithSingleReceiver(Guid sender, Guid Id, Guid receiver, Guid? responseTo = null) : base(sender, Id, new[] { receiver }, responseTo)
     {
     }
 }

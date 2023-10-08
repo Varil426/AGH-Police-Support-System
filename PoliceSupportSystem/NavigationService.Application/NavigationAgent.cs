@@ -42,6 +42,6 @@ public class NavigationAgent : AgentBase
     private async Task Handle(AskPositionMessage askPositionMessage)
     {
         var position = await _navigationService.GetCurrentPosition();
-        await MessageService.SendMessageAsync(new CurrentLocationMessage(position, Id, new[] { askPositionMessage.Sender }, askPositionMessage.Id));
+        await MessageService.SendMessageAsync(new CurrentLocationMessage(position, Id, Guid.NewGuid(), new[] { askPositionMessage.Sender }, askPositionMessage.Id));
     }
 }
