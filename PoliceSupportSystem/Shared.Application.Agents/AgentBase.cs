@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Shared.Application.Agents;
 
 public abstract class AgentBase : BackgroundService, IAgent
 {
+    private readonly ILogger _logger;
     public Guid Id { get; }
     public IEnumerable<Type> AcceptedMessageTypes { get; }
     public IEnumerable<Type> AcceptedEnvironmentSignalTypes { get; }
@@ -17,8 +19,9 @@ public abstract class AgentBase : BackgroundService, IAgent
 
     private readonly Dictionary<Guid, IMessage?> _awaitingResponse = new();
     
-    protected AgentBase(Guid id, IEnumerable<Type> acceptedMessageTypes, IEnumerable<Type> acceptedEnvironmentSignalTypes, IMessageService messageService)
+    protected AgentBase(Guid id, IEnumerable<Type> acceptedMessageTypes, IEnumerable<Type> acceptedEnvironmentSignalTypes, IMessageService messageService, ILogger logger)
     {
+        _logger = logger;
         Id = id;
         AcceptedMessageTypes = acceptedMessageTypes;
         AcceptedEnvironmentSignalTypes = acceptedEnvironmentSignalTypes;
@@ -105,7 +108,11 @@ public abstract class AgentBase : BackgroundService, IAgent
             _semaphore.Dispose();
         }
     }
-    
-    protected abstract Task HandleMessage(IMessage message);
+
+    protected virtual Task HandleMessage(IMessage message)
+    {
+        _logger.LogWarning("Cannot handle message of type: {messageType}", message.MessageType);
+        return Task.CompletedTask;
+    }
     protected abstract Task HandleSignal(IEnvironmentSignal signal);
 }

@@ -13,6 +13,7 @@ public class ApplicationModule : Module
 
         builder.RegisterType<ReportingService>().As<IReportingService>();
         builder.RegisterType<IncidentMonitoringService>().As<IIncidentMonitoringService>().SingleInstance();
+        builder.RegisterType<PatrolMonitoringService>().As<IPatrolMonitoringService>().SingleInstance();
 
         builder.RegisterHostedService<HqAgent>();
     }

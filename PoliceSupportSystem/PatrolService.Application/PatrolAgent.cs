@@ -1,4 +1,5 @@
-﻿using Shared.Application.Agents;
+﻿using Microsoft.Extensions.Logging;
+using Shared.Application.Agents;
 using Shared.Application.Agents.Communication.Messages;
 using Shared.Application.Agents.Communication.Signals;
 using Shared.Application.Services;
@@ -9,12 +10,17 @@ namespace PatrolService.Application;
 internal class PatrolAgent : AgentBase
 {
     private readonly IPatrolInfoService _patrolInfoService;
-    private static readonly IEnumerable<Type> PatrolAgentAcceptedMessageTypes = new [] { typeof(CurrentLocationMessage) };
+    private static readonly IEnumerable<Type> PatrolAgentAcceptedMessageTypes = new[] { typeof(CurrentLocationMessage) };
     private static readonly IEnumerable<Type> PatrolAgentAcceptedEnvironmentSignalTypes = Enumerable.Empty<Type>();
 
     private Position? _lastKnowPosition;
-    
-    public PatrolAgent(IMessageService messageService, IPatrolInfoService patrolInfoService) : base(patrolInfoService.PatrolAgentId, PatrolAgentAcceptedMessageTypes, PatrolAgentAcceptedEnvironmentSignalTypes, messageService)
+
+    public PatrolAgent(IMessageService messageService, IPatrolInfoService patrolInfoService, ILogger<PatrolAgent> logger) : base(
+        patrolInfoService.PatrolAgentId,
+        PatrolAgentAcceptedMessageTypes,
+        PatrolAgentAcceptedEnvironmentSignalTypes,
+        messageService,
+        logger)
     {
         _patrolInfoService = patrolInfoService;
     }
@@ -27,19 +33,16 @@ internal class PatrolAgent : AgentBase
         await MessageService.SendMessageAsync(new PatrolOfflineMessage(_patrolInfoService.PatrolId, Id));
     }
 
-    protected async override Task HandleMessage(IMessage message)
+    protected override Task HandleMessage(IMessage message) => message switch
     {
-        switch (message)
-        {
-            
-        }
-    }
+        _ => base.HandleMessage(message)
+    };
+
 
     protected async override Task HandleSignal(IEnvironmentSignal signal)
     {
         switch (signal)
         {
-            
         }
     }
 }
