@@ -1,6 +1,5 @@
 ﻿using Shared.CommonTypes.Geo;
-using Shared.Domain.DomainEvents;
 
-namespace Simulation.Application.DomainEvents;
+namespace Shared.Domain.DomainEvents.Patrol;
 
 public record PatrolCreated(Guid Id, string PatrolId, Position Position) : IDomainEvent;

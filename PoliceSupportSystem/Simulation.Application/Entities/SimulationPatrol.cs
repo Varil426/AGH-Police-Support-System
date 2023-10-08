@@ -1,24 +1,17 @@
 ﻿using Shared.CommonTypes.Geo;
-using Shared.Domain;
+using Shared.Domain.Patrol;
 using Simulation.Application.DomainEvents;
 using Simulation.Communication.Common;
 
 namespace Simulation.Application.Entities;
 
-public class SimulationPatrol : BaseRootDomainEntity, ISimulationRootEntity
+public class SimulationPatrol : Patrol, ISimulationRootEntity
 {
     private readonly List<IService> _relatedServices = new();
-    public Guid Id { get; }
-    public string PatrolId { get; }
-    public Position Position { get; private set; }
     public IReadOnlyCollection<IService> RelatedServices => _relatedServices.AsReadOnly();
 
-    public SimulationPatrol(Guid id, string patrolId, Position position)
+    public SimulationPatrol(Guid id, string patrolId, Position position) : base(id, patrolId, position)
     {
-        Id = id;
-        PatrolId = patrolId;
-        Position = position;
-        AddDomainEvent(new PatrolCreated(Id, PatrolId, Position));
     }
 
     public void AddRelatedService(IService service)

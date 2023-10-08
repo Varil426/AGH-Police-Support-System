@@ -1,6 +1,7 @@
 ﻿using Riok.Mapperly.Abstractions;
 using Shared.Domain.DomainEvents;
 using Shared.Domain.DomainEvents.Incident;
+using Shared.Domain.DomainEvents.Patrol;
 using Simulation.Application.DomainEvents;
 using Simulation.Communication.Common;
 using Simulation.Communication.Messages;
