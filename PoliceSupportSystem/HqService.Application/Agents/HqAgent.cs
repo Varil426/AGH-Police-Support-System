@@ -14,7 +14,6 @@ public class HqAgent : AgentBase
         Guid id,
         IMessageService messageService) : base(id, HqAcceptedMessageTypes, HqAcceptedSignalTypes, messageService)
     {
-        messageService.SubscribeForMessagesAsync(this);
     }
 
     protected override Task HandleMessage(IMessage message)

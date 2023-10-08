@@ -23,6 +23,8 @@ public abstract class AgentBase : BackgroundService, IAgent
         AcceptedMessageTypes = acceptedMessageTypes;
         AcceptedEnvironmentSignalTypes = acceptedEnvironmentSignalTypes;
         MessageService = messageService;
+        
+        messageService.SubscribeForMessagesAsync(this);
     }
 
     public async Task PushMessageAsync(IMessage message)
