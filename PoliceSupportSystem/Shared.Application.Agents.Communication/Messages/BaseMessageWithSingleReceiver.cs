@@ -1,8 +1,8 @@
 ﻿namespace Shared.Application.Agents.Communication.Messages;
 
-public record BaseMessageWithSingleReceiver : BaseMessage
+public abstract record BaseMessageWithSingleReceiver : BaseMessage
 {
-    public BaseMessageWithSingleReceiver(Guid sender, Guid Id, Guid receiver, Guid? responseTo = null) : base(sender, Id, new[] { receiver }, responseTo)
+    public BaseMessageWithSingleReceiver(Guid sender, Guid MessageId, Guid receiver, Guid? responseTo = null) : base(sender, MessageId, new[] { receiver }, responseTo)
     {
     }
 }

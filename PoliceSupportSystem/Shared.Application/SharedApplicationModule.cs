@@ -12,6 +12,6 @@ public class SharedApplicationModule : Module
 
         builder.RegisterType<DomainEventMapper>().As<IDomainEventMapper>();
         builder.RegisterType<DomainEventProcessor>().As<IDomainEventProcessor>();
-        builder.RegisterType<EntityFactory>().As<IIncidentFactory>();
+        builder.RegisterType<EntityFactory>().As<IIncidentFactory>().As<IPatrolFactory>();
     }
 }

@@ -2,7 +2,7 @@
 
 public interface IMessage
 {
-    Guid Id { get; }
+    Guid MessageId { get; }
     
     Guid? ResponseTo { get; }
     

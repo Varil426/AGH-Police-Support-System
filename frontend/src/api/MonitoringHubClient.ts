@@ -6,6 +6,7 @@ import { Routes } from "./ApiRoutes";
 import { toast } from "react-toastify";
 import { IPosition } from "./generated/Shared/CommonTypes/Geo/IPosition";
 import { action, computed, makeObservable, observable } from "mobx";
+import { PatrolStore } from "../stores/PatrolStore";
 
 // export type UpdateAction = (cityStateMessage: ICityStateMessage) => void;
 
@@ -15,7 +16,10 @@ export class MonitoringHubClient implements IMonitoringHubClient {
 
   @observable private _hqLocation: IPosition | undefined;
 
-  constructor(private readonly incidentStore: IncidentStore) {
+  constructor(
+    private readonly incidentStore: IncidentStore,
+    private readonly patrolStore: PatrolStore
+  ) {
     this.connection = new HubConnectionBuilder()
       .withUrl(Routes.MONITORING_HUB)
       .withAutomaticReconnect()
@@ -38,6 +42,10 @@ export class MonitoringHubClient implements IMonitoringHubClient {
 
     cityStateMessage.incidents.map((x) =>
       this.incidentStore.updateOrCreateIncident(x)
+    );
+
+    cityStateMessage.patrols.map((x) =>
+      this.patrolStore.updateOrCreatePatrol(x)
     );
   }
 

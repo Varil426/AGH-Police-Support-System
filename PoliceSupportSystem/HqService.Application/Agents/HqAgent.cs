@@ -3,13 +3,16 @@ using Microsoft.Extensions.Logging;
 using Shared.Application.Agents;
 using Shared.Application.Agents.Communication.Messages;
 using Shared.Application.Agents.Communication.Signals;
-using Shared.Domain.Patrol;
+using Shared.Application.Factories;
+using Shared.Application.Services;
 
 namespace HqService.Application.Agents;
 
 internal class HqAgent : AgentBase
 {
     private readonly IPatrolMonitoringService _patrolMonitoringService;
+    private readonly IDomainEventProcessor _domainEventProcessor;
+    private readonly IPatrolFactory _patrolFactory;
     private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[] { typeof(PatrolOnlineMessage), typeof(PatrolOfflineMessage) }.AsReadOnly();
     private static readonly IReadOnlyCollection<Type> HqAcceptedSignalTypes = new[] { typeof(TestSignal) }.AsReadOnly();
 
@@ -17,9 +20,13 @@ internal class HqAgent : AgentBase
         IHqInfoService hqInfoService,
         IMessageService messageService,
         IPatrolMonitoringService patrolMonitoringService,
-        Logger<HqAgent> logger) : base(hqInfoService.HqAgentId, HqAcceptedMessageTypes, HqAcceptedSignalTypes, messageService, logger)
+        ILogger<HqAgent> logger,
+        IDomainEventProcessor domainEventProcessor,
+        IPatrolFactory patrolFactory) : base(hqInfoService.HqAgentId, HqAcceptedMessageTypes, HqAcceptedSignalTypes, messageService, logger)
     {
         _patrolMonitoringService = patrolMonitoringService;
+        _domainEventProcessor = domainEventProcessor;
+        _patrolFactory = patrolFactory;
     }
 
     protected override Task HandleMessage(IMessage message) =>
@@ -37,13 +44,15 @@ internal class HqAgent : AgentBase
 
     private Task Handle(PatrolOnlineMessage patrolOnlineMessage)
     {
-        _patrolMonitoringService.AddPatrol(new Patrol(Guid.NewGuid(), patrolOnlineMessage.PatrolId, patrolOnlineMessage.Position));
-        return Task.CompletedTask;
+        var patrol = _patrolFactory.CreatePatrol(patrolOnlineMessage);
+        _patrolMonitoringService.AddPatrol(patrol);
+        return _domainEventProcessor.ProcessDomainEvents(patrol);
     }
 
     private Task Handle(PatrolOfflineMessage patrolOfflineMessage)
     {
         _patrolMonitoringService.RemovePatrol(patrolOfflineMessage.PatrolId);
+        // TODO Process domain event - PatrolRemoved
         return Task.CompletedTask;
     }
 }

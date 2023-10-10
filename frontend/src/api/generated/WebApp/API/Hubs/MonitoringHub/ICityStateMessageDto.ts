@@ -4,9 +4,11 @@
 
 import { IPosition } from '../../../../Shared/CommonTypes/Geo/IPosition';
 import { IIncidentDto } from '../../../../Shared/Application/Integration/DTOs/IIncidentDto';
+import { IPatrolDto } from '../../../../Shared/Application/Integration/DTOs/IPatrolDto';
 
 export interface ICityStateMessageDto
 {
 	hqLocation: IPosition;
 	incidents: IIncidentDto[];
+	patrols: IPatrolDto[];
 }

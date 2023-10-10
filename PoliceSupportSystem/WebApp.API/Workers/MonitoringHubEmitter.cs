@@ -21,8 +21,9 @@ public class MonitoringHubEmitter : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var incidents = _monitoringService.GetIncidents().Select(x => x.AsDto());
-            await _hubContext.Clients.All.ReceiveUpdate(new CityStateMessageDto(_monitoringService.HqLocation, incidents));
+            var incidents = _monitoringService.Incidents.Select(x => x.AsDto());
+            var patrols = _monitoringService.Patrols.Select(x => x.AsDto());
+            await _hubContext.Clients.All.ReceiveUpdate(new CityStateMessageDto(_monitoringService.HqLocation, incidents, patrols));
             // ReSharper disable once PossibleLossOfFraction
             await Task.Delay(TimeSpan.FromMilliseconds(1000 / 60), stoppingToken);
         }

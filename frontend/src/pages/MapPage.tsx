@@ -8,7 +8,8 @@ import { observer } from "mobx-react-lite";
 
 export const MapPage = observer(() => {
   const incidentStore = useRootStore().incidentStore;
-  const hub = new MonitoringHubClient(incidentStore);
+  const patrolStore = useRootStore().patrolStore;
+  const hub = new MonitoringHubClient(incidentStore, patrolStore);
 
   useEffect(() => {
     hub.start();

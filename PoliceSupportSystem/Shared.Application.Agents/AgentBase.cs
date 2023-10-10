@@ -76,19 +76,19 @@ public abstract class AgentBase : BackgroundService, IAgent
         if (message.Receivers is null || message.Receivers.Count() != 1)
             throw new Exception($"{nameof(Ask)} can only handled messages with exactly 1 receiver.");
 
-        _awaitingResponse[message.Id] = null;
+        _awaitingResponse[message.MessageId] = null;
         await MessageService.SendMessageAsync(message);
 
         IMessage? response = null;
         while (response is null)
         {
             await _semaphore.WaitAsync();
-            response = _awaitingResponse[message.Id];
+            response = _awaitingResponse[message.MessageId];
             _semaphore.Release();
         }
 
         await _semaphore.WaitAsync();
-        _awaitingResponse.Remove(message.Id);
+        _awaitingResponse.Remove(message.MessageId);
         _semaphore.Release();
 
         return (TResponseType) response;

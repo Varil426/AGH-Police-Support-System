@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { IncidentMarker } from "./markers/IncidentMarker";
+import { PatrolMarker } from "./markers/PatrolMarker";
 
 export interface IMapViewModelProps {
   model: MapModel;
@@ -29,6 +30,9 @@ export const MapViewModel = observer(({ model }: IMapViewModelProps) => {
       />
       {model.incidents.map((x) => (
         <IncidentMarker incident={x} />
+      ))}
+      {model.patrols.map((x) => (
+        <PatrolMarker patrol={x} />
       ))}
     </MapContainer>
   );

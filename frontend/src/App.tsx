@@ -7,10 +7,12 @@ import { IncidentStore } from "./stores/IncidentStore";
 import { ToastContainer } from "react-toastify";
 import { observer } from "mobx-react-lite";
 import { TestPage } from "./pages/TestPage";
+import { PatrolStore } from "./stores/PatrolStore";
 
 export const App = observer(() => {
   const incidentStore = new IncidentStore();
-  const rootStore = new RootStore(incidentStore);
+  const patrolStore = new PatrolStore();
+  const rootStore = new RootStore(incidentStore, patrolStore);
 
   return (
     <Router>
