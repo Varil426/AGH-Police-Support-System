@@ -1,5 +1,6 @@
 ﻿using Shared.CommonTypes.Geo;
 using Shared.CommonTypes.Incident;
+using Shared.CommonTypes.Patrol;
 using Simulation.Application.Entities;
 
 namespace Simulation.Application.Services;
@@ -41,7 +42,7 @@ internal class EntityFactory : ISimulationIncidentFactory, ISimulationPatrolFact
         IncidentStatusEnum status = IncidentStatusEnum.WaitingForResponse,
         DateTimeOffset? createdAt = null) => new(incidentId, location, status, incidentType) { CreatedAt = createdAt ?? DateTimeOffset.UtcNow };
 
-    public SimulationPatrol CreatePatrol(Guid id, string patrolId, Position position) => new(id, patrolId, position);
+    public SimulationPatrol CreatePatrol(Guid id, string patrolId, Position position, PatrolStatusEnum status) => new(id, patrolId, position, status);
 
-    public SimulationPatrol CreatePatrol(string patrolId) => CreatePatrol(Guid.NewGuid(), patrolId, _simulationSettings.HqLocation);
+    public SimulationPatrol CreatePatrol(string patrolId) => CreatePatrol(Guid.NewGuid(), patrolId, _simulationSettings.HqLocation, PatrolStatusEnum.AwaitingOrders);
 }

@@ -15,8 +15,11 @@ using Serilog.Sinks.Grafana.Loki;
 using Simulation.Application;
 using Simulation.Application.Directors.Settings;
 using Simulation.Application.Handlers;
+using Simulation.Application.Handlers.Messages;
+using Simulation.Application.Handlers.Queries;
 using Simulation.Application.Services;
 using Simulation.Communication.Messages;
+using Simulation.Communication.Queries;
 using Simulation.Infrastructure.Exceptions;
 using Simulation.Infrastructure.Services;
 using Simulation.Infrastructure.Settings;
@@ -121,6 +124,12 @@ public static class InfrastructureExtensions
                     x => s.AddScoped(
                         x.GetInterfaces().First(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationMessageHandler<>)),
                         x));
+                
+                var queryMessageHandlers = DiscoverQueryHandlers(handlerAssembly).ToList();
+                queryMessageHandlers.ForEach(
+                    x => s.AddScoped(
+                        x.GetInterfaces().First(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationQueryHandler<,>)),
+                        x));
             });
         
         return hostBuilder;
@@ -185,7 +194,10 @@ public static class InfrastructureExtensions
             typeof(InfrastructureExtensions).GetMethod(nameof(SubscribeForMessage), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(messageType).Invoke(null, new object[] { messageSubscriber, host.Services });
         
-
+        foreach (var messageType in DiscoverSimulationQueryTypes(new [] { messageAssembly }))
+            typeof(InfrastructureExtensions).GetMethod(nameof(SubscribeForSimulationQueries), BindingFlags.NonPublic | BindingFlags.Static)!
+                .MakeGenericMethod(messageType, messageType.GetInterface(typeof(ISimulationQuery<>).Name)!.GetGenericArguments().First()).Invoke(null, new object[] { messageSubscriber, host.Services });
+        
         messageSubscriber.Open();
 
         return host;
@@ -231,8 +243,25 @@ public static class InfrastructureExtensions
         return subscriber;
     }
     
+    private static IAsyncSubscriber SubscribeForSimulationQueries<TQuery, TResult>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
+        where TQuery : class, ISimulationQuery<TResult>
+        where TResult : ISimulationMessage
+    {
+        subscriber.Subscribe<TQuery, TResult>(
+            async x =>
+            {
+                await using var scope = serviceProvider.CreateAsyncScope();
+                var simulation = scope.ServiceProvider.GetRequiredService<ISimulation>();
+                return await scope.ServiceProvider.GetRequiredService<ISimulationQueryHandler<TQuery, TResult>>().HandleQueryAsync(simulation, x);
+            });
+        return subscriber;
+    }
+    
     private static IEnumerable<Type> DiscoverHandlers(Assembly assembly) => assembly.GetTypes().Where(
         x => !x.IsAbstract && x.GetInterfaces().Any(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationMessageHandler<>)));
+    
+    private static IEnumerable<Type> DiscoverQueryHandlers(Assembly assembly) => assembly.GetTypes().Where(
+        x => !x.IsAbstract && x.GetInterfaces().Any(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationQueryHandler<,>)));
 
     private static IEnumerable<Type> DiscoverMessageTypes(IEnumerable<Assembly> assemblies)
     {
@@ -241,6 +270,16 @@ public static class InfrastructureExtensions
             messageTypes.AddRange(
                 assembly.GetTypes().Where(
                     x => !x.IsAbstract && x.IsAssignableTo(typeof(ISimulationMessage))));
+        return messageTypes;
+    }
+    
+    private static IEnumerable<Type> DiscoverSimulationQueryTypes(IEnumerable<Assembly> assemblies)
+    {
+        var messageTypes = new List<Type>();
+        foreach (var assembly in assemblies)
+            messageTypes.AddRange(
+                assembly.GetTypes().Where(
+                    x => !x.IsAbstract && x.GetInterfaces().Any(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationQuery<>))));
         return messageTypes;
     }
 }

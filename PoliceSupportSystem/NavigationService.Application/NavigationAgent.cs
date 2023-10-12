@@ -12,7 +12,7 @@ public class NavigationAgent : AgentBase
     private readonly IPatrolInfoService _patrolInfoService;
     private readonly INavigationService _navigationService;
     private static readonly IEnumerable<Type> NavigationAgentAcceptedMessageTypes = new List<Type> { typeof(AskPositionMessage) };
-    private static readonly IEnumerable<Type> NavigationAgentAcceptedEnvironmentSignalTypes = Enumerable.Empty<Type>();
+    private static readonly IEnumerable<Type> NavigationAgentAcceptedEnvironmentSignalTypes = new [] { typeof(PositionChangedSignal) };
 
     public NavigationAgent(IMessageService messageService, IPatrolInfoService patrolInfoService, INavigationService navigationService, ILogger<NavigationAgent> logger) : base(
         patrolInfoService.NavAgentId,
@@ -32,16 +32,19 @@ public class NavigationAgent : AgentBase
     };
 
 
-    protected async override Task HandleSignal(IEnvironmentSignal signal)
+    protected override Task HandleSignal(IEnvironmentSignal signal) => signal switch
     {
-        switch (signal)
-        {
-        }
-    }
+        PositionChangedSignal positionChangedSignal => Handle(positionChangedSignal),
+        _ => base.HandleSignal(signal)
+    };
 
     private async Task Handle(AskPositionMessage askPositionMessage)
     {
         var position = await _navigationService.GetCurrentPosition();
         await MessageService.SendMessageAsync(new CurrentLocationMessage(position, Id, Guid.NewGuid(), new[] { askPositionMessage.Sender }, askPositionMessage.MessageId));
     }
+
+    private Task Handle(PositionChangedSignal positionChangedSignal) =>
+        MessageService.SendMessageAsync(
+            new CurrentLocationMessage(positionChangedSignal.Position, Id, Guid.NewGuid(), new[] { _patrolInfoService.PatrolAgentId }));
 }

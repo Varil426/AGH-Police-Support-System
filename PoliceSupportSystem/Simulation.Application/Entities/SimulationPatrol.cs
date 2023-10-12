@@ -1,4 +1,5 @@
 ﻿using Shared.CommonTypes.Geo;
+using Shared.CommonTypes.Patrol;
 using Shared.Domain.Patrol;
 using Simulation.Application.DomainEvents;
 using Simulation.Communication.Common;
@@ -10,7 +11,7 @@ public class SimulationPatrol : Patrol, ISimulationRootEntity
     private readonly List<IService> _relatedServices = new();
     public IReadOnlyCollection<IService> RelatedServices => _relatedServices.AsReadOnly();
 
-    public SimulationPatrol(Guid id, string patrolId, Position position) : base(id, patrolId, position)
+    public SimulationPatrol(Guid id, string patrolId, Position position, PatrolStatusEnum status) : base(id, patrolId, position, status)
     {
     }
 

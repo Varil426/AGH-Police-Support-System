@@ -1,6 +1,6 @@
 ﻿using Simulation.Communication.Messages;
 
-namespace Simulation.Application.Handlers;
+namespace Simulation.Application.Handlers.Messages;
 
 public class ServiceOfflineMessageHandler : BaseSimulationMessageHandler<ServiceOfflineMessage>
 {

@@ -4,6 +4,7 @@ using Shared.Application.Integration.Events;
 using Shared.Domain.DomainEvents;
 using Shared.Domain.DomainEvents.Incident;
 using Shared.Domain.DomainEvents.Patrol;
+using Shared.Domain.Patrol;
 
 namespace Shared.Application.Services;
 
@@ -14,6 +15,8 @@ internal partial class DomainEventMapper : IDomainEventMapper
     {
         IncidentCreated e => new IncidentCreatedEvent(Map(e)),
         PatrolCreated e => new PatrolCreatedEvent(Map(e)),
+        PatrolPositionUpdated e => new PatrolChangedEvent(Map(e.Patrol)),
+        PatrolStatusUpdated e => new PatrolChangedEvent(Map(e.Patrol)),
         _ => throw new Exception($"Event type ({@event.GetType().Name}) not supported")
     };
 
@@ -22,4 +25,6 @@ internal partial class DomainEventMapper : IDomainEventMapper
     private partial NewIncidentDto Map(IncidentCreated incidentCreated);
 
     private partial NewPatrolDto Map(PatrolCreated patrolCreated);
+
+    private partial PatrolDto Map(Patrol patrol);
 }

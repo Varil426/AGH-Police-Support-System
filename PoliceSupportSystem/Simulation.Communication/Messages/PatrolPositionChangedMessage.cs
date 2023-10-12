@@ -1,0 +1,8 @@
+﻿using Shared.CommonTypes.Geo;
+
+namespace Simulation.Communication.Messages;
+
+public record PatrolPositionChangedMessage(Position NewPosition, string Receiver) : IDirectSimulationMessage
+{
+    public DateTimeOffset CreatedAt { get; } = DateTimeOffset.UtcNow;
+}

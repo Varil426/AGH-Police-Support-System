@@ -1,9 +1,9 @@
 ﻿using Simulation.Application.Services;
 using Simulation.Communication.Messages;
 
-namespace Simulation.Application.Handlers;
+namespace Simulation.Application.Handlers.Messages;
 
-public class PatrolServiceOnlineMessageHandler : BaseSimulationMessageHandler<PatrolServiceOnline>
+internal class PatrolServiceOnlineMessageHandler : BaseSimulationMessageHandler<PatrolServiceOnline>
 {
     private readonly IServiceFactory _serviceFactory;
     private readonly ISimulationPatrolFactory _patrolFactory;

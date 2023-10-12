@@ -23,11 +23,11 @@ var host = Host.CreateDefaultBuilder(args)
     .AddServiceStatusNotifier()
     .RegisterSharedApplicationModule()
     .RegisterModule<ApplicationModule>()
-    .AddSharedSimulation(new[] { typeof(HqService.Simulation.Extensions).Assembly })
-    .AddSimulation()
+    .AddSharedSimulation(new[] { typeof(SimulationModule).Assembly })
+    .RegisterModule<SimulationModule>()
     .Build();
 
 host.SubscribeHandlers(new [] { typeof(TestEventHandler).Assembly });
-host.SubscribeSimulationMessageHandlers(new[] { typeof(HqService.Simulation.Extensions).Assembly });
+host.SubscribeSimulationMessageHandlers(new[] { typeof(SimulationModule).Assembly });
 
 host.Run();

@@ -1,7 +1,7 @@
 ﻿using Simulation.Application.Services;
 using Simulation.Communication.Messages;
 
-namespace Simulation.Application.Handlers;
+namespace Simulation.Application.Handlers.Messages;
 
 public class ServiceOnlineMessageHandler : BaseSimulationMessageHandler<ServiceOnlineMessage>
 {

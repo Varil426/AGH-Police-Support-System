@@ -3,6 +3,7 @@ using Shared.Domain.DomainEvents;
 using Shared.Domain.DomainEvents.Incident;
 using Shared.Domain.DomainEvents.Patrol;
 using Simulation.Application.DomainEvents;
+using Simulation.Application.Entities;
 using Simulation.Communication.Common;
 using Simulation.Communication.Messages;
 
@@ -17,6 +18,8 @@ internal partial class DomainEventMapper : IDomainEventMapper
         IncidentCreated incidentCreated => Encapsulate(Map(incidentCreated)),
         // Custom
         PatrolRelatedServiceAdded relatedServiceAdded => Map(relatedServiceAdded),
+        PatrolPositionUpdated patrolPositionUpdated => Map(patrolPositionUpdated),
+        // PatrolStatusUpdated patrolStatusUpdated => Encapsulate(Map(patrolStatusUpdated)), // TODO Left for future
         // Skippable
         PatrolCreated patrolCreated => Empty(),
         // Not handled
@@ -34,4 +37,11 @@ internal partial class DomainEventMapper : IDomainEventMapper
                 relatedServiceAdded.NewService.Id,
                 relatedServiceAdded.Patrol.Position))
         : Empty();
+
+    private IEnumerable<PatrolPositionChangedMessage> Map(PatrolPositionUpdated patrolPositionUpdated)
+    {
+        var simulationPatrol = (SimulationPatrol)patrolPositionUpdated.Patrol;
+        var navigationServices = simulationPatrol.GetRelatedServicesOfType(ServiceTypeEnum.NavigationService);
+        return navigationServices.Select(x => new PatrolPositionChangedMessage(simulationPatrol.Position, x.Id));
+    }
 }

@@ -18,6 +18,8 @@ public abstract class AgentBase : BackgroundService, IAgent
     private readonly SemaphoreSlim _semaphore = new( 1,1);
 
     private readonly Dictionary<Guid, IMessage?> _awaitingResponse = new();
+
+    private readonly Dictionary<Guid, bool> _awaitingAcknowledge = new();
     
     protected AgentBase(Guid id, IEnumerable<Type> acceptedMessageTypes, IEnumerable<Type> acceptedEnvironmentSignalTypes, IMessageService messageService, ILogger logger)
     {
@@ -33,8 +35,13 @@ public abstract class AgentBase : BackgroundService, IAgent
     public async Task PushMessageAsync(IMessage message)
     {
         await _semaphore.WaitAsync();
-        if (message.ResponseTo is not null && _awaitingResponse.ContainsKey(message.ResponseTo.Value))
-            _awaitingResponse[message.ResponseTo.Value] = message;
+        if (message.ResponseTo.HasValue)
+        {
+            if (_awaitingResponse.ContainsKey(message.ResponseTo.Value))
+                _awaitingResponse[message.ResponseTo.Value] = message;
+            if (message is AcknowledgementMessage && _awaitingAcknowledge.ContainsKey(message.ResponseTo.Value))
+                _awaitingAcknowledge[message.ResponseTo.Value] = true;
+        }
         else
             MessageQueue.Enqueue(message);
         _semaphore.Release();
@@ -67,9 +74,14 @@ public abstract class AgentBase : BackgroundService, IAgent
                 await HandleSignal(signal);
             
             _semaphore.Release();
+            
+            await PerformActions();
+            
             Thread.Sleep(TimeSpan.FromMilliseconds(50));
         }
     }
+
+    protected virtual Task PerformActions() => Task.CompletedTask;
 
     protected async Task<TResponseType> Ask<TResponseType>(IMessage message) where TResponseType : class, IMessage // TODO Whole messaging between agents should be reworked
     {
@@ -94,6 +106,35 @@ public abstract class AgentBase : BackgroundService, IAgent
         return (TResponseType) response;
     }
 
+    protected async Task SendWithAcknowledgeRequired(List<IMessageWithAcknowledgeRequired> messages)
+    {
+        if (messages.Any(x => x.Receivers is null || x.Receivers.Count() != 1))
+            throw new Exception($"{nameof(SendWithAcknowledgeRequired)} can only handled messages with exactly 1 receiver.");
+
+        if (!messages.Any())
+            return;
+        
+        _logger.LogInformation("Sending {numberOfMessages} that require acknowledging.", messages.Count);
+        foreach (var message in messages)
+        {
+            _awaitingAcknowledge[message.MessageId] = false;
+            await MessageService.SendMessageAsync(message);
+        }
+        
+        var wereAcknowledged = false;
+        while (!wereAcknowledged)
+        {
+            await _semaphore.WaitAsync();
+            wereAcknowledged = messages.All(x => _awaitingAcknowledge[x.MessageId]);
+            _semaphore.Release();
+        }
+        _logger.LogInformation("All {numberOfMessages} were acknowledged.", messages.Count);
+        
+        await _semaphore.WaitAsync();
+        messages.ForEach(x => _awaitingAcknowledge.Remove(x.MessageId));
+        _semaphore.Release();
+    }
+
     public override void Dispose()
     {
         Dispose(true);
@@ -114,5 +155,10 @@ public abstract class AgentBase : BackgroundService, IAgent
         _logger.LogWarning("Cannot handle message of type: {messageType}", message.MessageType);
         return Task.CompletedTask;
     }
-    protected abstract Task HandleSignal(IEnvironmentSignal signal);
+
+    protected virtual Task HandleSignal(IEnvironmentSignal signal)
+    {
+        _logger.LogWarning("Cannot handle signal of type: {messageType}", signal.Name);
+        return Task.CompletedTask;
+    }
 }

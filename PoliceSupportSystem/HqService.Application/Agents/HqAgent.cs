@@ -1,7 +1,9 @@
 ﻿using HqService.Application.Services;
+using HqService.Application.Services.DecisionService;
 using Microsoft.Extensions.Logging;
 using Shared.Application.Agents;
 using Shared.Application.Agents.Communication.Messages;
+using Shared.Application.Agents.Communication.Messages.PatrolOrders;
 using Shared.Application.Agents.Communication.Signals;
 using Shared.Application.Factories;
 using Shared.Application.Services;
@@ -11,9 +13,12 @@ namespace HqService.Application.Agents;
 internal class HqAgent : AgentBase
 {
     private readonly IPatrolMonitoringService _patrolMonitoringService;
+    private readonly ILogger<HqAgent> _logger;
     private readonly IDomainEventProcessor _domainEventProcessor;
     private readonly IPatrolFactory _patrolFactory;
-    private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[] { typeof(PatrolOnlineMessage), typeof(PatrolOfflineMessage) }.AsReadOnly();
+    private readonly IIncidentMonitoringService _incidentMonitoringService;
+    private readonly IDecisionService _decisionService;
+    private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[] { typeof(PatrolOnlineMessage), typeof(PatrolOfflineMessage), typeof(CurrentLocationMessage) }.AsReadOnly();
     private static readonly IReadOnlyCollection<Type> HqAcceptedSignalTypes = new[] { typeof(TestSignal) }.AsReadOnly();
 
     public HqAgent(
@@ -22,11 +27,37 @@ internal class HqAgent : AgentBase
         IPatrolMonitoringService patrolMonitoringService,
         ILogger<HqAgent> logger,
         IDomainEventProcessor domainEventProcessor,
-        IPatrolFactory patrolFactory) : base(hqInfoService.HqAgentId, HqAcceptedMessageTypes, HqAcceptedSignalTypes, messageService, logger)
+        IPatrolFactory patrolFactory,
+        IIncidentMonitoringService incidentMonitoringService,
+        IDecisionService decisionService) : base(hqInfoService.HqAgentId, HqAcceptedMessageTypes, HqAcceptedSignalTypes, messageService, logger)
     {
         _patrolMonitoringService = patrolMonitoringService;
+        _logger = logger;
         _domainEventProcessor = domainEventProcessor;
         _patrolFactory = patrolFactory;
+        _incidentMonitoringService = incidentMonitoringService;
+        _decisionService = decisionService;
+    }
+
+    protected override async Task PerformActions()
+    {
+        var notHandledIncidents = await _incidentMonitoringService.GetNotHandledIncidents();
+        var orders = await _decisionService.ComputeOrders(notHandledIncidents, _patrolMonitoringService.Patrols);
+        var messagesRequiringAcknowledgment = new List<IMessageWithAcknowledgeRequired>();
+        foreach (var order in orders)
+        {
+            switch (order)
+            {
+                case PatrollingOrder patrollingOrder:
+                    messagesRequiringAcknowledgment.Add(new PatrolDistrictOrderMessage(Id, Guid.NewGuid(), patrollingOrder.Id, patrollingOrder.DistrictName));
+                    break;
+                default:
+                    _logger.LogWarning("Received an unknown order type: {orderType}", order.GetType().Name);
+                    break;
+            }
+        }
+
+        await SendWithAcknowledgeRequired(messagesRequiringAcknowledgment);
     }
 
     protected override Task HandleMessage(IMessage message) =>
@@ -34,6 +65,7 @@ internal class HqAgent : AgentBase
         {
             PatrolOnlineMessage patrolOnlineMessage => Handle(patrolOnlineMessage),
             PatrolOfflineMessage patrolOfflineMessage => Handle(patrolOfflineMessage),
+            CurrentLocationMessage currentLocationMessage => Handle(currentLocationMessage),
             _ => base.HandleMessage(message)
         };
 
@@ -42,6 +74,20 @@ internal class HqAgent : AgentBase
         throw new NotImplementedException();
     }
 
+    private async Task Handle(CurrentLocationMessage currentLocationMessage)
+    {
+        var patrol = _patrolMonitoringService.Patrols.FirstOrDefault(x => x.Id == currentLocationMessage.Sender);
+        if (patrol is null)
+        {
+            _logger.LogWarning($"Received {nameof(currentLocationMessage)} of an unknown sender with id: {currentLocationMessage.Sender}");
+            return;
+        }
+
+        patrol.UpdatePosition(currentLocationMessage.Position);
+
+        await _domainEventProcessor.ProcessDomainEvents(patrol);
+    }
+    
     private Task Handle(PatrolOnlineMessage patrolOnlineMessage)
     {
         var patrol = _patrolFactory.CreatePatrol(patrolOnlineMessage);

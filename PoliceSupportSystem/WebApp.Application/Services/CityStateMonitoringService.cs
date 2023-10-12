@@ -61,6 +61,14 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         _semaphoreSlim.Release();
     }
 
+    public async Task UpdatePatrol(PatrolDto patrolDto)
+    {
+        await _semaphoreSlim.WaitAsync();
+        var patrol = _patrols.FirstOrDefault(x => x.Id == patrolDto.Id) ?? throw new Exception($"Patrol with ID: {patrolDto.Id} not found");
+        patrol.Update(patrolDto);
+        _semaphoreSlim.Release();
+    }
+
     // private async Task NotifyAll()
     // {
     //     foreach (var subscription in _subscriptions)

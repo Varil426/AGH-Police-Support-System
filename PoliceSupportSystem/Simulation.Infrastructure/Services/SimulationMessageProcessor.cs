@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
 using Simulation.Application;
-using Simulation.Application.Handlers;
+using Simulation.Application.Handlers.Messages;
 using Simulation.Application.Services;
 using Simulation.Communication.Messages;
 
