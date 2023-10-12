@@ -5,6 +5,8 @@ namespace Shared.Application.Agents;
 
 public abstract class AgentBase : BackgroundService, IAgent
 {
+    private static readonly IReadOnlyCollection<Type> AgentBaseMessageTypes = new[] { typeof(AcknowledgementMessage) };
+    
     private readonly ILogger _logger;
     public Guid Id { get; }
     public IEnumerable<Type> AcceptedMessageTypes { get; }
@@ -23,9 +25,11 @@ public abstract class AgentBase : BackgroundService, IAgent
     
     protected AgentBase(Guid id, IEnumerable<Type> acceptedMessageTypes, IEnumerable<Type> acceptedEnvironmentSignalTypes, IMessageService messageService, ILogger logger)
     {
+        var extendedAcceptedMessageTypes = acceptedMessageTypes.ToList();
+        extendedAcceptedMessageTypes.AddRange(AgentBaseMessageTypes);
         _logger = logger;
         Id = id;
-        AcceptedMessageTypes = acceptedMessageTypes;
+        AcceptedMessageTypes = extendedAcceptedMessageTypes;
         AcceptedEnvironmentSignalTypes = acceptedEnvironmentSignalTypes;
         MessageService = messageService;
         
