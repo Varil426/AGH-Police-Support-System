@@ -9,6 +9,6 @@ public class ApplicationModule : Module
     {
         base.Load(builder);
 
-        builder.RegisterHostedService<PatrolAgent>();
+        builder.RegisterAgent<PatrolAgent>();
     }
 }

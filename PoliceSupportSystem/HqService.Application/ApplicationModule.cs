@@ -17,6 +17,6 @@ public class ApplicationModule : Module
         builder.RegisterType<PatrolMonitoringService>().As<IPatrolMonitoringService>().SingleInstance();
         builder.RegisterType<SimpleDecisionService>().As<IDecisionService>();
 
-        builder.RegisterHostedService<HqAgent>();
+        builder.RegisterAgent<HqAgent>();
     }
 }

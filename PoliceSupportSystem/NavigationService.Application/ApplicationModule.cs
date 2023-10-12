@@ -9,6 +9,6 @@ public class ApplicationModule : Module
     {
         base.Load(builder);
 
-        builder.RegisterHostedService<NavigationAgent>();
+        builder.RegisterAgent<NavigationAgent>();
     }
 }
