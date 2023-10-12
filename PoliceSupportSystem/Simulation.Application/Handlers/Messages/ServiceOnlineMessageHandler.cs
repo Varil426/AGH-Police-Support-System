@@ -3,7 +3,7 @@ using Simulation.Communication.Messages;
 
 namespace Simulation.Application.Handlers.Messages;
 
-public class ServiceOnlineMessageHandler : BaseSimulationMessageHandler<ServiceOnlineMessage>
+internal class ServiceOnlineMessageHandler : BaseSimulationMessageHandler<ServiceOnlineMessage>
 {
     private readonly IServiceFactory _serviceFactory;
 

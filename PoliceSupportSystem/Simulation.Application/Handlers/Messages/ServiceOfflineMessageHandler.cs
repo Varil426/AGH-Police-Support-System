@@ -2,7 +2,7 @@
 
 namespace Simulation.Application.Handlers.Messages;
 
-public class ServiceOfflineMessageHandler : BaseSimulationMessageHandler<ServiceOfflineMessage>
+internal class ServiceOfflineMessageHandler : BaseSimulationMessageHandler<ServiceOfflineMessage>
 {
     public override Task HandleAsync(ISimulation simulation, ServiceOfflineMessage message)
     {

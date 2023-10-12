@@ -2,7 +2,7 @@
 
 namespace Simulation.Application.Handlers.Messages;
 
-public abstract class BaseSimulationMessageHandler<TMessage> : ISimulationMessageHandler<TMessage> where TMessage : class, ISimulationMessage
+internal abstract class BaseSimulationMessageHandler<TMessage> : ISimulationMessageHandler<TMessage> where TMessage : class, ISimulationMessage
 {
     public abstract Task HandleAsync(ISimulation simulation, TMessage message);
 
