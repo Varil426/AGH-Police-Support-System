@@ -9,10 +9,25 @@ namespace Simulation.Application.Entities;
 public class SimulationPatrol : Patrol, ISimulationRootEntity
 {
     private readonly List<IService> _relatedServices = new();
+    private Action _action;
+
+    public Action Action
+    {
+        get => _action;
+        set
+        {
+            if (_action == value)
+                return;
+            _action = value;
+            AddDomainEvent(new PatrolActionChanged(this, _action));
+        }
+    }
+
     public IReadOnlyCollection<IService> RelatedServices => _relatedServices.AsReadOnly();
 
     public SimulationPatrol(Guid id, string patrolId, Position position, PatrolStatusEnum status) : base(id, patrolId, position, status)
     {
+        _action = new WaitingAction();
     }
 
     public void AddRelatedService(IService service)

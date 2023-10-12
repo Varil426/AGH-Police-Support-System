@@ -11,7 +11,7 @@ public class NavigationAgent : AgentBase
 {
     private readonly IPatrolInfoService _patrolInfoService;
     private readonly INavigationService _navigationService;
-    private static readonly IEnumerable<Type> NavigationAgentAcceptedMessageTypes = new List<Type> { typeof(AskPositionMessage) };
+    private static readonly IEnumerable<Type> NavigationAgentAcceptedMessageTypes = new List<Type> { typeof(AskPositionMessage), typeof(ShowDistrictMessage) };
     private static readonly IEnumerable<Type> NavigationAgentAcceptedEnvironmentSignalTypes = new [] { typeof(PositionChangedSignal) };
 
     public NavigationAgent(IMessageService messageService, IPatrolInfoService patrolInfoService, INavigationService navigationService, ILogger<NavigationAgent> logger) : base(
@@ -28,6 +28,7 @@ public class NavigationAgent : AgentBase
     protected override Task HandleMessage(IMessage message) => message switch
     {
         AskPositionMessage askPositionMessage => Handle(askPositionMessage),
+        ShowDistrictMessage showDistrictMessage => Handle(showDistrictMessage),
         _ => base.HandleMessage(message)
     };
 
@@ -42,6 +43,12 @@ public class NavigationAgent : AgentBase
     {
         var position = await _navigationService.GetCurrentPosition();
         await MessageService.SendMessageAsync(new CurrentLocationMessage(position, Id, Guid.NewGuid(), new[] { askPositionMessage.Sender }, askPositionMessage.MessageId));
+    }
+    
+    private async Task Handle(ShowDistrictMessage showDistrictMessage)
+    {
+        await AcknowledgeMessage(showDistrictMessage);
+        await _navigationService.DisplayDistrict(showDistrictMessage.DistrictName);
     }
 
     private Task Handle(PositionChangedSignal positionChangedSignal) =>

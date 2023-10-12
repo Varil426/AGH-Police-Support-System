@@ -61,7 +61,7 @@ internal class PatrolAgent : AgentBase
         if (_lastOrder is null)
             return;
         
-        _logger.LogInformation($"TEST PatrolOrder {_lastOrder.Type}"); // TODO Remove
+        // _logger.LogInformation($"TEST PatrolOrder {_lastOrder.Type}"); // TODO Remove
     }
 
     private async Task Handle(CurrentLocationMessage currentLocationMessage)
@@ -80,5 +80,7 @@ internal class PatrolAgent : AgentBase
         _status = PatrolStatusEnum.Patrolling;
         await MessageService.SendMessageAsync(new PatrolStatusChangedMessage(Id, _status));
         _lastOrder = new PatrolOrder(OrderTypeEnum.Patrol, patrolDistrictOrderMessage.CreatedAt, patrolDistrictOrderMessage.DistrictName);
+        await SendWithAcknowledgeRequired(new ShowDistrictMessage(Id, _patrolInfoService.NavAgentId, patrolDistrictOrderMessage.DistrictName));
+        await AcknowledgeMessage(patrolDistrictOrderMessage);
     }
 }

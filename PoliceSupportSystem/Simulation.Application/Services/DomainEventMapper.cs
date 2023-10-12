@@ -21,7 +21,8 @@ internal partial class DomainEventMapper : IDomainEventMapper
         PatrolPositionUpdated patrolPositionUpdated => Map(patrolPositionUpdated),
         // PatrolStatusUpdated patrolStatusUpdated => Encapsulate(Map(patrolStatusUpdated)), // TODO Left for future
         // Skippable
-        PatrolCreated patrolCreated => Empty(),
+        PatrolCreated => Empty(),
+        PatrolActionChanged => Empty(),
         // Not handled
         _ => throw new Exception($"Cannot map domain event of type {domainEvent.GetType().Name}")
     };
