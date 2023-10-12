@@ -110,6 +110,11 @@ public abstract class AgentBase : BackgroundService, IAgent
         return (TResponseType) response;
     }
 
+    protected Task AcknowledgeMessage(IMessageWithAcknowledgeRequired messageWithAcknowledgeRequired) => MessageService.SendMessageAsync(
+        new AcknowledgementMessage(Id, Guid.NewGuid(), messageWithAcknowledgeRequired.Sender, messageWithAcknowledgeRequired.MessageId));
+    
+    protected Task SendWithAcknowledgeRequired(IMessageWithAcknowledgeRequired message) => SendWithAcknowledgeRequired(new List<IMessageWithAcknowledgeRequired> { message });
+    
     protected async Task SendWithAcknowledgeRequired(List<IMessageWithAcknowledgeRequired> messages)
     {
         if (messages.Any(x => x.Receivers is null || x.Receivers.Count() != 1))
