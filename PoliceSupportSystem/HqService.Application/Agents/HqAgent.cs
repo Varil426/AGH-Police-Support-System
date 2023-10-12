@@ -18,7 +18,7 @@ internal class HqAgent : AgentBase
     private readonly IPatrolFactory _patrolFactory;
     private readonly IIncidentMonitoringService _incidentMonitoringService;
     private readonly IDecisionService _decisionService;
-    private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[] { typeof(PatrolOnlineMessage), typeof(PatrolOfflineMessage), typeof(CurrentLocationMessage) }.AsReadOnly();
+    private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[] { typeof(PatrolOnlineMessage), typeof(PatrolOfflineMessage), typeof(CurrentLocationMessage), typeof(PatrolStatusChangedMessage) }.AsReadOnly();
     private static readonly IReadOnlyCollection<Type> HqAcceptedSignalTypes = new[] { typeof(TestSignal) }.AsReadOnly();
 
     public HqAgent(
@@ -66,6 +66,7 @@ internal class HqAgent : AgentBase
             PatrolOnlineMessage patrolOnlineMessage => Handle(patrolOnlineMessage),
             PatrolOfflineMessage patrolOfflineMessage => Handle(patrolOfflineMessage),
             CurrentLocationMessage currentLocationMessage => Handle(currentLocationMessage),
+            PatrolStatusChangedMessage patrolStatusChangedMessage => Handle(patrolStatusChangedMessage),
             _ => base.HandleMessage(message)
         };
 
@@ -93,6 +94,20 @@ internal class HqAgent : AgentBase
         var patrol = _patrolFactory.CreatePatrol(patrolOnlineMessage);
         _patrolMonitoringService.AddPatrol(patrol);
         return _domainEventProcessor.ProcessDomainEvents(patrol);
+    }
+
+    private async Task Handle(PatrolStatusChangedMessage patrolStatusChangedMessage)
+    {
+        var patrol = _patrolMonitoringService.Patrols.FirstOrDefault(x => x.Id == patrolStatusChangedMessage.Sender);
+        if (patrol is null)
+        {
+            _logger.LogWarning($"Received {nameof(PatrolStatusChangedMessage)} for an unknown patrol with ID {patrolStatusChangedMessage.Sender}");
+            return;
+        }
+        
+        patrol.UpdateStatus(patrolStatusChangedMessage.Status);
+        _logger.LogInformation("A patrol with {ID} changed its status to {NewStatus}", patrol.Id, patrol.Status);
+        await _domainEventProcessor.ProcessDomainEvents(patrol);
     }
 
     private Task Handle(PatrolOfflineMessage patrolOfflineMessage)
