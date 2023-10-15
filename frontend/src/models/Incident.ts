@@ -1,4 +1,4 @@
-import { observable } from "mobx";
+import { makeObservable, observable } from "mobx";
 import type { IPosition } from "../api/generated/Shared/CommonTypes/Geo/IPosition";
 import { IncidentTypeEnum } from "../api/generated/Shared/CommonTypes/Incident/IncidentTypeEnum";
 import { IncidentStatusEnum } from "../api/generated/Shared/CommonTypes/Incident/IncidentStatusEnum";
@@ -19,5 +19,7 @@ export class Incident {
     this.location = position;
     this.type = type;
     this.status = status;
+
+    makeObservable(this);
   }
 }

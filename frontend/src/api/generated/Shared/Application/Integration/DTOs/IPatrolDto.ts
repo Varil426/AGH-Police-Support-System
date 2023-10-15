@@ -3,10 +3,12 @@
 //     the code is regenerated.
 
 import { IPosition } from '../../../CommonTypes/Geo/IPosition';
+import { PatrolStatusEnum } from '../../../CommonTypes/Patrol/PatrolStatusEnum';
 
 export interface IPatrolDto
 {
 	id: string;
 	patrolId: string;
 	position: IPosition;
+	status: PatrolStatusEnum;
 }
