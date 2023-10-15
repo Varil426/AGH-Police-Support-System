@@ -1,6 +1,6 @@
 ﻿using Shared.Domain.DomainEvents;
-using Simulation.Application.Entities;
-using Action = Simulation.Application.Entities.Action;
+using Simulation.Application.Entities.Patrol;
+using Action = Simulation.Application.Entities.Patrol.Actions.Action;
 
 namespace Simulation.Application.DomainEvents;
 

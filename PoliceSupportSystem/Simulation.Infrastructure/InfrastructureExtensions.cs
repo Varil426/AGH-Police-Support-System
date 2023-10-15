@@ -38,11 +38,13 @@ public static class InfrastructureExtensions
                 var rabbitMqSettings = ctx.Configuration.GetSettings<RabbitMqSettings>(nameof(RabbitMqSettings));
                 var simulationSettings = ctx.Configuration.GetSettings<SimulationSettings>(nameof(SimulationSettings));
                 var incidentDirectorSettings = ctx.Configuration.GetSettings<IncidentDirectorSettings>(nameof(IncidentDirectorSettings));
+                var patrolDirectorSettings = ctx.Configuration.GetSettings<PatrolDirectorSettings>(nameof(PatrolDirectorSettings));
                 var dbSettings = ctx.Configuration.GetSettings<DbSettings>(nameof(DbSettings));
 
                 serviceCollection.AddSingleton(rabbitMqSettings);
                 serviceCollection.AddSingleton(simulationSettings);
                 serviceCollection.AddSingleton(incidentDirectorSettings);
+                serviceCollection.AddSingleton(patrolDirectorSettings);
                 serviceCollection.AddSingleton(dbSettings);
             });
         return hostBuilder;

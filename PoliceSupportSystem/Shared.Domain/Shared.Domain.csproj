@@ -11,4 +11,9 @@
       <ProjectReference Include="..\Shared.CommonTypes\Shared.CommonTypes.csproj" />
     </ItemGroup>
 
+
+    <ItemGroup>
+      <PackageReference Include="BAMCIS.GeoCoordinate" Version="1.0.2" />
+    </ItemGroup>
+
 </Project>

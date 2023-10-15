@@ -3,7 +3,7 @@ using Shared.Domain.DomainEvents;
 using Shared.Domain.DomainEvents.Incident;
 using Shared.Domain.DomainEvents.Patrol;
 using Simulation.Application.DomainEvents;
-using Simulation.Application.Entities;
+using Simulation.Application.Entities.Patrol;
 using Simulation.Communication.Common;
 using Simulation.Communication.Messages;
 
@@ -19,10 +19,11 @@ internal partial class DomainEventMapper : IDomainEventMapper
         // Custom
         PatrolRelatedServiceAdded relatedServiceAdded => Map(relatedServiceAdded),
         PatrolPositionUpdated patrolPositionUpdated => Map(patrolPositionUpdated),
-        // PatrolStatusUpdated patrolStatusUpdated => Encapsulate(Map(patrolStatusUpdated)), // TODO Left for future
+        PatrolStatusUpdated patrolStatusUpdated => Empty(),//Encapsulate(Map(patrolStatusUpdated)), // TODO Left for future
         // Skippable
         PatrolCreated => Empty(),
         PatrolActionChanged => Empty(),
+        PatrolOrderChanged => Empty(),
         // Not handled
         _ => throw new Exception($"Cannot map domain event of type {domainEvent.GetType().Name}")
     };

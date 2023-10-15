@@ -25,7 +25,7 @@ public class Incident : BaseRootDomainEntity
         if (newLocation == Location)
              return;
         Location = newLocation;
-        UpdatedAt = DateTimeOffset.UtcNow;
+        UpdateUpdatedAt();
         AddDomainEvent(new IncidentLocationUpdated(Id, newLocation));
     }
 
@@ -34,7 +34,7 @@ public class Incident : BaseRootDomainEntity
         if (newStatus == Status)
             return;
         Status = newStatus;
-        UpdatedAt = DateTimeOffset.UtcNow;
+        UpdateUpdatedAt();
         AddDomainEvent(new IncidentStatusUpdated(Id, newStatus));
     }
 
@@ -43,7 +43,7 @@ public class Incident : BaseRootDomainEntity
         if (newType == Type)
             return;
         Type = newType;
-        UpdatedAt = DateTimeOffset.UtcNow;
+        UpdateUpdatedAt();
         AddDomainEvent(new IncidentTypeUpdated(Id, newType));
     }
 }

@@ -60,9 +60,11 @@ public static class Extensions
             var messageType = simulationMessageHandlerInterface.GetGenericArguments()[0];
             // TODO Can be improved - multiple handlers with Autofac
             typeof(Extensions).GetMethod(nameof(AddSimulationMessageHandler), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(simulationMessageHandlerInterface, messageType).Invoke(null, new object[] { simulationDirectMessageSubscriber, host.Services });
-            typeof(Extensions).GetMethod(nameof(AddSimulationMessageHandler), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(simulationMessageHandlerInterface, messageType).Invoke(null, new object[] { simulationMessageSubscriber, host.Services });
+                .MakeGenericMethod(simulationMessageHandlerInterface, messageType).Invoke(
+                    null,
+                    messageType.IsAssignableTo(typeof(IDirectSimulationMessage))
+                        ? new object[] { simulationDirectMessageSubscriber, host.Services }
+                        : new object[] { simulationMessageSubscriber, host.Services });
         }
 
         simulationDirectMessageSubscriber.Open();

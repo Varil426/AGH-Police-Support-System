@@ -17,8 +17,9 @@ public abstract class BaseRootDomainEntity : IRootDomainEntity
     }
 
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset UpdatedAt { get; protected set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAt { get; /*protected*/ private set; } = DateTimeOffset.UtcNow;
     protected void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
     protected void ClearDomainEvents() => _domainEvents.Clear();
+    protected void UpdateUpdatedAt(DateTimeOffset? time = null) => UpdatedAt = time ?? DateTimeOffset.UtcNow;
     // public void ClearDomainEvents() => _domainEvents.Clear();
 }

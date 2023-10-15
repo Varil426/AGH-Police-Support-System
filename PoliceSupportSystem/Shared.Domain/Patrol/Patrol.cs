@@ -27,7 +27,7 @@ public class Patrol : BaseRootDomainEntity
     {
         if (newStatus == Status)
             return;
-        UpdatedAt = DateTimeOffset.UtcNow;
+        UpdateUpdatedAt();
         Status = newStatus;
         AddDomainEvent(new PatrolStatusUpdated(this, newStatus));
     }
@@ -36,7 +36,7 @@ public class Patrol : BaseRootDomainEntity
     {
         if (newPosition == Position)
             return;
-        UpdatedAt = DateTimeOffset.UtcNow;
+        UpdateUpdatedAt();
         Position = newPosition;
         AddDomainEvent(new PatrolPositionUpdated(this, newPosition));
     }
