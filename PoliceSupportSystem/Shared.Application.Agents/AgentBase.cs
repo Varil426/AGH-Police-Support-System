@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Nito.AsyncEx;
 
 namespace Shared.Application.Agents;
 
@@ -13,11 +14,12 @@ public abstract class AgentBase : BackgroundService, IAgent
     public IEnumerable<Type> AcceptedEnvironmentSignalTypes { get; }
     protected IMessageService MessageService { get; }
 
-    protected Queue<IMessage> MessageQueue { get; } = new();
+    private Queue<IMessage> MessageQueue { get; } = new();
     
-    protected Queue<IEnvironmentSignal> EnvironmentSignalQueue { get; } = new();
+    private Queue<IEnvironmentSignal> EnvironmentSignalQueue { get; } = new();
 
-    private readonly SemaphoreSlim _semaphore = new( 1,1);
+    // private readonly SemaphoreSlim _semaphore = new( 2,2);
+    private readonly AsyncReaderWriterLock  _readerWriterLock = new();
 
     private readonly Dictionary<Guid, IMessage?> _awaitingResponse = new();
 
@@ -36,9 +38,16 @@ public abstract class AgentBase : BackgroundService, IAgent
         messageService.SubscribeForMessagesAsync(this);
     }
 
-    public async Task PushMessageAsync(IMessage message)
+    public async Task PushMessageAsync(IMessage message) => 
+        // await PerformSynchronously(() => EnqueueMessage(message), nameof(PushMessageAsync));
+        await PerformWriteOperation(() => EnqueueMessage(message));
+    
+    public async Task PushMessagesAsync(IEnumerable<IMessage> messages) => 
+        // await PerformSynchronously(() => messages.ToList().ForEach(EnqueueMessage), nameof(PushMessagesAsync));
+        await PerformWriteOperation(() => messages.ToList().ForEach(EnqueueMessage));
+
+    private void EnqueueMessage(IMessage message)
     {
-        await _semaphore.WaitAsync();
         if (message.ResponseTo.HasValue)
         {
             if (_awaitingResponse.ContainsKey(message.ResponseTo.Value))
@@ -48,16 +57,16 @@ public abstract class AgentBase : BackgroundService, IAgent
         }
         else
             MessageQueue.Enqueue(message);
-        _semaphore.Release();
     }
+    
+    public async Task PushEnvironmentSignalAsync(IEnvironmentSignal signal) => 
+        // await PerformSynchronously(() => EnvironmentSignalQueue.Enqueue(signal), nameof(PushEnvironmentSignalAsync));
+        await PerformWriteOperation(() => EnvironmentSignalQueue.Enqueue(signal));
 
-    public async Task PushEnvironmentSignalAsync(IEnvironmentSignal signal)
-    {
-        await _semaphore.WaitAsync();
-        EnvironmentSignalQueue.Enqueue(signal);
-        _semaphore.Release();
-    }
-
+    public async Task PushEnvironmentSignalsAsync(IEnumerable<IEnvironmentSignal> signals) =>
+        // await PerformSynchronously(() => signals.ToList().ForEach(x => EnvironmentSignalQueue.Enqueue(x)), nameof(PushEnvironmentSignalsAsync));
+        await PerformWriteOperation(() => signals.ToList().ForEach(x => EnvironmentSignalQueue.Enqueue(x)));
+    
     public virtual Task RunAsync(CancellationToken cancellationToken, params string[] args)
     {
         return StartAsync(cancellationToken);
@@ -69,16 +78,29 @@ public abstract class AgentBase : BackgroundService, IAgent
     {
         while (!stoppingToken.IsCancellationRequested) // TODO ThrowIfCancellationRequested()
         {
-            await _semaphore.WaitAsync(stoppingToken);
+            var messagesToBeHandled = new List<IMessage>();
+            var signalsToBeHandled = new List<IEnvironmentSignal>();
+
+            // await PerformSynchronously(
+            //     () =>
+            //     {
+            //         while (MessageQueue.TryDequeue(out var message) && AcceptedMessageTypes.Contains(message.GetType()))
+            //             messagesToBeHandled.Add(message);
+            //         while (EnvironmentSignalQueue.TryDequeue(out var signal) && AcceptedEnvironmentSignalTypes.Contains(signal.GetType()))
+            //             signalsToBeHandled.Add(signal);
+            //     }, "CollectMessagesAndSignals");
             
-            if (MessageQueue.TryDequeue(out var message) && AcceptedMessageTypes.Contains(message.GetType()))
-                await HandleMessage(message);
-            
-            if (EnvironmentSignalQueue.TryDequeue(out var signal) && AcceptedEnvironmentSignalTypes.Contains(signal.GetType()))
-                await HandleSignal(signal);
-            
-            _semaphore.Release();
-            
+            await PerformReadOperation(
+                () =>
+                {
+                    while (MessageQueue.TryDequeue(out var message) && AcceptedMessageTypes.Contains(message.GetType()))
+                        messagesToBeHandled.Add(message);
+                    while (EnvironmentSignalQueue.TryDequeue(out var signal) && AcceptedEnvironmentSignalTypes.Contains(signal.GetType()))
+                        signalsToBeHandled.Add(signal);
+                });
+
+            await Task.WhenAll(messagesToBeHandled.Select(HandleMessage));
+            await Task.WhenAll(signalsToBeHandled.Select(HandleSignal));
             await PerformActions();
             
             Thread.Sleep(TimeSpan.FromMilliseconds(50));
@@ -95,18 +117,19 @@ public abstract class AgentBase : BackgroundService, IAgent
         _awaitingResponse[message.MessageId] = null;
         await MessageService.SendMessageAsync(message);
 
+        _logger.LogInformation("Sent \"Ask\" message of type {messageType} with ID: {id}.", message.GetType().Name, message.MessageId);
         IMessage? response = null;
         while (response is null)
         {
-            await _semaphore.WaitAsync();
-            response = _awaitingResponse[message.MessageId];
-            _semaphore.Release();
+            // await PerformSynchronously(() => response = _awaitingResponse[message.MessageId], $"{nameof(Ask)}1");
+            await PerformReadOperation(() => response = _awaitingResponse[message.MessageId]);
+            await Task.Delay(TimeSpan.FromMicroseconds(50));
         }
 
-        await _semaphore.WaitAsync();
-        _awaitingResponse.Remove(message.MessageId);
-        _semaphore.Release();
+        // await PerformSynchronously(() => _awaitingResponse.Remove(message.MessageId), $"{nameof(Ask)}2");
+        await PerformWriteOperation(() => _awaitingResponse.Remove(message.MessageId));
 
+        _logger.LogInformation("Received response for message with ID: {id}.", response.ResponseTo);
         return (TResponseType) response;
     }
 
@@ -133,15 +156,14 @@ public abstract class AgentBase : BackgroundService, IAgent
         var wereAcknowledged = false;
         while (!wereAcknowledged)
         {
-            await _semaphore.WaitAsync();
-            wereAcknowledged = messages.All(x => _awaitingAcknowledge[x.MessageId]);
-            _semaphore.Release();
+            // await PerformSynchronously(() => wereAcknowledged = messages.All(x => _awaitingAcknowledge[x.MessageId]), $"{nameof(SendWithAcknowledgeRequired)}1");
+            await PerformReadOperation(() => wereAcknowledged = messages.All(x => _awaitingAcknowledge[x.MessageId]));
+            await Task.Delay(TimeSpan.FromMicroseconds(50));
         }
         _logger.LogInformation("All {numberOfMessages} were acknowledged.", messages.Count);
-        
-        await _semaphore.WaitAsync();
-        messages.ForEach(x => _awaitingAcknowledge.Remove(x.MessageId));
-        _semaphore.Release();
+
+        // await PerformSynchronously(() => messages.ForEach(x => _awaitingAcknowledge.Remove(x.MessageId)), $"{nameof(SendWithAcknowledgeRequired)}2");
+        await PerformWriteOperation(() => messages.ForEach(x => _awaitingAcknowledge.Remove(x.MessageId)));
     }
 
     public override void Dispose()
@@ -155,7 +177,7 @@ public abstract class AgentBase : BackgroundService, IAgent
     {
         if (disposing)
         {
-            _semaphore.Dispose();
+            // _semaphore.Dispose();
         }
     }
 
@@ -169,5 +191,56 @@ public abstract class AgentBase : BackgroundService, IAgent
     {
         _logger.LogWarning("Cannot handle signal of type: {messageType}", signal.Name);
         return Task.CompletedTask;
+    }
+
+    // private async Task PerformSynchronously(Action action, string? marker = null) => await PerformSynchronously(
+    //     () =>
+    // {
+    //     action.Invoke();
+    //     return Task.CompletedTask;
+    // }, marker);
+    //
+    // private async Task PerformSynchronously(Func<Task> asyncAction, string? marker = null)
+    // {
+    //     var markerMessage = marker is not null ? $" Marker: {marker}" : string.Empty;
+    //     try
+    //     {
+    //         _logger.LogDebug($"Waiting to enter the semaphore.{marker}");
+    //         await _semaphore.WaitAsync();
+    //         // _logger.LogDebug($"Entered the semaphore. Marker: {(new System.Diagnostics.StackTrace()).GetFrame((int)frameIndex)?.GetMethod()?.Name ?? "UNKNOWN"}");
+    //         _logger.LogDebug($"Entered the semaphore.{markerMessage}");
+    //         await asyncAction.Invoke();
+    //     }
+    //     finally
+    //     {
+    //         _semaphore.Release();
+    //         _logger.LogDebug($"Exited the semaphore.{markerMessage}");
+    //     }
+    // }
+
+    private async Task PerformWriteOperation(Action action) => await PerformWriteOperation(
+        () =>
+        {
+            action.Invoke();
+            return Task.CompletedTask;
+        });
+    
+    private async Task PerformWriteOperation(Func<Task> asyncAction)
+    {
+        using var _ = await _readerWriterLock.WriterLockAsync();
+        await asyncAction.Invoke();
+    }
+    
+    private async Task PerformReadOperation(Action action) => await PerformReadOperation(
+        () =>
+        {
+            action.Invoke();
+            return Task.CompletedTask;
+        });
+    
+    private async Task PerformReadOperation(Func<Task> asyncAction)
+    {
+        using var _ = await _readerWriterLock.ReaderLockAsync();
+        await asyncAction.Invoke();
     }
 }
