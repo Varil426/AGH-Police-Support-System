@@ -41,13 +41,35 @@ services:
         condition: service_healthy
       simulation:
         condition: service_started
+      webapp:
+        condition: service_healthy
     build:
       context: ./PoliceSupportSystem
       dockerfile: hq-service-dockerfile
     networks:
       - rabbitmq_net
       - loki_net
-
+  # WebApp
+  webapp:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    build:
+      context: ./PoliceSupportSystem
+      dockerfile: web-app-dockerfile
+    ports:
+      - "5299:5299"
+    networks:
+      - rabbitmq_net
+      - loki_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5299/api/health-check"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 networks:
   rabbitmq_net:
     driver: bridge
