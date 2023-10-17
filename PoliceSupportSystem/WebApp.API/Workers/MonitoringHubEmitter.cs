@@ -25,7 +25,7 @@ public class MonitoringHubEmitter : BackgroundService
             var patrols = _monitoringService.Patrols.Select(x => x.AsDto());
             await _hubContext.Clients.All.ReceiveUpdate(new CityStateMessageDto(_monitoringService.HqLocation, incidents, patrols));
             // ReSharper disable once PossibleLossOfFraction
-            await Task.Delay(TimeSpan.FromMilliseconds(1000 / 60), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(1) / 20, stoppingToken);
         }
     }
 }
