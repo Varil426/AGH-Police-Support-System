@@ -32,6 +32,7 @@ services:
     networks:
       - rabbitmq_net
       - loki_net
+      - simulation_net
   # HQ Service
   hqservice:
     depends_on:
@@ -74,4 +75,6 @@ networks:
   rabbitmq_net:
     driver: bridge
   loki_net:
+    driver: bridge
+  simulation_net:
     driver: bridge
