@@ -9,9 +9,9 @@ public interface ISimulationEntity : IDomainEntity
     
     Position Position { get; }
 
-    IReadOnlyCollection<IService> RelatedServices { get; }
+    public IReadOnlyCollection<IService> RelatedServices { get; }
 
-    void AddRelatedService(IService service);
+    public void AddRelatedService(IService service);
 
-    void RemoveRelatedService(string relatedServiceId);
+    public void RemoveRelatedService(string relatedServiceId);
 }

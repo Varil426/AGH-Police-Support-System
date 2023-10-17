@@ -25,7 +25,7 @@ internal class RouteBuilder : IRouteBuilder
         if (!route.Steps.Any())
         {
             _logger.LogWarning("{serviceName} returned empty path.", nameof(IMapService));
-            return new SimulationPatrolRoute(start, end, route.Steps);
+            return new SimulationPatrolRoute(route.Steps);
         }
         
         var firstNode = route.Steps.First();
@@ -34,6 +34,6 @@ internal class RouteBuilder : IRouteBuilder
         var lastNode = route.Steps.Last();
         route.Steps.Add(new Path(lastNode.To, end, lastNode.To.GetDistanceTo(end)));
 
-        return new SimulationPatrolRoute(start, end, route.Steps);
+        return new SimulationPatrolRoute(route.Steps);
     }
 }

@@ -4,7 +4,7 @@ using Shared.Domain.DomainEvents.Patrol;
 
 namespace Shared.Domain.Patrol;
 
-public class Patrol : BaseRootDomainEntity
+public class Patrol : BaseRootDomainEntity, IPatrol
 {
     public string PatrolId { get; }
 

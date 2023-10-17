@@ -68,22 +68,21 @@ internal class PatrolDirector : IDirector
                     patrol.Action = new WaitingAction();
                     break;
                 }
-                
-                // TODO Fix patrol position changed propagation
-                MovePatrol(patrol, movingAction.Route);
 
+                MovePatrol(patrol, movingAction.Route);
                 break;
         }
     }
 
-    // TODO Need to be fixed!
-    private void MovePatrol(SimulationPatrol patrol, SimulationPatrolRoute route)
+    // Internal visibility for testing!
+    internal void MovePatrol(ISimulationPatrol patrol, SimulationPatrolRoute route)
     {
-        var distanceTraveledInMeters = _simulationTimeService.SimulationTimeSinceLastAction.TotalHours * _patrolDirectorSettings.NormalPatrolSpeed * 1000;
+        var distanceTraveledInMeters = _simulationTimeService.SimulationTimeSinceLastAction.TotalHours *
+                                       (patrol.IsInEmergencyState ? _patrolDirectorSettings.EmergencyPatrolSpeed : _patrolDirectorSettings.NormalPatrolSpeed) * 1000;
 
         var tempPosition = patrol.Position;
         var distanceToNearestTarget = tempPosition.GetDistanceTo(route.CurrentStep.To);
-                
+
         while (distanceTraveledInMeters > distanceToNearestTarget)
         {
             distanceTraveledInMeters -= distanceToNearestTarget;
@@ -102,7 +101,7 @@ internal class PatrolDirector : IDirector
 
         _logger.LogDebug($"Temp {tempPosition.Latitude} {tempPosition.Longitude}"); // TODO Remove
         var routeLeftToNearestTarget = distanceTraveledInMeters / distanceToNearestTarget;
-        var finalPosition = tempPosition + (tempPosition - route.CurrentStep.To).Abs() * routeLeftToNearestTarget;
+        var finalPosition = tempPosition + (route.CurrentStep.To - tempPosition) * routeLeftToNearestTarget;
         patrol.UpdatePosition(finalPosition);
         _logger.LogDebug($"Final {finalPosition.Latitude} {finalPosition.Longitude}"); // TODO Remove
     }

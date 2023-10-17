@@ -8,7 +8,7 @@ using Action = Simulation.Application.Entities.Patrol.Actions.Action;
 
 namespace Simulation.Application.Entities.Patrol;
 
-public class SimulationPatrol : Shared.Domain.Patrol.Patrol, ISimulationRootEntity
+public class SimulationPatrol : Shared.Domain.Patrol.Patrol, ISimulationRootEntity, ISimulationPatrol
 {
     private readonly List<IService> _relatedServices = new();
     

@@ -1,5 +1,6 @@
 ﻿using BAMCIS.GIS;
 using Shared.CommonTypes.Geo;
+using Path = Shared.CommonTypes.Geo.Path;
 
 namespace Shared.Domain.Helpers;
 
@@ -20,4 +21,6 @@ public static class GeoHelpers
         position1.ToGeoCoordinate().DistanceTo(position2.ToGeoCoordinate(), type);
 
     public static Position Abs(this Position position) => new(Math.Abs(position.Latitude), Math.Abs(position.Longitude));
+
+    public static Path Path(this Position a, Position b) => new Path(a,b, a.GetDistanceTo(b));
 }
