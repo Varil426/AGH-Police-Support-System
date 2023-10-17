@@ -60,12 +60,12 @@ services:
       context: ./PoliceSupportSystem
       dockerfile: web-app-dockerfile
     ports:
-      - "5299:5299"
+      - "5299:8080"
     networks:
       - rabbitmq_net
       - loki_net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5299/api/health-check"]
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:8080/api/health-check"]
       interval: 5s
       timeout: 5s
       retries: 3

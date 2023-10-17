@@ -24,4 +24,4 @@ COPY --from=build-env /App/WebApp.API/out .
 RUN apt update \
  && apt install -y curl
 
-ENTRYPOINT ["dotnet", "WebApp.API.dll", "--environment=Docker", "--urls=http://localhost:5299/"]
+ENTRYPOINT ["dotnet", "WebApp.API.dll", "--environment=Docker", "--urls=http://0.0.0.0:8080/"]
