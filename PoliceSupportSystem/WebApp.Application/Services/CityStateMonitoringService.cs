@@ -21,8 +21,29 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
     private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
 
     public Position HqLocation => _mapSettings.HqLocation; 
-    public IReadOnlyCollection<Incident> Incidents => _incidents.ToList().AsReadOnly();
-    public IReadOnlyCollection<Patrol> Patrols => _patrols.ToList().AsReadOnly();
+    public IReadOnlyCollection<Incident> Incidents
+    {
+        // TODO Improve this
+        get
+        {
+            _semaphoreSlim.Wait();
+            var result = _incidents.ToList().AsReadOnly();
+            _semaphoreSlim.Release();
+            return result;
+        }
+    }
+
+    public IReadOnlyCollection<Patrol> Patrols
+    {
+        // TODO Improve this
+        get
+        {
+            _semaphoreSlim.Wait();
+            var result = _patrols.ToList().AsReadOnly();
+            _semaphoreSlim.Release();
+            return result;
+        }
+    }
 
     public CityStateMonitoringService(IIncidentFactory incidentFactory, MapSettings mapSettings, IPatrolFactory patrolFactory)
     {
