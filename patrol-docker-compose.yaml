@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  # Patrol
+  patrol:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      simulation:
+        condition: service_started
+      hqservice:
+        condition: service_started
+    build:
+      context: ./PoliceSupportSystem
+      dockerfile: patrol-combo-service-dockerfile
+    networks:
+      - rabbitmq_net
+      - loki_net
+      - simulation_net
+networks:
+  rabbitmq_net:
+    driver: bridge
+  loki_net:
+    driver: bridge
+  simulation_net:
+    driver: bridge

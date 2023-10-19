@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  # Base
+  rabbitmq:
+    extends:
+      file: infrastructure-docker-compose.yaml
+      service: rabbitmq
+  simulationdb:
+    extends:
+      file: infrastructure-docker-compose.yaml
+      service: simulationdb
+  loki:
+    extends:
+      file: infrastructure-docker-compose.yaml
+      service: loki
+  grafana:
+    extends:
+      file: infrastructure-docker-compose.yaml
+      service: grafana
+  simulation:
+    extends:
+      file: police-services-docker-compose.yaml
+      service: simulation
+  hqservice:
+    extends:
+      file: police-services-docker-compose.yaml
+      service: hqservice
+  webapp:
+    extends:
+      file: police-services-docker-compose.yaml
+      service: webapp
+  #Patrols
+  patrol_1:
+    extends:
+      file: patrol-docker-compose.yaml
+      service: patrol
+networks:
+  rabbitmq_net:
+    driver: bridge
+  loki_net:
+    driver: bridge
+  simulation_net:
+    driver: bridge
