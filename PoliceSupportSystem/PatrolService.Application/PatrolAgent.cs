@@ -77,6 +77,7 @@ internal class PatrolAgent : AgentBase
     {
         if (_lastOrder?.GivenAt > patrolDistrictOrderMessage.CreatedAt)
             return;
+        _logger.LogInformation("Patrol: {PatrolId} received a patrol district {DistrictName} order.", _patrolInfoService.PatrolId, patrolDistrictOrderMessage.DistrictName);
         _status = PatrolStatusEnum.Patrolling;
         await MessageService.SendMessageAsync(new PatrolStatusChangedMessage(Id, _status));
         _lastOrder = new PatrolOrder(OrderTypeEnum.Patrol, patrolDistrictOrderMessage.CreatedAt, patrolDistrictOrderMessage.DistrictName);
