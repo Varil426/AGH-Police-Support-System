@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Shared.CommonTypes.Geo;
 using Shared.CommonTypes.Patrol;
 using Shared.Domain.Helpers;
 using Simulation.Application.Directors.Settings;
@@ -80,6 +79,8 @@ internal class PatrolDirector : IDirector
         var distanceTraveledInMeters = _simulationTimeService.SimulationTimeSinceLastAction.TotalHours *
                                        (patrol.IsInEmergencyState ? _patrolDirectorSettings.EmergencyPatrolSpeed : _patrolDirectorSettings.NormalPatrolSpeed) * 1000;
 
+        // _logger.LogDebug($"Distance traveled {distanceTraveledInMeters} in {_simulationTimeService.SimulationTimeSinceLastAction.TotalSeconds}s"); // TODO Remove
+        
         var tempPosition = patrol.Position;
         var distanceToNearestTarget = tempPosition.GetDistanceTo(route.CurrentStep.To);
 

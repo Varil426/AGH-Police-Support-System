@@ -19,6 +19,7 @@ internal class SimulationTimeService : ISimulationTimeService
 
     public TimeSpan SimulationTimeSinceStart => /*_simulationStartWatch.Elapsed;*/ TimeSinceStart * _simulationSettings.TimeRate;
     public TimeSpan SimulationTimeSinceLastAction => /*_lastActionWatch.Elapsed;*/ TimeSinceLastAction * _simulationSettings.TimeRate;
+    public double SimulationTimeRate => _simulationSettings.TimeRate;
 
     public void Start()
     {

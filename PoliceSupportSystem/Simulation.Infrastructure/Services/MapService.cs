@@ -12,6 +12,7 @@ internal sealed class MapService : IMapService
     private readonly NpgsqlDataSource _dataSource;
 
     private const int DefaultSrid = 4326;
+    private const int PositionEqualityThreshold = 10;
 
     public MapService(NpgsqlDataSource dataSource)
     {
@@ -103,7 +104,7 @@ internal sealed class MapService : IMapService
         return positions;
     }
     
-    private void FillGaps(List<Path> paths)
+    private static void FillGaps(List<Path> paths)
     {
 	    var steps = paths.ToList();
 
@@ -113,14 +114,14 @@ internal sealed class MapService : IMapService
 		    var from = steps[i];
 		    var to = steps[i+1];
 
-		    if (from.To == to.From) continue;
+		    if (from.To.Equals(to.From, PositionEqualityThreshold)) continue;
 		    
 		    paths.Insert(i+1+addedStepsCounter, from.To.Path(to.From));
 		    addedStepsCounter++;
 	    }
     }
     
-    private void AddStartEndNodes(Position from, Position to, List<Path> paths)
+    private static void AddStartEndNodes(Position from, Position to, IList<Path> paths)
     {
 	    if (!paths.Any())
 	    {
@@ -131,10 +132,10 @@ internal sealed class MapService : IMapService
 	    var firstNode = paths.First();
 	    var lastNode = paths.Last();
 	    
-	    if (firstNode.From != from)
+	    if (!firstNode.From.Equals(from, PositionEqualityThreshold))
 		    paths.Insert(0, from.Path(firstNode.From));
 	    
-	    if (lastNode.To != to)
+	    if (!lastNode.To.Equals(to, PositionEqualityThreshold))
 		    paths.Add(lastNode.To.Path(to));
     }
 }
