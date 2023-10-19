@@ -3,19 +3,19 @@ services:
   # Common
   rabbitmq:
     extends:
-      file: docker-compose.yaml
+      file: infrastructure-docker-compose.yaml
       service: rabbitmq
   simulationdb:
     extends:
-      file: docker-compose.yaml
+      file: infrastructure-docker-compose.yaml
       service: simulationdb
   loki:
     extends:
-      file: docker-compose.yaml
+      file: infrastructure-docker-compose.yaml
       service: loki
   grafana:
     extends:
-      file: docker-compose.yaml
+      file: infrastructure-docker-compose.yaml
       service: grafana
   # Simulation
   simulation:
