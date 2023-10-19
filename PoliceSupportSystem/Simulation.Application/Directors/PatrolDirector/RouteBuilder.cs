@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Shared.CommonTypes.Geo;
-using Shared.Domain.Helpers;
 using Simulation.Application.Entities.Patrol;
 using Simulation.Application.Services;
-using Path = Shared.CommonTypes.Geo.Path;
 
 namespace Simulation.Application.Directors.PatrolDirector;
 
@@ -27,12 +25,6 @@ internal class RouteBuilder : IRouteBuilder
             _logger.LogWarning("{serviceName} returned empty path.", nameof(IMapService));
             return new SimulationPatrolRoute(route.Steps);
         }
-        
-        var firstNode = route.Steps.First();
-        route.Steps.Insert(0, new Path(start, firstNode.From, start.GetDistanceTo(firstNode.From)));
-
-        var lastNode = route.Steps.Last();
-        route.Steps.Add(new Path(lastNode.To, end, lastNode.To.GetDistanceTo(end)));
 
         return new SimulationPatrolRoute(route.Steps);
     }

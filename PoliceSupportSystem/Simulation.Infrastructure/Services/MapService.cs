@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Npgsql;
 using Shared.CommonTypes.Geo;
+using Shared.Domain.Helpers;
 using Simulation.Application.Services;
 using Path = Shared.CommonTypes.Geo.Path;
 
@@ -73,6 +74,9 @@ internal sealed class MapService : IMapService
 	        
 	        paths.Add(new Path(new Position(sourceLatitude, sourceLongitude), new Position(targetLatitude, targetLongitude), distance));
         }
+
+        FillGaps(paths);
+        AddStartEndNodes(from, to, paths);
         
         return new Route(paths);
     }
@@ -97,5 +101,40 @@ internal sealed class MapService : IMapService
         while (await reader.ReadAsync())
             positions.Add(new Position(reader.GetDouble("latitude"), reader.GetDouble("longitude")));
         return positions;
+    }
+    
+    private void FillGaps(List<Path> paths)
+    {
+	    var steps = paths.ToList();
+
+	    var addedStepsCounter = 0;
+	    for (var i = 0; i < steps.Count - 1; i++)
+	    {
+		    var from = steps[i];
+		    var to = steps[i+1];
+
+		    if (from.To == to.From) continue;
+		    
+		    paths.Insert(i+1+addedStepsCounter, from.To.Path(to.From));
+		    addedStepsCounter++;
+	    }
+    }
+    
+    private void AddStartEndNodes(Position from, Position to, List<Path> paths)
+    {
+	    if (!paths.Any())
+	    {
+		    paths.Add(from.Path(to));
+		    return;
+	    }
+
+	    var firstNode = paths.First();
+	    var lastNode = paths.Last();
+	    
+	    if (firstNode.From != from)
+		    paths.Insert(0, from.Path(firstNode.From));
+	    
+	    if (lastNode.To != to)
+		    paths.Add(lastNode.To.Path(to));
     }
 }
