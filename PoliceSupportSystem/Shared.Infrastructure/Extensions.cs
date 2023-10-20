@@ -36,7 +36,7 @@ public static class Extensions
 {
     private const string RabbitMqConfigSectionName = "RabbitMq";
     private const string LokiConfigSectionName = "Loki";
-    private const string EnvironmentVariablePrefix = "PoliceSupportSystem";
+    private const string EnvironmentVariablePrefix = "PoliceSupportSystem_";
 
     public static IHostBuilder AddSharedAppSettings(this IHostBuilder hostBuilder) =>
         hostBuilder.ConfigureAppConfiguration(
