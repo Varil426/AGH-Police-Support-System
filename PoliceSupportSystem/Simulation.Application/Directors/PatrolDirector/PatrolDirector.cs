@@ -76,8 +76,8 @@ internal class PatrolDirector : IDirector
     // Internal visibility for testing!
     internal void MovePatrol(ISimulationPatrol patrol, SimulationPatrolRoute route)
     {
-        var distanceTraveledInMeters = _simulationTimeService.SimulationTimeSinceLastAction.TotalHours *
-                                       (patrol.IsInEmergencyState ? _patrolDirectorSettings.EmergencyPatrolSpeed : _patrolDirectorSettings.NormalPatrolSpeed) * 1000;
+        var distanceTraveledInMeters = _simulationTimeService.SimulationTimeSinceLastAction.TotalSeconds *
+                                       (patrol.IsInEmergencyState ? _patrolDirectorSettings.EmergencyPatrolSpeedMetersPerSecond : _patrolDirectorSettings.NormalPatrolSpeedMetersPerSecond);
 
         // _logger.LogDebug($"Distance traveled {distanceTraveledInMeters} in {_simulationTimeService.SimulationTimeSinceLastAction.TotalSeconds}s"); // TODO Remove
         
