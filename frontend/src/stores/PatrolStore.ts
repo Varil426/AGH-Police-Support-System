@@ -1,9 +1,13 @@
-import { action, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 import { Patrol } from "../models/Patrol";
 import { IPatrolDto } from "../api/generated/Shared/Application/Integration/DTOs/IPatrolDto";
 
 export class PatrolStore {
   @observable readonly patrols: Patrol[] = [];
+
+  constructor() {
+    makeObservable(this);
+  }
 
   @action
   addPatrol(dto: IPatrolDto) {
@@ -29,8 +33,9 @@ export class PatrolStore {
 
   @action
   updateOrCreatePatrol(dto: IPatrolDto) {
-    if (this.patrols.some((x) => x.id === dto.id))
+    if (this.patrols.some((x) => x.id === dto.id)) {
       return this.updatePatrol(dto);
+    }
     this.addPatrol(dto);
   }
 }

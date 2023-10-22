@@ -29,10 +29,10 @@ export const MapViewModel = observer(({ model }: IMapViewModelProps) => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {model.incidents.map((x) => (
-        <IncidentMarker incident={x} />
+        <IncidentMarker incident={x} key={x.id} />
       ))}
       {model.patrols.map((x) => (
-        <PatrolMarker patrol={x} />
+        <PatrolMarker patrol={x} key={x.id} />
       ))}
     </MapContainer>
   );

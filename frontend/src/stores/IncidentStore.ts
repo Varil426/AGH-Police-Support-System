@@ -1,9 +1,13 @@
-import { action, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 import { Incident } from "../models/Incident";
 import { IIncidentDto } from "../api/generated/Shared/Application/Integration/DTOs/IIncidentDto";
 
 export class IncidentStore {
   @observable readonly incidents: Incident[] = [];
+
+  constructor() {
+    makeObservable(this);
+  }
 
   @action
   addIncident(dto: IIncidentDto) {
