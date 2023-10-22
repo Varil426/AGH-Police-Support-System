@@ -36,7 +36,7 @@ internal class IncidentRandomizer : IIncidentRandomizer
         
         foreach (var position in positions)
         {
-            var startAfter = currentSimulationTime + TimeSpan.FromMinutes(_random.Next(planAheadFor.Minutes));
+            var startAfter = currentSimulationTime + TimeSpan.FromMinutes(_random.Next((int)planAheadFor.TotalMinutes));
             var finishAfter = TimeSpan.FromMinutes(_random.Next(MinimumIncidentDuration, MaximumIncidentDuration));
             TimeSpan? changeIntoShootingAfter = ShouldChangeIntoShooting(district.DangerLevel) ? TimeSpan.FromMinutes(_random.Next(MinimumTimeToChangeIntoShooting, MaximumTimeToChangeIntoShooting)) : null;
             
