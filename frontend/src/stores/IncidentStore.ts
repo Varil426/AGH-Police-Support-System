@@ -39,4 +39,12 @@ export class IncidentStore {
       return this.updateIncident(dto);
     this.addIncident(dto);
   }
+
+  @action
+  removeNotPresent(ids: string[]) {
+    const toBeDeleted = this.incidents.filter(
+      (x) => !ids.find((e) => e === x.id)
+    );
+    toBeDeleted.forEach((x) => this.removeIncident(x.id));
+  }
 }

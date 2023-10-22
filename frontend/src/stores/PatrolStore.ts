@@ -38,4 +38,12 @@ export class PatrolStore {
     }
     this.addPatrol(dto);
   }
+
+  @action
+  removeNotPresent(ids: string[]) {
+    const toBeDeleted = this.patrols.filter(
+      (x) => !ids.find((e) => e === x.id)
+    );
+    toBeDeleted.forEach((x) => this.removePatrol(x.id));
+  }
 }

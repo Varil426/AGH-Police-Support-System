@@ -47,6 +47,13 @@ export class MonitoringHubClient implements IMonitoringHubClient {
     cityStateMessage.patrols.map((x) =>
       this.patrolStore.updateOrCreatePatrol(x)
     );
+
+    this.incidentStore.removeNotPresent(
+      cityStateMessage.incidents.map((x) => x.id)
+    );
+    this.patrolStore.removeNotPresent(
+      cityStateMessage.patrols.map((x) => x.id)
+    );
   }
 
   @computed get hqLocation(): IPosition | undefined {
