@@ -23,6 +23,7 @@ internal class MessageService : IMessageService, IDisposable
             x =>
             {
                 x.SetExchange(rabbitMqSettings.SimulationExchangeName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.SimulationExchangeName)));
+                x.SetRoutingKey("public");
             });
     }
 

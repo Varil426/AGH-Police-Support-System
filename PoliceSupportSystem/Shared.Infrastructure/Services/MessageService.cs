@@ -35,10 +35,15 @@ internal class MessageService : IMessageService, IMessageHandler, IDisposable
 
     public async Task Handle(IMessage message)
     {
-        _logger.LogInformation($"Received message: {message.MessageType} with ID: {message.MessageId}.");
-        var validReceivers = _subscribedAgents.Where(x => x.AcceptedMessageTypes.Any(type => type.IsInstanceOfType(message)));
+        _logger.LogInformation($"Received the message: {message.MessageType} with ID: {message.MessageId}.");
+        var validReceivers = _subscribedAgents.Where(x => x.AcceptedMessageTypes.Any(type => type.IsInstanceOfType(message))).ToList();
+        if (!validReceivers.Any())
+        {
+            _logger.LogInformation($"No valid receivers for the message: {message.MessageType} with ID: {message.MessageId}.");
+            return;
+        }
         await Task.WhenAll(validReceivers.SkipWhile(x => message.Receivers != null && !message.Receivers.Contains(x.Id)).Select(x => x.PushMessageAsync(message)));
-        _logger.LogDebug("Successfully pushed message with ID: {id}.", message.MessageId);
+        _logger.LogInformation("Successfully pushed the message with ID: {id}.", message.MessageId);
     }
 
     public async Task SendMessageAsync(IMessage message) => await _messageBus.SendAsync(message);

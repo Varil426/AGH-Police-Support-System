@@ -49,7 +49,7 @@ public static class Extensions
             x =>
             
                 x.SetExchange(settings.SimulationExchangeName)
-                    .SetRoutingKey("#")
+                    .SetRoutingKey("public")
                     .SetConsumerTag(serviceInfo.Id)
                     .SetReceiveSelfPublish(false) // TODO Add to config
         );
