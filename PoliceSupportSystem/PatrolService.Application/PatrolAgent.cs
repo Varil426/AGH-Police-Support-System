@@ -66,7 +66,7 @@ internal class PatrolAgent : AgentBase
 
     private async Task Handle(CurrentLocationMessage currentLocationMessage)
     {
-        if (_lastKnowPosition == currentLocationMessage.Position)
+        if (currentLocationMessage.Receivers is null || !currentLocationMessage.Receivers.Contains(Id) || _lastKnowPosition == currentLocationMessage.Position)
             return;
 
         _lastKnowPosition = currentLocationMessage.Position;
