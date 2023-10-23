@@ -32,7 +32,11 @@ export const MapViewModel = observer(({ model }: IMapViewModelProps) => {
         <IncidentMarker incident={x} key={x.id} />
       ))}
       {model.patrols.map((x) => (
-        <PatrolMarker patrol={x} key={x.id} />
+        <PatrolMarker
+          patrol={x}
+          key={x.id}
+          isSelected={model.selectedPatrols.includes(x)}
+        />
       ))}
     </MapContainer>
   );

@@ -3,12 +3,16 @@ import { MonitoringHubClient } from "../../api/MonitoringHubClient";
 import { IncidentStore } from "../../stores/IncidentStore";
 import { useRootStore } from "../../utils/RootStoreProvider";
 import { PatrolStore } from "../../stores/PatrolStore";
+import { Patrol } from "../../models/Patrol";
 
 export class MapModel {
   private readonly incidentStore: IncidentStore = useRootStore().incidentStore;
   private readonly patrolStore: PatrolStore = useRootStore().patrolStore;
 
-  constructor(private readonly hubClient: MonitoringHubClient) {
+  constructor(
+    private readonly hubClient: MonitoringHubClient,
+    readonly selectedPatrols: Patrol[]
+  ) {
     makeObservable(this);
   }
 

@@ -2,13 +2,15 @@ import { Marker } from "react-leaflet";
 import { Incident } from "../../../models/Incident";
 import { observer } from "mobx-react-lite";
 import { DivIcon } from "leaflet";
-import { useEffect, useState } from "react";
 
 export interface IncidentMarkerProps {
   incident: Incident;
 }
 
-const icon = new DivIcon({ html: "❗" });
+const icon = new DivIcon({
+  html: "❗",
+  className: "marker-icon",
+});
 
 export const IncidentMarker = observer(({ incident }: IncidentMarkerProps) => {
   return (

@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.marker-icon {
+  width: 25px !important;
+  height: 25px !important;
+  text-align: center;
+
+  border-radius: 50%;
+}
+
+.marker-icon.selected {
+  background-color: teal;
+}

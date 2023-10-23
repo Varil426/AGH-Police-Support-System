@@ -29,6 +29,7 @@ export class PatrolStore {
     const u = this.patrols.find((x) => x.id === dto.id);
     if (!u) return;
     u.position = dto.position;
+    u.status = dto.status;
   }
 
   @action
