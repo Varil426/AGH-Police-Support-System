@@ -4,8 +4,9 @@
 
 export enum IncidentStatusEnum {
 	WaitingForResponse = 0,
-	OnGoingNormal = 1,
-	AwaitingBackup = 2,
-	OnGoingShooting = 3,
-	Resolved = 4
+	AwaitingPatrolArrival = 1,
+	OnGoingNormal = 2,
+	AwaitingBackup = 3,
+	OnGoingShooting = 4,
+	Resolved = 5
 }

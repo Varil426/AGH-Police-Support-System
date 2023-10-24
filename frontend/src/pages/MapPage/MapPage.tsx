@@ -9,6 +9,8 @@ import { Flex } from "antd";
 import { PatrolListViewModel } from "../../components/patrolList/PatrolListViewModel";
 import { PatrolListModel } from "../../components/patrolList/PatrolListModel";
 import { MapPageModel } from "./MapPageModel";
+import { IncidentStatsPanelViewModel } from "../../components/incidentStatsPanel/IncidentStatsPanelViewModel";
+import { IncidentStatsPanelModel } from "../../components/incidentStatsPanel/IncidentStatsPanelModel";
 
 export interface MapPageProps {
   model: MapPageModel;
@@ -27,9 +29,12 @@ export const MapPage = observer(({ model }: MapPageProps) => {
     <Route path="/map">
       <Flex>
         <MapViewModel model={new MapModel(hub, model.selectedPatrols)} />
-        <PatrolListViewModel
-          model={new PatrolListModel(model.selectedPatrols)}
-        />
+        <Flex vertical>
+          <IncidentStatsPanelViewModel model={new IncidentStatsPanelModel()} />
+          <PatrolListViewModel
+            model={new PatrolListModel(model.selectedPatrols)}
+          />
+        </Flex>
       </Flex>
     </Route>
   );
