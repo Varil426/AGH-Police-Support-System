@@ -13,7 +13,7 @@ public interface ICityStateMonitoringService //: IAsyncSubscribable<ICityStateMo
     
     Task AddIncident(NewIncidentDto newIncidentDto);
     Task AddPatrol(NewPatrolDto newPatrolDto);
-    Task UpdateIncident(UpdateIncidentDto updateIncidentDto);
+    Task UpdateIncident(IncidentDto incidentDto);
     Task UpdatePatrol(PatrolDto patrolDto);
 
     // IReadOnlyCollection<Incident> GetIncidents();

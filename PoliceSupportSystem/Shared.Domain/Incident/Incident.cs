@@ -35,7 +35,7 @@ public class Incident : BaseRootDomainEntity
             return;
         Status = newStatus;
         UpdateUpdatedAt();
-        AddDomainEvent(new IncidentStatusUpdated(Id, newStatus));
+        AddDomainEvent(new IncidentStatusUpdated(this, newStatus));
     }
 
     public virtual void UpdateType(IncidentTypeEnum newType)

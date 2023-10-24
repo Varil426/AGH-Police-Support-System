@@ -14,7 +14,7 @@ internal class PatrolAgent : AgentBase
 {
     private readonly IPatrolInfoService _patrolInfoService;
     private readonly ILogger<PatrolAgent> _logger;
-    private static readonly IEnumerable<Type> PatrolAgentAcceptedMessageTypes = new[] { typeof(CurrentLocationMessage), typeof(PatrolDistrictOrderMessage) };
+    private static readonly IEnumerable<Type> PatrolAgentAcceptedMessageTypes = new[] { typeof(CurrentLocationMessage), typeof(PatrolDistrictOrderMessage), typeof(HandleIncidentOrderMessage) };
     private static readonly IEnumerable<Type> PatrolAgentAcceptedEnvironmentSignalTypes = Enumerable.Empty<Type>();
 
     private Position? _lastKnowPosition;
@@ -45,6 +45,7 @@ internal class PatrolAgent : AgentBase
     {
         PatrolDistrictOrderMessage patrolDistrictOrderMessage => Handle(patrolDistrictOrderMessage),
         CurrentLocationMessage currentLocationMessage => Handle(currentLocationMessage),
+        HandleIncidentOrderMessage handleIncidentOrderMessage => Handle(handleIncidentOrderMessage),
         _ => base.HandleMessage(message)
     };
 
@@ -83,5 +84,17 @@ internal class PatrolAgent : AgentBase
         _lastOrder = new PatrolOrder(OrderTypeEnum.Patrol, patrolDistrictOrderMessage.CreatedAt, patrolDistrictOrderMessage.DistrictName);
         await SendWithAcknowledgeRequired(new ShowDistrictMessage(Id, _patrolInfoService.NavAgentId, patrolDistrictOrderMessage.DistrictName));
         await AcknowledgeMessage(patrolDistrictOrderMessage);
+    }
+    
+    private async Task Handle(HandleIncidentOrderMessage handleIncidentOrderMessage)
+    {
+        if (_lastOrder?.GivenAt > handleIncidentOrderMessage.CreatedAt)
+            return;
+        _logger.LogInformation("Patrol: {PatrolId} received a handle incident ({IncidentId}) order.", _patrolInfoService.PatrolId, handleIncidentOrderMessage.IncidentId);
+        _status = PatrolStatusEnum.ResolvingIncident;
+        await MessageService.SendMessageAsync(new PatrolStatusChangedMessage(Id, _status));
+        _lastOrder = new HandleIncidentOrder(OrderTypeEnum.Patrol, handleIncidentOrderMessage.CreatedAt, handleIncidentOrderMessage.IncidentLocation, handleIncidentOrderMessage.IncidentId);
+        await SendWithAcknowledgeRequired(new NavigateToMessage(Id, _patrolInfoService.NavAgentId, handleIncidentOrderMessage.IncidentLocation));
+        await AcknowledgeMessage(handleIncidentOrderMessage);
     }
 }

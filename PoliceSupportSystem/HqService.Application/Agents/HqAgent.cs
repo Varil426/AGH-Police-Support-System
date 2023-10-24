@@ -7,6 +7,7 @@ using Shared.Application.Agents.Communication.Messages.PatrolOrders;
 using Shared.Application.Agents.Communication.Signals;
 using Shared.Application.Factories;
 using Shared.Application.Services;
+using Shared.CommonTypes.Incident;
 
 namespace HqService.Application.Agents;
 
@@ -41,8 +42,8 @@ internal class HqAgent : AgentBase
 
     protected override async Task PerformActions()
     {
-        var notHandledIncidents = await _incidentMonitoringService.GetNotHandledIncidents();
-        var orders = await _decisionService.ComputeOrders(notHandledIncidents, _patrolMonitoringService.Patrols);
+        var onGoingIncidents = await _incidentMonitoringService.GetOnGoingIncidents();
+        var orders = await _decisionService.ComputeOrders(onGoingIncidents, _patrolMonitoringService.Patrols);
         var messagesRequiringAcknowledgment = new List<IMessageWithAcknowledgeRequired>();
         foreach (var order in orders)
         {
@@ -51,6 +52,10 @@ internal class HqAgent : AgentBase
                 case PatrollingOrder patrollingOrder:
                     messagesRequiringAcknowledgment.Add(new PatrolDistrictOrderMessage(Id, Guid.NewGuid(), patrollingOrder.Id, patrollingOrder.DistrictName));
                     break;
+                case HandleIncidentOrder handleIncidentOrder:
+                    messagesRequiringAcknowledgment.Add(
+                        new HandleIncidentOrderMessage(Id, Guid.NewGuid(), handleIncidentOrder.Id, handleIncidentOrder.IncidentDto.Id, handleIncidentOrder.IncidentDto.Location));
+                    break;
                 default:
                     _logger.LogWarning("Received an unknown order type: {orderType}", order.GetType().Name);
                     break;
@@ -58,6 +63,20 @@ internal class HqAgent : AgentBase
         }
 
         await SendWithAcknowledgeRequired(messagesRequiringAcknowledgment);
+
+        foreach (var messageWithAcknowledgeRequired in messagesRequiringAcknowledgment)
+        {
+            switch (messageWithAcknowledgeRequired)
+            {
+                case HandleIncidentOrderMessage handleIncidentOrderMessage:
+                    (await _incidentMonitoringService.GetIncidentById(handleIncidentOrderMessage.IncidentId) ?? throw new Exception("Incident not found")).UpdateStatus(
+                        IncidentStatusEnum.AwaitingPatrolArrival);
+                    break;
+            }
+        }
+
+        await _domainEventProcessor.ProcessDomainEvents(await _incidentMonitoringService.GetIncidents());
+        await _domainEventProcessor.ProcessDomainEvents(_patrolMonitoringService.Patrols);
     }
 
     protected override Task HandleMessage(IMessage message) =>

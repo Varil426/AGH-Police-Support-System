@@ -74,11 +74,11 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         _semaphoreSlim.Release();
     }
 
-    public async Task UpdateIncident(UpdateIncidentDto updateIncidentDto)
+    public async Task UpdateIncident(IncidentDto incidentDto)
     {
         await _semaphoreSlim.WaitAsync();
-        var incident = _incidents.FirstOrDefault(x => x.Id == updateIncidentDto.Id) ?? throw new Exception($"Incident with ID: {updateIncidentDto.Id} not found");
-        incident.Update(updateIncidentDto);
+        var incident = _incidents.FirstOrDefault(x => x.Id == incidentDto.Id) ?? throw new Exception($"Incident with ID: {incidentDto.Id} not found");
+        incident.Update(incidentDto);
         _semaphoreSlim.Release();
     }
 

@@ -19,8 +19,8 @@ internal partial class DomainEventMapper : IDomainEventMapper
         // Custom
         PatrolRelatedServiceAdded relatedServiceAdded => Map(relatedServiceAdded),
         PatrolPositionUpdated patrolPositionUpdated => Map(patrolPositionUpdated),
-        PatrolStatusUpdated patrolStatusUpdated => Empty(),//Encapsulate(Map(patrolStatusUpdated)), // TODO Left for future
         // Skippable
+        PatrolStatusUpdated patrolStatusUpdated => Empty(),
         PatrolCreated => Empty(),
         PatrolActionChanged => Empty(),
         PatrolOrderChanged => Empty(),

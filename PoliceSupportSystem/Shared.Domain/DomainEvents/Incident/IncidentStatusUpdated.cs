@@ -2,4 +2,4 @@
 
 namespace Shared.Domain.DomainEvents.Incident;
 
-public record IncidentStatusUpdated(Guid IncidentId, IncidentStatusEnum NewStatus) : IDomainEvent;
+public record IncidentStatusUpdated(Domain.Incident.Incident Incident, IncidentStatusEnum NewStatus) : IDomainEvent;

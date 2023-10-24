@@ -11,7 +11,7 @@ public class NavigationAgent : AgentBase
 {
     private readonly IPatrolInfoService _patrolInfoService;
     private readonly INavigationService _navigationService;
-    private static readonly IEnumerable<Type> NavigationAgentAcceptedMessageTypes = new List<Type> { typeof(AskPositionMessage), typeof(ShowDistrictMessage) };
+    private static readonly IEnumerable<Type> NavigationAgentAcceptedMessageTypes = new List<Type> { typeof(AskPositionMessage), typeof(ShowDistrictMessage), typeof(NavigateToMessage) };
     private static readonly IEnumerable<Type> NavigationAgentAcceptedEnvironmentSignalTypes = new [] { typeof(PositionChangedSignal) };
 
     public NavigationAgent(IMessageService messageService, IPatrolInfoService patrolInfoService, INavigationService navigationService, ILogger<NavigationAgent> logger) : base(
@@ -29,6 +29,7 @@ public class NavigationAgent : AgentBase
     {
         AskPositionMessage askPositionMessage => Handle(askPositionMessage),
         ShowDistrictMessage showDistrictMessage => Handle(showDistrictMessage),
+        NavigateToMessage navigateToMessage => Handle(navigateToMessage),
         _ => base.HandleMessage(message)
     };
 
@@ -49,6 +50,12 @@ public class NavigationAgent : AgentBase
     {
         await AcknowledgeMessage(showDistrictMessage);
         await _navigationService.DisplayDistrict(showDistrictMessage.DistrictName);
+    }
+    
+    private async Task Handle(NavigateToMessage navigateToMessage)
+    {
+        await AcknowledgeMessage(navigateToMessage);
+        await _navigationService.DisplayRouteTo(navigateToMessage.Position);
     }
 
     private Task Handle(PositionChangedSignal positionChangedSignal) =>

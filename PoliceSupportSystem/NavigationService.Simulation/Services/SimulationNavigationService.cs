@@ -27,4 +27,5 @@ public class SimulationNavigationService : INavigationService
     }
 
     public Task DisplayDistrict(string districtName) => _messageBus.SendSimulationMessage(new PatrolDistrictMessage(districtName, _patrolInfoService.PatrolId));
+    public Task DisplayRouteTo(Position position) => _messageBus.SendSimulationMessage(new PatrolDestinationMessage(position, _patrolInfoService.PatrolId));
 }

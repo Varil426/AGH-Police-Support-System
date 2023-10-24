@@ -6,6 +6,7 @@ namespace Shared.CommonTypes.Incident;
 public enum IncidentStatusEnum
 {
     WaitingForResponse,
+    AwaitingPatrolArrival,
     OnGoingNormal,
     AwaitingBackup,
     OnGoingShooting,

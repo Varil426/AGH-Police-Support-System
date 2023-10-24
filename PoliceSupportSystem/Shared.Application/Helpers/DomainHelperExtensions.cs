@@ -6,16 +6,16 @@ namespace Shared.Application.Helpers;
 
 public static class DomainHelperExtensions
 {
-    public static void Update(this Incident incident, UpdateIncidentDto dto)
+    public static void Update(this Incident incident, IncidentDto dto)
     {
-        if (dto.NewIncidentType != incident.Type)
-            incident.UpdateType(dto.NewIncidentType);
+        if (dto.Type != incident.Type)
+            incident.UpdateType(dto.Type);
         
-        if (dto.NewIncidentStatus != incident.Status)
-            incident.UpdateStatus(dto.NewIncidentStatus);
+        if (dto.Status != incident.Status)
+            incident.UpdateStatus(dto.Status);
         
-        if (dto.NewLocation != incident.Location && dto.NewLocation is not null)
-            incident.UpdateLocation(dto.NewLocation);
+        if (dto.Location != incident.Location)
+            incident.UpdateLocation(dto.Location);
     }
 
     public static void Update(this Patrol patrol, PatrolDto dto)

@@ -5,5 +5,5 @@ namespace HqService.Application.Services.DecisionService;
 
 public interface IDecisionService
 {
-    Task<IReadOnlyList<PatrolOrder>> ComputeOrders(IEnumerable<Incident> onGoingIncidents, IEnumerable<Patrol> patrols);
+    Task<IReadOnlyList<PatrolOrder>> ComputeOrders(IEnumerable<Incident> onGoingIncidents, IReadOnlyCollection<Patrol> patrols);
 }

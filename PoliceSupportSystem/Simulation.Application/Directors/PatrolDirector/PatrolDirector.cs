@@ -11,6 +11,7 @@ namespace Simulation.Application.Directors.PatrolDirector;
 
 internal class PatrolDirector : IDirector
 {
+    private const int PositionEqualityThreshold = 1;
     private readonly ILogger<PatrolDirector> _logger;
     private readonly ISimulationTimeService _simulationTimeService;
     private readonly IRouteBuilder _routeBuilder;
@@ -39,6 +40,9 @@ internal class PatrolDirector : IDirector
             {
                 case PatrolStatusEnum.Patrolling:
                     await PerformPatrolling(patrol);
+                    break;
+                case PatrolStatusEnum.ResolvingIncident:
+                    await PerformResolveIncident(patrol);
                     break;
                 case PatrolStatusEnum.AwaitingOrders:
                     _logger.LogInformation("Patrol {PatrolId} is awaiting orders.", patrol.PatrolId);
@@ -69,6 +73,28 @@ internal class PatrolDirector : IDirector
                 }
 
                 MovePatrol(patrol, movingAction.Route);
+                break;
+        }
+    }
+
+    private async Task PerformResolveIncident(SimulationPatrol patrol)
+    {
+        switch (patrol.Order)
+        {
+            case MoveOrder moveOrder:
+                if (patrol.Action is MovingAction movingAction && moveOrder.Destination.Equals(movingAction.Route.Steps.Last().To, PositionEqualityThreshold))
+                {
+                    if (movingAction.Route.DestinationReached)
+                    {
+                        _logger.LogInformation("Patrol: {PatrolId} has reached its destination.", patrol.PatrolId);
+                        // TODO Start resolving the incident
+                        return;
+                    }
+                    MovePatrol(patrol, movingAction.Route);
+                    return;
+                }
+                var route = await _routeBuilder.CreateRoute(patrol.Position, moveOrder.Destination);
+                patrol.Action = new MovingAction(route);
                 break;
         }
     }
