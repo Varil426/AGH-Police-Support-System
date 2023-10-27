@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using PatrolService.Application;
 using Shared.Application.Agents.Communication.Signals;
+using Shared.CommonTypes.Incident;
 using Shared.Simulation.Handlers;
 using Simulation.Communication.Messages;
 
@@ -17,5 +18,13 @@ internal class IncidentStatusUpdatedHandler : ISimulationMessageHandler<Incident
         _patrolAgent = patrolAgent;
     }
 
-    public async Task Handle(IncidentStatusUpdatedMessage simulationMessage) => await _patrolAgent.PushEnvironmentSignalAsync(new IncidentResolvedSignal(simulationMessage.IncidentId));
+    public async Task Handle(IncidentStatusUpdatedMessage simulationMessage)
+    {
+        switch (simulationMessage.NewStatus)
+        {
+            case IncidentStatusEnum.Resolved:
+                await _patrolAgent.PushEnvironmentSignalAsync(new IncidentResolvedSignal(simulationMessage.IncidentId));
+                break;
+        }
+    }
 }
