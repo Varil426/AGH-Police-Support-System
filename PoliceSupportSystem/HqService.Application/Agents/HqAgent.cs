@@ -8,6 +8,7 @@ using Shared.Application.Agents.Communication.Signals;
 using Shared.Application.Factories;
 using Shared.Application.Services;
 using Shared.CommonTypes.Incident;
+using Shared.CommonTypes.Patrol;
 
 namespace HqService.Application.Agents;
 
@@ -19,7 +20,11 @@ internal class HqAgent : AgentBase
     private readonly IPatrolFactory _patrolFactory;
     private readonly IIncidentMonitoringService _incidentMonitoringService;
     private readonly IDecisionService _decisionService;
-    private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[] { typeof(PatrolOnlineMessage), typeof(PatrolOfflineMessage), typeof(CurrentLocationMessage), typeof(PatrolStatusChangedMessage) }.AsReadOnly();
+
+    private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[]
+            { typeof(PatrolOnlineMessage), typeof(PatrolOfflineMessage), typeof(CurrentLocationMessage), typeof(PatrolStatusChangedMessage), typeof(IncidentInvestigationStarted), typeof(IncidentResolvedMessage) }
+        .AsReadOnly();
+
     private static readonly IReadOnlyCollection<Type> HqAcceptedSignalTypes = new[] { typeof(TestSignal) }.AsReadOnly();
 
     public HqAgent(
@@ -86,6 +91,8 @@ internal class HqAgent : AgentBase
             PatrolOfflineMessage patrolOfflineMessage => Handle(patrolOfflineMessage),
             CurrentLocationMessage currentLocationMessage => Handle(currentLocationMessage),
             PatrolStatusChangedMessage patrolStatusChangedMessage => Handle(patrolStatusChangedMessage),
+            IncidentInvestigationStarted incidentInvestigationStarted => Handle(incidentInvestigationStarted),
+            IncidentResolvedMessage incidentResolvedMessage => Handle(incidentResolvedMessage),
             _ => base.HandleMessage(message)
         };
 
@@ -102,7 +109,11 @@ internal class HqAgent : AgentBase
             _logger.LogWarning($"Received {nameof(currentLocationMessage)} of an unknown sender with id: {currentLocationMessage.Sender}");
             return;
         }
-
+        
+        // Fix for handling wrong order of the events - should be improved in the future.
+        if (currentLocationMessage.CreatedAt < patrol.UpdatedAt)
+            return;
+        
         patrol.UpdatePosition(currentLocationMessage.Position);
 
         await _domainEventProcessor.ProcessDomainEvents(patrol);
@@ -134,5 +145,24 @@ internal class HqAgent : AgentBase
         _patrolMonitoringService.RemovePatrol(patrolOfflineMessage.PatrolId);
         // TODO Process domain event - PatrolRemoved
         return Task.CompletedTask;
+    }
+
+    private async Task Handle(IncidentInvestigationStarted incidentInvestigationStarted)
+    {
+        var incident = await _incidentMonitoringService.GetIncidentById(incidentInvestigationStarted.IncidentId) ?? throw new Exception("Incident not found");
+        incident.UpdateStatus(IncidentStatusEnum.OnGoingNormal);
+        await _domainEventProcessor.ProcessDomainEvents(incident);
+    }
+    
+    private async Task Handle(IncidentResolvedMessage incidentResolvedMessage)
+    {
+        var incident = await _incidentMonitoringService.GetIncidentById(incidentResolvedMessage.IncidentId) ?? throw new Exception("Incident not found");
+        var patrol = _patrolMonitoringService.Patrols.FirstOrDefault(x => x.Id == incidentResolvedMessage.Sender) ?? throw new Exception("Patrol not found");
+        
+        incident.UpdateStatus(IncidentStatusEnum.Resolved);
+        patrol.UpdateStatus(PatrolStatusEnum.AwaitingOrders);
+
+        await _domainEventProcessor.ProcessDomainEvents(incident);
+        await _domainEventProcessor.ProcessDomainEvents(patrol);
     }
 }

@@ -12,7 +12,7 @@ public class NavigationAgent : AgentBase
     private readonly IPatrolInfoService _patrolInfoService;
     private readonly INavigationService _navigationService;
     private static readonly IEnumerable<Type> NavigationAgentAcceptedMessageTypes = new List<Type> { typeof(AskPositionMessage), typeof(ShowDistrictMessage), typeof(NavigateToMessage) };
-    private static readonly IEnumerable<Type> NavigationAgentAcceptedEnvironmentSignalTypes = new [] { typeof(PositionChangedSignal) };
+    private static readonly IEnumerable<Type> NavigationAgentAcceptedEnvironmentSignalTypes = new [] { typeof(PositionChangedSignal), typeof(DestinationReachedSignal) };
 
     public NavigationAgent(IMessageService messageService, IPatrolInfoService patrolInfoService, INavigationService navigationService, ILogger<NavigationAgent> logger) : base(
         patrolInfoService.NavAgentId,
@@ -37,13 +37,14 @@ public class NavigationAgent : AgentBase
     protected override Task HandleSignal(IEnvironmentSignal signal) => signal switch
     {
         PositionChangedSignal positionChangedSignal => Handle(positionChangedSignal),
+        DestinationReachedSignal destinationReachedSignal => Handle(destinationReachedSignal),
         _ => base.HandleSignal(signal)
     };
 
     private async Task Handle(AskPositionMessage askPositionMessage)
     {
         var position = await _navigationService.GetCurrentPosition();
-        await MessageService.SendMessageAsync(new CurrentLocationMessage(position, Id, Guid.NewGuid(), new[] { askPositionMessage.Sender }, askPositionMessage.MessageId));
+        await MessageService.SendMessageAsync(new CurrentLocationMessage(position, Id, Guid.NewGuid(), DateTimeOffset.UtcNow, new[] { askPositionMessage.Sender }, askPositionMessage.MessageId));
     }
     
     private async Task Handle(ShowDistrictMessage showDistrictMessage)
@@ -60,5 +61,9 @@ public class NavigationAgent : AgentBase
 
     private Task Handle(PositionChangedSignal positionChangedSignal) =>
         MessageService.SendMessageAsync(
-            new CurrentLocationMessage(positionChangedSignal.Position, Id, Guid.NewGuid(), new[] { _patrolInfoService.PatrolAgentId }));
+            new CurrentLocationMessage(positionChangedSignal.Position, Id, Guid.NewGuid(), DateTimeOffset.UtcNow, new[] { _patrolInfoService.PatrolAgentId }));
+    
+    private Task Handle(DestinationReachedSignal destinationReachedSignal) =>
+        MessageService.SendMessageAsync(
+            new DestinationReachedMessage(Id, Guid.NewGuid(), _patrolInfoService.PatrolAgentId));
 }

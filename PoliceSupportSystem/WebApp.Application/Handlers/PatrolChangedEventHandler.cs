@@ -13,5 +13,10 @@ internal class PatrolChangedEventHandler : IEventHandler<PatrolChangedEvent>
         _cityStateMonitoringService = cityStateMonitoringService;
     }
 
-    public Task Handle(PatrolChangedEvent @event) => _cityStateMonitoringService.UpdatePatrol(@event.PatrolDto);
+    public Task Handle(PatrolChangedEvent @event)
+    {
+        var patrol = _cityStateMonitoringService.Patrols.FirstOrDefault(x => x.Id == @event.PatrolDto.Id) ?? throw new Exception("Patrol not found");
+        // Fix for handling wrong order of the events - should be improved in the future.
+        return @event.CreatedAt < patrol.UpdatedAt ? Task.CompletedTask : _cityStateMonitoringService.UpdatePatrol(@event.PatrolDto);
+    }
 }

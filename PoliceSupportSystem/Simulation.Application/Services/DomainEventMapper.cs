@@ -1,4 +1,5 @@
-﻿using Riok.Mapperly.Abstractions;
+﻿using System.Collections;
+using Riok.Mapperly.Abstractions;
 using Shared.Domain.DomainEvents;
 using Shared.Domain.DomainEvents.Incident;
 using Shared.Domain.DomainEvents.Patrol;
@@ -12,6 +13,9 @@ namespace Simulation.Application.Services;
 [Mapper]
 internal partial class DomainEventMapper : IDomainEventMapper
 {
+    private static IEnumerable<ISimulationMessage> Encapsulate(ISimulationMessage simulationMessage) => new[] { simulationMessage };
+    private static IEnumerable<ISimulationMessage> Empty() => Enumerable.Empty<ISimulationMessage>();
+
     public IEnumerable<ISimulationMessage> Map(IDomainEvent domainEvent) => domainEvent switch
     {
         // Auto
@@ -19,6 +23,7 @@ internal partial class DomainEventMapper : IDomainEventMapper
         // Custom
         PatrolRelatedServiceAdded relatedServiceAdded => Map(relatedServiceAdded),
         PatrolPositionUpdated patrolPositionUpdated => Map(patrolPositionUpdated),
+        IncidentStatusUpdated incidentStatusUpdated => Map(incidentStatusUpdated),
         // Skippable
         PatrolStatusUpdated patrolStatusUpdated => Empty(),
         PatrolCreated => Empty(),
@@ -28,10 +33,11 @@ internal partial class DomainEventMapper : IDomainEventMapper
         _ => throw new Exception($"Cannot map domain event of type {domainEvent.GetType().Name}")
     };
 
-    private IEnumerable<ISimulationMessage> Encapsulate(ISimulationMessage simulationMessage) => new[] { simulationMessage };
-    private IEnumerable<ISimulationMessage> Empty() => Enumerable.Empty<ISimulationMessage>();
-        
+
     private partial NewIncidentMessage Map(IncidentCreated incidentCreated);
+
+    private IEnumerable<ISimulationMessage> Map(IncidentStatusUpdated incidentStatusUpdated) => Encapsulate(
+        new IncidentStatusUpdatedMessage(Guid.NewGuid(), incidentStatusUpdated.Incident.Id, incidentStatusUpdated.NewStatus, DateTimeOffset.UtcNow));
 
     private IEnumerable<ISimulationMessage> Map(PatrolRelatedServiceAdded relatedServiceAdded) => relatedServiceAdded.NewService.ServiceType == ServiceTypeEnum.NavigationService
         ? Encapsulate(

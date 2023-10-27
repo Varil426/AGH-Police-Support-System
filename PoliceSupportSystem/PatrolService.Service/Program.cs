@@ -1,5 +1,5 @@
-using System.Reflection;
 using PatrolService.Application;
+using PatrolService.Simulation;
 using Shared.Infrastructure;
 using Shared.Simulation;
 
@@ -10,7 +10,7 @@ var host = Host.CreateDefaultBuilder(args)
     .AddRabbitMqSettings()
     .AddServiceSettings()
     .AddPatrolSettings()
-    .AddRabbitMqBus(new Assembly[] { }) // TODO
+    .AddRabbitMqBus(new[] { typeof(ApplicationModule).Assembly })
     .ConfigureServices(
         services =>
             services
@@ -23,11 +23,12 @@ var host = Host.CreateDefaultBuilder(args)
     .AddServiceStatusNotifier()
     .RegisterSharedApplicationModule()
     .RegisterModule<ApplicationModule>()
-    .AddSharedSimulation(new Assembly[] { }) // TODO
+    .RegisterModule<SimulationModule>()
+    .AddSharedSimulation(new[] { typeof(SimulationModule).Assembly })
     .AddPatrolSpecificSimulationServices()
     .Build();
 
-host.SubscribeHandlers(new Assembly[] { }); // TODO
-host.SubscribeSimulationMessageHandlers(new Assembly[] { }); // TODO 
+host.SubscribeHandlers(new[] { typeof(ApplicationModule).Assembly });
+host.SubscribeSimulationMessageHandlers(new[] { typeof(SimulationModule).Assembly }); 
 
 host.Run();

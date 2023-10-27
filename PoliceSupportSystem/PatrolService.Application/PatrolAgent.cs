@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using PatrolService.Application.Orders;
+using PatrolService.Application.Services;
 using Shared.Application.Agents;
 using Shared.Application.Agents.Communication.Messages;
 using Shared.Application.Agents.Communication.Messages.PatrolOrders;
@@ -10,18 +11,22 @@ using Shared.CommonTypes.Patrol;
 
 namespace PatrolService.Application;
 
-internal class PatrolAgent : AgentBase
+public class PatrolAgent : AgentBase
 {
     private readonly IPatrolInfoService _patrolInfoService;
     private readonly ILogger<PatrolAgent> _logger;
-    private static readonly IEnumerable<Type> PatrolAgentAcceptedMessageTypes = new[] { typeof(CurrentLocationMessage), typeof(PatrolDistrictOrderMessage), typeof(HandleIncidentOrderMessage) };
-    private static readonly IEnumerable<Type> PatrolAgentAcceptedEnvironmentSignalTypes = Enumerable.Empty<Type>();
+    private readonly IConfirmationService _confirmationService;
+
+    private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedMessageTypes = new[]
+        { typeof(CurrentLocationMessage), typeof(PatrolDistrictOrderMessage), typeof(HandleIncidentOrderMessage), typeof(DestinationReachedMessage) }.AsReadOnly();
+
+    private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedEnvironmentSignalTypes = new[] { typeof(IncidentResolvedSignal) }.AsReadOnly();
 
     private Position? _lastKnowPosition;
     private PatrolStatusEnum _status;
     private BaseOrder? _lastOrder;
 
-    public PatrolAgent(IMessageService messageService, IPatrolInfoService patrolInfoService, ILogger<PatrolAgent> logger) : base(
+    public PatrolAgent(IMessageService messageService, IPatrolInfoService patrolInfoService, ILogger<PatrolAgent> logger, IConfirmationService confirmationService) : base(
         patrolInfoService.PatrolAgentId,
         PatrolAgentAcceptedMessageTypes,
         PatrolAgentAcceptedEnvironmentSignalTypes,
@@ -30,6 +35,7 @@ internal class PatrolAgent : AgentBase
     {
         _patrolInfoService = patrolInfoService;
         _logger = logger;
+        _confirmationService = confirmationService;
         _status = PatrolStatusEnum.AwaitingOrders;
     }
 
@@ -46,16 +52,16 @@ internal class PatrolAgent : AgentBase
         PatrolDistrictOrderMessage patrolDistrictOrderMessage => Handle(patrolDistrictOrderMessage),
         CurrentLocationMessage currentLocationMessage => Handle(currentLocationMessage),
         HandleIncidentOrderMessage handleIncidentOrderMessage => Handle(handleIncidentOrderMessage),
+        DestinationReachedMessage destinationReachedMessage => Handle(destinationReachedMessage),
         _ => base.HandleMessage(message)
     };
 
 
-    protected async override Task HandleSignal(IEnvironmentSignal signal)
+    protected override Task HandleSignal(IEnvironmentSignal signal) => signal switch
     {
-        switch (signal)
-        {
-        }
-    }
+        IncidentResolvedSignal incidentResolvedSignal => Handle(incidentResolvedSignal),
+        _ => base.HandleSignal(signal)
+    };
 
     protected async override Task PerformActions()
     {
@@ -71,7 +77,7 @@ internal class PatrolAgent : AgentBase
             return;
 
         _lastKnowPosition = currentLocationMessage.Position;
-        await MessageService.SendMessageAsync(new CurrentLocationMessage(_lastKnowPosition, Id, Guid.NewGuid()));
+        await MessageService.SendMessageAsync(new CurrentLocationMessage(_lastKnowPosition, Id, Guid.NewGuid(), DateTimeOffset.UtcNow));
     }
     
     private async Task Handle(PatrolDistrictOrderMessage patrolDistrictOrderMessage)
@@ -96,5 +102,27 @@ internal class PatrolAgent : AgentBase
         _lastOrder = new HandleIncidentOrder(OrderTypeEnum.Patrol, handleIncidentOrderMessage.CreatedAt, handleIncidentOrderMessage.IncidentLocation, handleIncidentOrderMessage.IncidentId);
         await SendWithAcknowledgeRequired(new NavigateToMessage(Id, _patrolInfoService.NavAgentId, handleIncidentOrderMessage.IncidentLocation));
         await AcknowledgeMessage(handleIncidentOrderMessage);
+    }
+
+    private async Task Handle(DestinationReachedMessage destinationReachedMessage)
+    {
+        switch (_lastOrder)
+        {
+            case HandleIncidentOrder handleIncidentOrder:
+                await _confirmationService.ConfirmIncidentStart(handleIncidentOrder.IncidentId);
+                await MessageService.SendMessageAsync(new IncidentInvestigationStarted(handleIncidentOrder.IncidentId, Id, Guid.NewGuid()));
+                break;
+            // TODO SupportShootingOrder
+        }
+    }
+
+    private async Task Handle(IncidentResolvedSignal incidentResolvedSignal)
+    {
+        if (_lastOrder is not HandleIncidentOrder handleIncidentOrder || handleIncidentOrder.IncidentId != incidentResolvedSignal.IncidentId)
+            return;
+
+        _lastOrder = null;
+        _status = PatrolStatusEnum.AwaitingOrders;
+        await MessageService.SendMessageAsync(new IncidentResolvedMessage(Id, Guid.NewGuid(), handleIncidentOrder.IncidentId));
     }
 }

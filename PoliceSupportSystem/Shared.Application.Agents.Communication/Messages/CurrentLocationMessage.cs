@@ -2,4 +2,16 @@
 
 namespace Shared.Application.Agents.Communication.Messages;
 
-public record CurrentLocationMessage(Position Position, Guid Sender, Guid MessageId, IEnumerable<Guid>? Receivers = null, Guid? ResponseTo = null) : BaseMessage(Sender, MessageId, Receivers, ResponseTo);
+public record CurrentLocationMessage : BaseMessage
+{
+    public CurrentLocationMessage(Position position, Guid Sender, Guid MessageId, DateTimeOffset createdAt, IEnumerable<Guid>? Receivers = null, Guid? ResponseTo = null) : base(Sender,
+        MessageId,
+        Receivers,
+        ResponseTo)
+    {
+        Position = position;
+        CreatedAt = createdAt;
+    }
+
+    public Position Position { get; init; }
+}

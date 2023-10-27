@@ -1,5 +1,6 @@
 ﻿using Shared.CommonTypes.Patrol;
 using Shared.Domain.Patrol;
+using Simulation.Application.Entities.Patrol.Actions;
 using Simulation.Application.Entities.Patrol.Orders;
 using Simulation.Communication.Common;
 using Action = Simulation.Application.Entities.Patrol.Actions.Action;
@@ -17,6 +18,11 @@ public interface ISimulationPatrol : IPatrol
     void RemoveRelatedService(IService service);
     void RemoveRelatedService(string relatedServiceId);
     IEnumerable<IService> GetRelatedServicesOfType(ServiceTypeEnum serviceType);
-
     bool IsInEmergencyState => Status is PatrolStatusEnum.InShooting or PatrolStatusEnum.ResolvingIncident;
+    void FreePatrol()
+    {
+        Action = new WaitingAction();
+        Order = null;
+        UpdateStatus(PatrolStatusEnum.AwaitingOrders);
+    }
 }

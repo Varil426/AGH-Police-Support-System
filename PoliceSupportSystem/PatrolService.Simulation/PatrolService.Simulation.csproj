@@ -7,12 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HqService.Application\HqService.Application.csproj" />
-      <ProjectReference Include="..\Shared.Simulation\Shared.Simulation.csproj" />
+        <ProjectReference Include="..\PatrolService.Application\PatrolService.Application.csproj" />
+        <ProjectReference Include="..\Shared.Simulation\Shared.Simulation.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Autofac" Version="7.1.0" />
+        <PackageReference Include="Autofac" Version="7.1.0" />
     </ItemGroup>
-    
+
 </Project>

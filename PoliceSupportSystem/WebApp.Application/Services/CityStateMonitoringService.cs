@@ -78,7 +78,14 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
     {
         await _semaphoreSlim.WaitAsync();
         var incident = _incidents.FirstOrDefault(x => x.Id == incidentDto.Id) ?? throw new Exception($"Incident with ID: {incidentDto.Id} not found");
+
+        // if (incidentDto.Status == IncidentStatusEnum.Resolved)
+        //     _incidents.Remove(incident);
+        // else
+        //     incident.Update(incidentDto);
+        
         incident.Update(incidentDto);
+        
         _semaphoreSlim.Release();
     }
 

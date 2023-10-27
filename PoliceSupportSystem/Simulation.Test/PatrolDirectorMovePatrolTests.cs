@@ -18,6 +18,7 @@ public class PatrolDirectorMovePatrolTests
     private readonly Mock<ISimulationTimeService> _simulationTimeServiceMock = new();
     private readonly Mock<IRouteBuilder> _routeBuilderMock = new();
     private readonly Mock<IMapService> _mapServiceMock = new();
+    private readonly Mock<IMessageService> _messageServiceMock = new();
     private readonly PatrolDirectorSettings _patrolDirectorSettings = new(50, 80);
     private readonly Mock<ISimulationPatrol> _patrolMock = new();
 
@@ -33,7 +34,8 @@ public class PatrolDirectorMovePatrolTests
             _simulationTimeServiceMock.Object,
             _routeBuilderMock.Object,
             _mapServiceMock.Object,
-            _patrolDirectorSettings);
+            _patrolDirectorSettings,
+            _messageServiceMock.Object);
 
         _simulationTimeServiceMock.SetupGet(x => x.SimulationTimeSinceLastAction).Returns(() => _timeSinceLastAction);
 

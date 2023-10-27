@@ -2,7 +2,4 @@
 
 namespace Shared.Application.Integration.Events;
 
-public record PatrolChangedEvent(PatrolDto PatrolDto) : IEvent
-{
-    public DateTimeOffset CreatedAt { get; } = DateTimeOffset.UtcNow;
-}
+public record PatrolChangedEvent(PatrolDto PatrolDto, DateTimeOffset CreatedAt) : IEvent;

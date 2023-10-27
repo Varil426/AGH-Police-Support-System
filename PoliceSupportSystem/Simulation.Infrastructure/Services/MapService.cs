@@ -78,6 +78,18 @@ internal sealed class MapService : IMapService
 
         FillGaps(paths);
         AddStartEndNodes(from, to, paths);
+
+        // for (var i = 0; i < paths.Count - 1; i++)
+        // {
+	       //  var a = paths[i];
+	       //  var b = paths[i+1];
+        //
+	       //  if (a.To != b.From)
+	       //  {
+		      //   var v = 1;
+	       //  }
+		      //   
+        // }
         
         return new Route(paths);
     }

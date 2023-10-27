@@ -6,6 +6,8 @@ using Simulation.Application.Entities.Patrol;
 using Simulation.Application.Entities.Patrol.Actions;
 using Simulation.Application.Entities.Patrol.Orders;
 using Simulation.Application.Services;
+using Simulation.Communication.Common;
+using Simulation.Communication.Messages;
 
 namespace Simulation.Application.Directors.PatrolDirector;
 
@@ -17,19 +19,22 @@ internal class PatrolDirector : IDirector
     private readonly IRouteBuilder _routeBuilder;
     private readonly IMapService _mapService;
     private readonly PatrolDirectorSettings _patrolDirectorSettings;
+    private readonly IMessageService _messageService;
 
     public PatrolDirector(
         ILogger<PatrolDirector> logger,
         ISimulationTimeService simulationTimeService,
         IRouteBuilder routeBuilder,
         IMapService mapService,
-        PatrolDirectorSettings patrolDirectorSettings)
+        PatrolDirectorSettings patrolDirectorSettings,
+        IMessageService messageService)
     {
         _logger = logger;
         _simulationTimeService = simulationTimeService;
         _routeBuilder = routeBuilder;
         _mapService = mapService;
         _patrolDirectorSettings = patrolDirectorSettings;
+        _messageService = messageService;
     }
 
     public async Task Act(ISimulation simulation)
@@ -42,7 +47,8 @@ internal class PatrolDirector : IDirector
                     await PerformPatrolling(patrol);
                     break;
                 case PatrolStatusEnum.ResolvingIncident:
-                    await PerformResolveIncident(patrol);
+                case PatrolStatusEnum.InShooting:
+                    await PerformIncidentActions(patrol, simulation);
                     break;
                 case PatrolStatusEnum.AwaitingOrders:
                     _logger.LogInformation("Patrol {PatrolId} is awaiting orders.", patrol.PatrolId);
@@ -77,22 +83,28 @@ internal class PatrolDirector : IDirector
         }
     }
 
-    private async Task PerformResolveIncident(SimulationPatrol patrol)
+    private async Task PerformIncidentActions(ISimulationPatrol patrol, ISimulation simulation)
     {
         switch (patrol.Order)
         {
             case MoveOrder moveOrder:
+                if (patrol.Action is ResolvingIncidentAction)
+                    return;
                 if (patrol.Action is MovingAction movingAction && moveOrder.Destination.Equals(movingAction.Route.Steps.Last().To, PositionEqualityThreshold))
                 {
                     if (movingAction.Route.DestinationReached)
                     {
-                        _logger.LogInformation("Patrol: {PatrolId} has reached its destination.", patrol.PatrolId);
-                        // TODO Start resolving the incident
+                        var navServices = patrol.GetRelatedServicesOfType(ServiceTypeEnum.NavigationService);
+                        await _messageService.SendMessagesAsync(navServices.Select(x => new DestinationReachedMessage(x.Id)));
+                        patrol.Action = new WaitingAction();
                         return;
                     }
+                    
                     MovePatrol(patrol, movingAction.Route);
                     return;
                 }
+                if (patrol.Position.Equals(moveOrder.Destination, PositionEqualityThreshold))
+                    return;
                 var route = await _routeBuilder.CreateRoute(patrol.Position, moveOrder.Destination);
                 patrol.Action = new MovingAction(route);
                 break;
@@ -116,7 +128,10 @@ internal class PatrolDirector : IDirector
             tempPosition = route.CurrentStep.To;
             route.LastStepIndex++;
             if (route.DestinationReached)
+            {
+                _logger.LogInformation("Patrol: {PatrolId} has reached its destination ({Destination}).", patrol.PatrolId, route.Steps.Last().To);
                 break;
+            }
             distanceToNearestTarget = tempPosition.GetDistanceTo(route.CurrentStep.To);
         }
 

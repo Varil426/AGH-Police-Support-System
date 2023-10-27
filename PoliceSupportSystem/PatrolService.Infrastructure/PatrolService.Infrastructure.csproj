@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\PatrolService.Application\PatrolService.Application.csproj" />
+      <ProjectReference Include="..\PatrolService.Simulation\PatrolService.Simulation.csproj" />
       <ProjectReference Include="..\Shared.Infrastructure\Shared.Infrastructure.csproj" />
     </ItemGroup>
 

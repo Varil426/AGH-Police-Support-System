@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Shared.CommonTypes.Incident;
+using Shared.CommonTypes.Patrol;
 using Simulation.Application.Directors.Settings;
 using Simulation.Application.Entities;
 using Simulation.Application.Helpers;
@@ -100,19 +101,31 @@ internal class IncidentDirector : BackgroundService, IDirector
         foreach (var incident in simulation.Incidents)
         {
             var plannedIncident = _plannedIncidents.FirstOrDefault(x => x.IncidentId == incident.Id) ?? throw new Exception("Missing planned incident");
-            var isInCurrentStateFromSimulationTime = _simulationTimeService.TranslateToSimulationTime(incident.UpdatedAt);
+            var isInCurrentStateFromSimulationTime = _simulationTimeService.TranslateToSimulationTime(incident.History.Last().UpdatedAt);
             
             switch (incident.Status)
             {
                 case IncidentStatusEnum.OnGoingNormal when plannedIncident.ShouldChangeIntoShootingAfter != null:
                     if (isInCurrentStateFromSimulationTime + plannedIncident.ShouldChangeIntoShootingAfter <= _simulationTimeService.SimulationTimeSinceStart)
                     {
+                        _logger.LogInformation("Incident {IncidentId} changes into a shooting.", incident.Id);
                         incident.UpdateStatus(IncidentStatusEnum.AwaitingBackup);
                         incident.UpdateType(IncidentTypeEnum.Shooting);
+                        
+                        incident.RelatedPatrols.ToList().ForEach(x => x.UpdateStatus(PatrolStatusEnum.InShooting));
                     }
                     break;
                 case IncidentStatusEnum.OnGoingNormal when plannedIncident.ShouldChangeIntoShootingAfter == null:
-                    // TODO
+                    if (isInCurrentStateFromSimulationTime + plannedIncident.ShouldFinishAfter <= _simulationTimeService.SimulationTimeSinceStart)
+                    {
+                        _logger.LogInformation("Incident {IncidentId} resolved.", incident.Id);
+                        incident.UpdateStatus(IncidentStatusEnum.Resolved);
+                        foreach (var patrol in incident.RelatedPatrols.ToList())
+                        {
+                            patrol.FreePatrol();
+                            incident.RemoveRelatedPatrol(patrol);
+                        }
+                    }
                     break;
                 case IncidentStatusEnum.OnGoingShooting:
                     // TODO
