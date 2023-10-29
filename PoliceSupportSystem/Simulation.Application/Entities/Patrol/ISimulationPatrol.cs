@@ -18,7 +18,7 @@ public interface ISimulationPatrol : IPatrol
     void RemoveRelatedService(IService service);
     void RemoveRelatedService(string relatedServiceId);
     IEnumerable<IService> GetRelatedServicesOfType(ServiceTypeEnum serviceType);
-    bool IsInEmergencyState => Status is PatrolStatusEnum.InShooting or PatrolStatusEnum.ResolvingIncident;
+    bool IsInEmergencyState { get; }
     void FreePatrol()
     {
         Action = new WaitingAction();

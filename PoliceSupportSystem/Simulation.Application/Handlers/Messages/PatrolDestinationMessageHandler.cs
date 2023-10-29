@@ -20,6 +20,7 @@ internal class PatrolDestinationMessageHandler : BaseSimulationMessageHandler<Pa
     {
         var patrol = simulation.Patrols.FirstOrDefault(x => x.PatrolId.Equals(message.PatrolId, StringComparison.InvariantCultureIgnoreCase)) ??
                      throw new Exception($"Patrol with ID {message.PatrolId} not found");
+        patrol.IsInEmergencyState = message.IsEmergency;
 
         var route = await _routeBuilder.CreateRoute(patrol.Position, message.Position);
         patrol.Action = new NavigatingAction(route);

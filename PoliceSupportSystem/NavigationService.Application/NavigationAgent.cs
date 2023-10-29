@@ -56,7 +56,7 @@ public class NavigationAgent : AgentBase
     private async Task Handle(NavigateToMessage navigateToMessage)
     {
         await AcknowledgeMessage(navigateToMessage);
-        await _navigationService.DisplayRouteTo(navigateToMessage.Position);
+        await _navigationService.DisplayRouteTo(navigateToMessage.Position, navigateToMessage.IsEmergency);
     }
 
     private Task Handle(PositionChangedSignal positionChangedSignal) =>

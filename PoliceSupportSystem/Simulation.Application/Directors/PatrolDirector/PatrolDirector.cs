@@ -80,6 +80,7 @@ internal class PatrolDirector : IDirector
                     if (navigatingAction.Route.DestinationReached)
                     {
                         patrol.Action = new ReadyAction();
+                        patrol.IsInEmergencyState = false;
                         var navServices = patrol.GetRelatedServicesOfType(ServiceTypeEnum.NavigationService);
                         await _messageService.SendMessagesAsync(navServices.Select(x => new DestinationReachedMessage(x.Id)));
                         break;

@@ -101,7 +101,7 @@ public class PatrolAgent : AgentBase
         _status = PatrolStatusEnum.ResolvingIncident;
         await MessageService.SendMessageAsync(new PatrolStatusChangedMessage(Id, _status));
         _lastOrder = new HandleIncidentOrder(OrderTypeEnum.Patrol, handleIncidentOrderMessage.CreatedAt, handleIncidentOrderMessage.IncidentLocation, handleIncidentOrderMessage.IncidentId);
-        await SendWithAcknowledgeRequired(new NavigateToMessage(Id, _patrolInfoService.NavAgentId, handleIncidentOrderMessage.IncidentLocation));
+        await SendWithAcknowledgeRequired(new NavigateToMessage(Id, _patrolInfoService.NavAgentId, handleIncidentOrderMessage.IncidentLocation, true));
         await AcknowledgeMessage(handleIncidentOrderMessage);
     }
 

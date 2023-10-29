@@ -2,4 +2,4 @@
 
 namespace Shared.Application.Agents.Communication.Messages;
 
-public record NavigateToMessage(Guid Sender, Guid Receiver, Position Position) : BaseMessageWithAcknowledgeRequired(Sender, Guid.NewGuid(), Receiver);
+public record NavigateToMessage(Guid Sender, Guid Receiver, Position Position, bool IsEmergency = false) : BaseMessageWithAcknowledgeRequired(Sender, Guid.NewGuid(), Receiver);

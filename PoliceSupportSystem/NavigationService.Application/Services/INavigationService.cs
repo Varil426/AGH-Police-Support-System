@@ -8,5 +8,5 @@ public interface INavigationService
 
     public Task DisplayDistrict(string districtName);
     
-    public Task DisplayRouteTo(Position position);
+    public Task DisplayRouteTo(Position position, bool isEmergency = false);
 }

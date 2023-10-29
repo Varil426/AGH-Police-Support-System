@@ -18,6 +18,7 @@ public class SimulationPatrol : Shared.Domain.Patrol.Patrol, ISimulationRootEnti
     
     public DateTimeOffset ActionChangedAt { get; private set; }
     public DateTimeOffset OrderReceivedAt { get; private set; }
+    public bool IsInEmergencyState { get; set; }
 
     public Action Action
     {
