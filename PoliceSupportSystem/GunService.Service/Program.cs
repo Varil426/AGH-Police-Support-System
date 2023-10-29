@@ -1,6 +1,10 @@
-using System.Reflection;
+using GunService.Application;
+using GunService.Simulation;
 using Shared.Infrastructure;
 using Shared.Simulation;
+
+var applicationAssemblies = new[] { typeof(ApplicationModule).Assembly };
+var simulationAssemblies = new[] { typeof(SimulationModule).Assembly };
 
 var host = Host.CreateDefaultBuilder(args)
     .UseAutofac()
@@ -9,23 +13,21 @@ var host = Host.CreateDefaultBuilder(args)
     .AddRabbitMqSettings()
     .AddServiceSettings()
     .AddPatrolSettings()
-    .AddRabbitMqBus(new Assembly[] { }) // TODO
+    .AddRabbitMqBus(applicationAssemblies)
     .ConfigureServices(
         services =>
             services
                 .AddMessageService()
                 .AddMessageBus()
-        // .AddHostedService<Worker>() // TODO Remove
-        // .AddHostedService<HqAgent>(x => new HqAgent(/*Guid.NewGuid()*/Guid.Parse("0f8fad5b-d9cb-469f-a165-70867728950e"), x.GetRequiredService<IMessageService>()))
         // TODO Create agents
     )
     .AddServiceStatusNotifier()
     .RegisterSharedApplicationModule()
-    .AddSharedSimulation(new Assembly[] { }) // TODO
+    .AddSharedSimulation(simulationAssemblies)
     .AddPatrolSpecificSimulationServices()
     .Build();
 
-host.SubscribeHandlers(new Assembly[] { }); // TODO
-host.SubscribeSimulationMessageHandlers(new Assembly[] { }); // TODO
+host.SubscribeHandlers(applicationAssemblies);
+host.SubscribeSimulationMessageHandlers(simulationAssemblies);
 
 host.Run();

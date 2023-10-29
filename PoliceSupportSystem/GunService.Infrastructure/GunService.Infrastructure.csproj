@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\GunService.Application\GunService.Application.csproj" />
+      <ProjectReference Include="..\GunService.Simulation\GunService.Simulation.csproj" />
       <ProjectReference Include="..\Shared.Infrastructure\Shared.Infrastructure.csproj" />
     </ItemGroup>
 

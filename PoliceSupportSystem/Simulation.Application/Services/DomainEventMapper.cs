@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using Riok.Mapperly.Abstractions;
+using Shared.CommonTypes.Patrol;
 using Shared.Domain.DomainEvents;
 using Shared.Domain.DomainEvents.Incident;
 using Shared.Domain.DomainEvents.Patrol;
 using Simulation.Application.DomainEvents;
+using Simulation.Application.Entities;
 using Simulation.Application.Entities.Patrol;
 using Simulation.Communication.Common;
 using Simulation.Communication.Messages;
@@ -24,8 +26,8 @@ internal partial class DomainEventMapper : IDomainEventMapper
         PatrolRelatedServiceAdded relatedServiceAdded => Map(relatedServiceAdded),
         PatrolPositionUpdated patrolPositionUpdated => Map(patrolPositionUpdated),
         IncidentStatusUpdated incidentStatusUpdated => Map(incidentStatusUpdated),
+        PatrolStatusUpdated patrolStatusUpdated => Map(patrolStatusUpdated),
         // Skippable
-        PatrolStatusUpdated patrolStatusUpdated => Empty(),
         PatrolCreated => Empty(),
         PatrolActionChanged => Empty(),
         PatrolOrderChanged => Empty(),
@@ -35,6 +37,12 @@ internal partial class DomainEventMapper : IDomainEventMapper
 
 
     private partial NewIncidentMessage Map(IncidentCreated incidentCreated);
+
+    private IEnumerable<ISimulationMessage> Map(PatrolStatusUpdated patrolStatusUpdated) =>
+        patrolStatusUpdated.NewStatus == PatrolStatusEnum.InShooting &&
+        (patrolStatusUpdated.Patrol as ISimulationPatrol)?.GetRelatedServicesOfType(ServiceTypeEnum.GunService).First() is { } gunService
+            ? Encapsulate(new GunFiredMessage(gunService.Id))
+            : Empty();
 
     private IEnumerable<ISimulationMessage> Map(IncidentStatusUpdated incidentStatusUpdated) => Encapsulate(
         new IncidentStatusUpdatedMessage(Guid.NewGuid(), incidentStatusUpdated.Incident.Id, incidentStatusUpdated.NewStatus, DateTimeOffset.UtcNow));

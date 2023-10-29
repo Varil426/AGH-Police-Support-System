@@ -18,7 +18,7 @@ public class PatrolAgent : AgentBase
     private readonly IConfirmationService _confirmationService;
 
     private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedMessageTypes = new[]
-        { typeof(CurrentLocationMessage), typeof(PatrolDistrictOrderMessage), typeof(HandleIncidentOrderMessage), typeof(DestinationReachedMessage) }.AsReadOnly();
+        { typeof(CurrentLocationMessage), typeof(PatrolDistrictOrderMessage), typeof(HandleIncidentOrderMessage), typeof(DestinationReachedMessage), typeof(GunFiredMessage) }.AsReadOnly();
 
     private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedEnvironmentSignalTypes = new[] { typeof(IncidentResolvedSignal) }.AsReadOnly();
 
@@ -53,6 +53,7 @@ public class PatrolAgent : AgentBase
         CurrentLocationMessage currentLocationMessage => Handle(currentLocationMessage),
         HandleIncidentOrderMessage handleIncidentOrderMessage => Handle(handleIncidentOrderMessage),
         DestinationReachedMessage destinationReachedMessage => Handle(destinationReachedMessage),
+        GunFiredMessage gunFiredMessage => Handle(gunFiredMessage),
         _ => base.HandleMessage(message)
     };
 
@@ -114,6 +115,14 @@ public class PatrolAgent : AgentBase
                 break;
             // TODO SupportShootingOrder
         }
+    }
+    
+    private async Task Handle(GunFiredMessage gunFiredMessage)
+    {
+        if (gunFiredMessage.Sender != _patrolInfoService.GunAgentId)
+            return;
+
+        await MessageService.SendMessageAsync(new GunFiredMessage(Id, Guid.NewGuid()));
     }
 
     private async Task Handle(IncidentResolvedSignal incidentResolvedSignal)

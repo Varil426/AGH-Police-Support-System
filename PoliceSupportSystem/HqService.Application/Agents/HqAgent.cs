@@ -9,6 +9,8 @@ using Shared.Application.Factories;
 using Shared.Application.Services;
 using Shared.CommonTypes.Incident;
 using Shared.CommonTypes.Patrol;
+using Shared.Domain.Incident;
+using Shared.Domain.Patrol;
 
 namespace HqService.Application.Agents;
 
@@ -20,9 +22,19 @@ internal class HqAgent : AgentBase
     private readonly IPatrolFactory _patrolFactory;
     private readonly IIncidentMonitoringService _incidentMonitoringService;
     private readonly IDecisionService _decisionService;
+    
+    private readonly Dictionary<Incident, List<Patrol>> _incidentsToRelatedPatrols = new ();
 
     private static readonly IReadOnlyCollection<Type> HqAcceptedMessageTypes = new[]
-            { typeof(PatrolOnlineMessage), typeof(PatrolOfflineMessage), typeof(CurrentLocationMessage), typeof(PatrolStatusChangedMessage), typeof(IncidentInvestigationStarted), typeof(IncidentResolvedMessage) }
+        {
+            typeof(PatrolOnlineMessage),
+            typeof(PatrolOfflineMessage),
+            typeof(CurrentLocationMessage),
+            typeof(PatrolStatusChangedMessage),
+            typeof(IncidentInvestigationStarted),
+            typeof(IncidentResolvedMessage),
+            typeof(GunFiredMessage)
+        }
         .AsReadOnly();
 
     private static readonly IReadOnlyCollection<Type> HqAcceptedSignalTypes = new[] { typeof(TestSignal) }.AsReadOnly();
@@ -60,6 +72,11 @@ internal class HqAgent : AgentBase
                 case HandleIncidentOrder handleIncidentOrder:
                     messagesRequiringAcknowledgment.Add(
                         new HandleIncidentOrderMessage(Id, Guid.NewGuid(), handleIncidentOrder.Id, handleIncidentOrder.IncidentDto.Id, handleIncidentOrder.IncidentDto.Location));
+                    var incident = (await _incidentMonitoringService.GetIncidentById(handleIncidentOrder.IncidentDto.Id))!;
+                    var patrol = _patrolMonitoringService.Patrols.First(x => x.Id == handleIncidentOrder.Id);
+                    if (!_incidentsToRelatedPatrols.ContainsKey(incident))
+                        _incidentsToRelatedPatrols.Add(incident, new List<Patrol>());
+                    _incidentsToRelatedPatrols[incident].Add(patrol);
                     break;
                 default:
                     _logger.LogWarning("Received an unknown order type: {orderType}", order.GetType().Name);
@@ -93,6 +110,7 @@ internal class HqAgent : AgentBase
             PatrolStatusChangedMessage patrolStatusChangedMessage => Handle(patrolStatusChangedMessage),
             IncidentInvestigationStarted incidentInvestigationStarted => Handle(incidentInvestigationStarted),
             IncidentResolvedMessage incidentResolvedMessage => Handle(incidentResolvedMessage),
+            GunFiredMessage gunFiredMessage => Handle(gunFiredMessage),
             _ => base.HandleMessage(message)
         };
 
@@ -152,6 +170,18 @@ internal class HqAgent : AgentBase
         var incident = await _incidentMonitoringService.GetIncidentById(incidentInvestigationStarted.IncidentId) ?? throw new Exception("Incident not found");
         incident.UpdateStatus(IncidentStatusEnum.OnGoingNormal);
         await _domainEventProcessor.ProcessDomainEvents(incident);
+    }
+    
+    private async Task Handle(GunFiredMessage gunFiredMessage)
+    {
+        var patrol = _patrolMonitoringService.Patrols.First(x => x.Id == gunFiredMessage.Sender);
+        var incident = _incidentsToRelatedPatrols.First(x => x.Value.Contains(patrol)).Key;
+        
+        incident.UpdateStatus(IncidentStatusEnum.OnGoingShooting);
+        patrol.UpdateStatus(PatrolStatusEnum.InShooting);
+        
+        await _domainEventProcessor.ProcessDomainEvents(incident);
+        await _domainEventProcessor.ProcessDomainEvents(patrol);
     }
     
     private async Task Handle(IncidentResolvedMessage incidentResolvedMessage)
