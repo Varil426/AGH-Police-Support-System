@@ -178,6 +178,7 @@ internal class HqAgent : AgentBase
         var incident = _incidentsToRelatedPatrols.First(x => x.Value.Contains(patrol)).Key;
         
         incident.UpdateStatus(IncidentStatusEnum.OnGoingShooting);
+        incident.UpdateType(IncidentTypeEnum.Shooting);
         patrol.UpdateStatus(PatrolStatusEnum.InShooting);
         
         await _domainEventProcessor.ProcessDomainEvents(incident);

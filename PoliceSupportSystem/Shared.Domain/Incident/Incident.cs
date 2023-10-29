@@ -44,6 +44,6 @@ public class Incident : BaseRootDomainEntity
             return;
         Type = newType;
         UpdateUpdatedAt();
-        AddDomainEvent(new IncidentTypeUpdated(Id, newType));
+        AddDomainEvent(new IncidentTypeUpdated(this, newType));
     }
 }

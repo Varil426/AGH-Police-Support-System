@@ -26,7 +26,7 @@ internal class IncidentRandomizer : IIncidentRandomizer
 
     public int DetermineNumberOfIncidentsForDay(DistrictDangerLevelEnum dangerLevel) => _random.Next(GetMaxNumberOfIncidentPerDay(dangerLevel));
 
-    public bool ShouldChangeIntoShooting(DistrictDangerLevelEnum dangerLevel) => _random.NextDouble() <= GetChanceToChangeIntoShooting(dangerLevel);
+    public bool ShouldChangeIntoShooting(DistrictDangerLevelEnum dangerLevel) => true;//_random.NextDouble() <= GetChanceToChangeIntoShooting(dangerLevel);
 
     public async Task<IEnumerable<PlannedIncident>> PlanIncidents(District district, TimeSpan currentSimulationTime, TimeSpan planAheadFor)
     {

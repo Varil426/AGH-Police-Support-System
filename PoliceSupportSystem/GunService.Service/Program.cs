@@ -23,7 +23,9 @@ var host = Host.CreateDefaultBuilder(args)
     )
     .AddServiceStatusNotifier()
     .RegisterSharedApplicationModule()
+    .RegisterModule<ApplicationModule>()
     .AddSharedSimulation(simulationAssemblies)
+    .RegisterModule<SimulationModule>()
     .AddPatrolSpecificSimulationServices()
     .Build();
 

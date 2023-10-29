@@ -9,14 +9,14 @@ namespace GunService.Application;
 public class GunAgent : AgentBase
 {
     private readonly IPatrolInfoService _patrolInfoService;
-    private readonly ILogger _logger;
+    private readonly ILogger<GunAgent> _logger;
 
     private static readonly IReadOnlyCollection<Type> GunAgentAcceptedMessageTypes = new Type[] {  }
         .AsReadOnly();
 
     private static readonly IReadOnlyCollection<Type> GunAgentAcceptedSignalTypes = new[] { typeof(GunFiredSignal) }.AsReadOnly();
     
-    public GunAgent(IPatrolInfoService patrolInfoService, IMessageService messageService, ILogger logger) : base(
+    public GunAgent(IPatrolInfoService patrolInfoService, IMessageService messageService, ILogger<GunAgent> logger) : base(
         patrolInfoService.GunAgentId,
         GunAgentAcceptedMessageTypes,
         GunAgentAcceptedSignalTypes,
@@ -34,5 +34,8 @@ public class GunAgent : AgentBase
     };
 
     private Task Handle(GunFiredSignal gunFiredSignal)
-        => MessageService.SendMessageAsync(new GunFiredMessage(Id, Guid.NewGuid(), _patrolInfoService.PatrolAgentId));
+    {
+        _logger.LogInformation($"Received {nameof(GunFiredSignal)}.");
+        return MessageService.SendMessageAsync(new GunFiredMessage(Id, Guid.NewGuid(), _patrolInfoService.PatrolAgentId));
+    }
 }

@@ -28,6 +28,7 @@ internal partial class DomainEventMapper : IDomainEventMapper
         IncidentStatusUpdated incidentStatusUpdated => Map(incidentStatusUpdated),
         PatrolStatusUpdated patrolStatusUpdated => Map(patrolStatusUpdated),
         // Skippable
+        IncidentTypeUpdated => Empty(),
         PatrolCreated => Empty(),
         PatrolActionChanged => Empty(),
         PatrolOrderChanged => Empty(),
@@ -46,7 +47,7 @@ internal partial class DomainEventMapper : IDomainEventMapper
 
     private IEnumerable<ISimulationMessage> Map(IncidentStatusUpdated incidentStatusUpdated) => Encapsulate(
         new IncidentStatusUpdatedMessage(Guid.NewGuid(), incidentStatusUpdated.Incident.Id, incidentStatusUpdated.NewStatus, DateTimeOffset.UtcNow));
-
+    
     private IEnumerable<ISimulationMessage> Map(PatrolRelatedServiceAdded relatedServiceAdded) => relatedServiceAdded.NewService.ServiceType == ServiceTypeEnum.NavigationService
         ? Encapsulate(
             new CurrentPositionMessage(

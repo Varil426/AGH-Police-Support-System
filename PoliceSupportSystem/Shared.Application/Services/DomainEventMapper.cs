@@ -19,6 +19,7 @@ internal partial class DomainEventMapper : IDomainEventMapper
         PatrolPositionUpdated e => new PatrolChangedEvent(Map(e.Patrol), DateTimeOffset.UtcNow),
         PatrolStatusUpdated e => new PatrolChangedEvent(Map(e.Patrol), DateTimeOffset.UtcNow),
         IncidentStatusUpdated e => new IncidentChangedEvent(Map(e.Incident)),
+        IncidentTypeUpdated e => new IncidentChangedEvent(Map(e.Incident)),
         _ => throw new Exception($"Event type ({@event.GetType().Name}) not supported")
     };
 
