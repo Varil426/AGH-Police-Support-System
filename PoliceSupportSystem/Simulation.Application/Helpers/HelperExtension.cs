@@ -1,4 +1,5 @@
 ﻿using Simulation.Application.Entities;
+using Simulation.Application.Entities.Incident.AuditEntry;
 using Simulation.Application.Services;
 
 namespace Simulation.Application.Helpers;
@@ -33,6 +34,6 @@ public static class HelperExtension
 
     public static async Task<List<T>> ToListAsync<T>(this Task<IEnumerable<T>> x) => (await x).ToList();
 
-    public static TimeSpan GetUpdatedAtInSimulationTime(this IncidentAuditEntry auditEntry, ISimulationTimeService service) =>
+    public static TimeSpan GetUpdatedAtInSimulationTime(this IIncidentAuditEntry auditEntry, ISimulationTimeService service) =>
         service.TranslateToSimulationTime(auditEntry.UpdatedAt);
 }

@@ -9,7 +9,8 @@ internal record PlannedIncident(
     TimeSpan ShouldStartAfter,
     IncidentTypeEnum InitialIncidentType,
     TimeSpan ShouldFinishAfter,
-    TimeSpan? ShouldChangeIntoShootingAfter)
+    TimeSpan? ShouldChangeIntoShootingAfter,
+    int? NumberOfPatrolsRequiredToSolve = null)
 {
     public bool HasStarted { get; set; } = default;
     public bool HasShootingStarted { get; set; } = default;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Simulation.Application.Directors;
 using Simulation.Application.Entities;
+using Simulation.Application.Entities.Incident;
 using Simulation.Application.Entities.Patrol;
 using Simulation.Application.Services;
 

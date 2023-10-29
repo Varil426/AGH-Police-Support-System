@@ -1,7 +1,7 @@
 ﻿using Shared.CommonTypes.Geo;
 using Shared.CommonTypes.Incident;
 using Shared.CommonTypes.Patrol;
-using Simulation.Application.Entities;
+using Simulation.Application.Entities.Incident;
 using Simulation.Application.Entities.Patrol;
 
 namespace Simulation.Application.Services;

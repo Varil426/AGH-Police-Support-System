@@ -4,6 +4,7 @@ using Shared.CommonTypes.Incident;
 using Shared.CommonTypes.Patrol;
 using Simulation.Application.Directors.Settings;
 using Simulation.Application.Entities;
+using Simulation.Application.Entities.Incident.AuditEntry;
 using Simulation.Application.Helpers;
 using Simulation.Application.Services;
 
@@ -101,12 +102,12 @@ internal class IncidentDirector : BackgroundService, IDirector
         foreach (var incident in simulation.Incidents)
         {
             var plannedIncident = _plannedIncidents.FirstOrDefault(x => x.IncidentId == incident.Id) ?? throw new Exception("Missing planned incident");
-            var isInCurrentStateFromSimulationTime = _simulationTimeService.TranslateToSimulationTime(incident.History.Last().UpdatedAt);
+            var isInCurrentStateSinceSimulationTime = _simulationTimeService.TranslateToSimulationTime(incident.History.Last().UpdatedAt);
             
             switch (incident.Status)
             {
                 case IncidentStatusEnum.OnGoingNormal when plannedIncident.ShouldChangeIntoShootingAfter != null:
-                    if (isInCurrentStateFromSimulationTime + plannedIncident.ShouldChangeIntoShootingAfter <= _simulationTimeService.SimulationTimeSinceStart)
+                    if (isInCurrentStateSinceSimulationTime + plannedIncident.ShouldChangeIntoShootingAfter <= _simulationTimeService.SimulationTimeSinceStart)
                     {
                         _logger.LogInformation("Incident {IncidentId} changes into a shooting.", incident.Id);
                         incident.UpdateStatus(IncidentStatusEnum.AwaitingBackup);
@@ -116,7 +117,7 @@ internal class IncidentDirector : BackgroundService, IDirector
                     }
                     break;
                 case IncidentStatusEnum.OnGoingNormal when plannedIncident.ShouldChangeIntoShootingAfter == null:
-                    if (isInCurrentStateFromSimulationTime + plannedIncident.ShouldFinishAfter <= _simulationTimeService.SimulationTimeSinceStart)
+                    if (isInCurrentStateSinceSimulationTime + plannedIncident.ShouldFinishAfter <= _simulationTimeService.SimulationTimeSinceStart)
                     {
                         _logger.LogInformation("Incident {IncidentId} resolved.", incident.Id);
                         incident.UpdateStatus(IncidentStatusEnum.Resolved);
@@ -128,7 +129,29 @@ internal class IncidentDirector : BackgroundService, IDirector
                     }
                     break;
                 case IncidentStatusEnum.OnGoingShooting:
-                    // TODO
+                    if (incident.RelatedPatrols.Count < plannedIncident.NumberOfPatrolsRequiredToSolve)
+                    {
+                        _logger.LogInformation(
+                            "Shooting {IncidentId} is currently handled by {NumberOfPatrolsHandling}, but the minimum required number is {RequiredNumberOfPatrols}.",
+                            incident.Id,
+                            incident.RelatedPatrols.Count,
+                            plannedIncident.NumberOfPatrolsRequiredToSolve);
+                        break;
+                    }
+
+                    var requiredNumberOfPatrolsReachedAt = incident.History.OfType<RelatedPatrolAddedAuditEntry>().OrderByDescending(x => x.UpdatedAt)
+                        .First(x => x.NewNumberOfPatrols == plannedIncident.NumberOfPatrolsRequiredToSolve).UpdatedAt;
+                    var requiredNumberOfPatrolsReachedSinceSimulationTime = _simulationTimeService.TranslateToSimulationTime(requiredNumberOfPatrolsReachedAt);
+                    if (requiredNumberOfPatrolsReachedSinceSimulationTime + plannedIncident.ShouldFinishAfter <= _simulationTimeService.SimulationTimeSinceStart)
+                    {
+                        _logger.LogInformation("Shooting {IncidentId} resolved.", incident.Id);
+                        incident.UpdateStatus(IncidentStatusEnum.Resolved);
+                        foreach (var patrol in incident.RelatedPatrols.ToList())
+                        {
+                            patrol.FreePatrol();
+                            incident.RemoveRelatedPatrol(patrol);
+                        }
+                    }
                     break;
             }
             
