@@ -19,7 +19,7 @@ export const IncidentStatsPanelViewModel = observer(
         </span>
         <span>
           Incident under investigation:{" "}
-          {model.incidentsWaitingForResponse.length}
+          {model.incidentsUnderInvestigation.length}
         </span>
         <span>Active shootings: {model.activeShootings.length}</span>
       </Flex>
