@@ -2,4 +2,8 @@
 
 namespace PatrolService.Application.Orders;
 
-internal record SupportShootingOrder(OrderTypeEnum Type, DateTimeOffset GivenAt, Position IncidentLocation, Guid IncidentId) : BaseOrder(Type, GivenAt);
+internal record SupportShootingOrder(OrderTypeEnum Type, DateTimeOffset GivenAt, Position IncidentLocation, Guid IncidentId) : BaseIncidentOrder(
+    Type,
+    GivenAt,
+    IncidentLocation,
+    IncidentId);

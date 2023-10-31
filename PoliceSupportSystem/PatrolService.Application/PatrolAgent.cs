@@ -143,11 +143,11 @@ public class PatrolAgent : AgentBase
 
     private async Task Handle(IncidentResolvedSignal incidentResolvedSignal)
     {
-        if (_lastOrder is not HandleIncidentOrder handleIncidentOrder || handleIncidentOrder.IncidentId != incidentResolvedSignal.IncidentId)
+        if (_lastOrder is not BaseIncidentOrder baseIncident || baseIncident.IncidentId != incidentResolvedSignal.IncidentId)
             return;
 
         _lastOrder = null;
         _status = PatrolStatusEnum.AwaitingOrders;
-        await MessageService.SendMessageAsync(new IncidentResolvedMessage(Id, Guid.NewGuid(), handleIncidentOrder.IncidentId));
+        await MessageService.SendMessageAsync(new IncidentResolvedMessage(Id, Guid.NewGuid(), baseIncident.IncidentId));
     }
 }
