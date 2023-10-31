@@ -20,7 +20,7 @@ public class PatrolAgent : AgentBase
     private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedMessageTypes = new[]
         { typeof(CurrentLocationMessage), typeof(PatrolDistrictOrderMessage), typeof(HandleIncidentOrderMessage), typeof(DestinationReachedMessage), typeof(GunFiredMessage), typeof(SupportShootingOrderMessage) }.AsReadOnly();
 
-    private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedEnvironmentSignalTypes = new[] { typeof(IncidentResolvedSignal) }.AsReadOnly();
+     private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedEnvironmentSignalTypes = new[] { typeof(IncidentResolvedSignal), typeof(IncidentAlreadyOverSignal) }.AsReadOnly();
 
     private Position? _lastKnowPosition;
     private PatrolStatusEnum _status;
@@ -62,6 +62,7 @@ public class PatrolAgent : AgentBase
     protected override Task HandleSignal(IEnvironmentSignal signal) => signal switch
     {
         IncidentResolvedSignal incidentResolvedSignal => Handle(incidentResolvedSignal),
+        IncidentAlreadyOverSignal incidentAlreadyOverSignal => Handle(incidentAlreadyOverSignal),
         _ => base.HandleSignal(signal)
     };
 
@@ -144,6 +145,16 @@ public class PatrolAgent : AgentBase
     private async Task Handle(IncidentResolvedSignal incidentResolvedSignal)
     {
         if (_lastOrder is not BaseIncidentOrder baseIncident || baseIncident.IncidentId != incidentResolvedSignal.IncidentId)
+            return;
+
+        _lastOrder = null;
+        _status = PatrolStatusEnum.AwaitingOrders;
+        await MessageService.SendMessageAsync(new IncidentResolvedMessage(Id, Guid.NewGuid(), baseIncident.IncidentId));
+    }
+    
+    private async Task Handle(IncidentAlreadyOverSignal incidentAlreadyOverSignal)
+    {
+        if (_lastOrder is not BaseIncidentOrder baseIncident || baseIncident.IncidentId != incidentAlreadyOverSignal.IncidentId)
             return;
 
         _lastOrder = null;

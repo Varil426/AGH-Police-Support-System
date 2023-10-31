@@ -7,12 +7,12 @@ using Simulation.Communication.Messages;
 
 namespace PatrolService.Simulation.Handlers;
 
-internal class IncidentStatusUpdatedHandler : ISimulationMessageHandler<IncidentStatusUpdatedMessage>
+internal class IncidentStatusUpdatedMessageHandler : ISimulationMessageHandler<IncidentStatusUpdatedMessage>
 {
-    private readonly ILogger<IncidentStatusUpdatedHandler> _logger;
+    private readonly ILogger<IncidentStatusUpdatedMessageHandler> _logger;
     private readonly PatrolAgent _patrolAgent;
 
-    public IncidentStatusUpdatedHandler(ILogger<IncidentStatusUpdatedHandler> logger, PatrolAgent patrolAgent)
+    public IncidentStatusUpdatedMessageHandler(ILogger<IncidentStatusUpdatedMessageHandler> logger, PatrolAgent patrolAgent)
     {
         _logger = logger;
         _patrolAgent = patrolAgent;
