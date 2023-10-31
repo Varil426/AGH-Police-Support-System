@@ -30,9 +30,7 @@ export class IncidentStatsPanelModel {
 
   @computed get activeShootings() {
     return this.incidents.filter(
-      (x) =>
-        x.status === IncidentStatusEnum.OnGoingShooting ||
-        x.status === IncidentStatusEnum.AwaitingBackup
+      (x) => x.status === IncidentStatusEnum.OnGoingShooting
     );
   }
 }
