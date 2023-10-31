@@ -13,6 +13,8 @@ internal class SimpleDecisionService : IDecisionService
     private readonly IMapInfoService _mapInfoService;
     private readonly Random _random;
 
+    private readonly Dictionary<Incident, IList<Patrol>> _patrolsRelatedToIncident = new();
+
     public SimpleDecisionService(IMapInfoService mapInfoService)
     {
         _mapInfoService = mapInfoService;
@@ -21,6 +23,7 @@ internal class SimpleDecisionService : IDecisionService
 
     public async Task<IReadOnlyList<PatrolOrder>> ComputeOrders(IEnumerable<Incident> onGoingIncidents, IReadOnlyCollection<Patrol> patrols)
     {
+        RefreshRelatedList();
         var districts = await _mapInfoService.GetDistricts();
         var orders = new List<PatrolOrder>();
         var patrolsOrdered = new List<Patrol>();
@@ -30,6 +33,9 @@ internal class SimpleDecisionService : IDecisionService
         var onGoingIncidentsList = onGoingIncidents.ToList();
         foreach (var shooting in onGoingIncidentsList.Where(x => x.Status == IncidentStatusEnum.OnGoingShooting))
         {
+            if (GetNumberOfRelatedPatrols(shooting) >= MaxNumberOfSupportingPatrols + 1)
+                continue;
+            
             var closestFreePatrols = PatrolsNotOrdered().Where(x => x.Status is PatrolStatusEnum.Patrolling or PatrolStatusEnum.AwaitingOrders)
                 .OrderBy(x => x.Position.GetDistanceTo(shooting.Location)).Take(MaxNumberOfSupportingPatrols);
 
@@ -37,6 +43,7 @@ internal class SimpleDecisionService : IDecisionService
             {
                 orders.Add(new SupportShootingOrder(patrol.Id, patrol.PatrolId, shooting.AsDto()));
                 patrolsOrdered.Add(patrol);
+                AddRelatedPatrol(shooting, patrol);
             }
         }
         
@@ -50,6 +57,7 @@ internal class SimpleDecisionService : IDecisionService
             
             orders.Add(new HandleIncidentOrder(closestFreePatrol.Id, closestFreePatrol.PatrolId, incident.AsDto()));
             patrolsOrdered.Add(closestFreePatrol);
+            AddRelatedPatrol(incident, closestFreePatrol);
         }
         
         // Rest of the patrols can patrol
@@ -70,4 +78,20 @@ internal class SimpleDecisionService : IDecisionService
 
         return orders;
     }
+
+    private void RefreshRelatedList()
+    {
+        var resolved = _patrolsRelatedToIncident.Keys.Where(x => x.Status == IncidentStatusEnum.Resolved).ToList();
+        resolved.ForEach(x => _patrolsRelatedToIncident.Remove(x));
+    }
+    
+    private void AddRelatedPatrol(Incident incident, Patrol patrol)
+    {
+        if (!_patrolsRelatedToIncident.ContainsKey(incident))
+            _patrolsRelatedToIncident[incident] = new List<Patrol>();
+        
+        _patrolsRelatedToIncident[incident].Add(patrol);
+    }
+
+    private int GetNumberOfRelatedPatrols(Incident incident) => _patrolsRelatedToIncident.TryGetValue(incident, out var l) ? l.Count : 0;
 }
