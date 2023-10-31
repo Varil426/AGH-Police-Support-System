@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 .marker-icon {
-  width: 25px !important;
-  height: 25px !important;
+  width: 20px !important;
+  height: 20px !important;
   text-align: center;
 
   border-radius: 50%;

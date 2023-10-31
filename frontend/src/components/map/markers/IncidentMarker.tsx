@@ -2,14 +2,22 @@ import { Marker } from "react-leaflet";
 import { Incident } from "../../../models/Incident";
 import { observer } from "mobx-react-lite";
 import { DivIcon } from "leaflet";
+import { IncidentStatusEnum } from "../../../api/generated/Shared/CommonTypes/Incident/IncidentStatusEnum";
 
 export interface IncidentMarkerProps {
   incident: Incident;
 }
 
-const icon = new DivIcon({
+const className = "marker-icon bg-black bg-opacity-50";
+
+const incidentIcon = new DivIcon({
+  html: "❕",
+  className: className,
+});
+
+const shootingIcon = new DivIcon({
   html: "❗",
-  className: "marker-icon",
+  className: className,
 });
 
 export const IncidentMarker = observer(({ incident }: IncidentMarkerProps) => {
@@ -19,7 +27,11 @@ export const IncidentMarker = observer(({ incident }: IncidentMarkerProps) => {
         lat: incident.location.latitude,
         lng: incident.location.longitude,
       }}
-      icon={icon}
+      icon={
+        incident.status === IncidentStatusEnum.OnGoingShooting
+          ? shootingIcon
+          : incidentIcon
+      }
     ></Marker>
   );
 });
