@@ -10,6 +10,6 @@ public class SimulationModule : Module
     {
         base.Load(builder);
 
-        builder.RegisterType<ConfirmationService>().As<IConfirmationService>();
+        builder.RegisterType<SimulationConfirmationService>().As<IConfirmationService>();
     }
 }

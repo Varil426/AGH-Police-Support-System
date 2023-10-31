@@ -8,7 +8,6 @@ public enum IncidentStatusEnum
     WaitingForResponse,
     AwaitingPatrolArrival,
     OnGoingNormal,
-    AwaitingBackup,
     OnGoingShooting,
     Resolved
 }

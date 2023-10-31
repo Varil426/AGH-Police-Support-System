@@ -110,7 +110,7 @@ internal class IncidentDirector : BackgroundService, IDirector
                     if (isInCurrentStateSinceSimulationTime + plannedIncident.ShouldChangeIntoShootingAfter <= _simulationTimeService.SimulationTimeSinceStart)
                     {
                         _logger.LogInformation("Incident {IncidentId} changes into a shooting.", incident.Id);
-                        incident.UpdateStatus(IncidentStatusEnum.AwaitingBackup);
+                        incident.UpdateStatus(IncidentStatusEnum.OnGoingShooting);
                         incident.UpdateType(IncidentTypeEnum.Shooting);
                         
                         incident.RelatedPatrols.ToList().ForEach(x => x.UpdateStatus(PatrolStatusEnum.InShooting));

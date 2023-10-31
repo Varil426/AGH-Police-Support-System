@@ -9,6 +9,7 @@ namespace HqService.Application.Services.DecisionService;
 
 internal class SimpleDecisionService : IDecisionService
 {
+    private const int MaxNumberOfSupportingPatrols = 2;
     private readonly IMapInfoService _mapInfoService;
     private readonly Random _random;
 
@@ -26,8 +27,20 @@ internal class SimpleDecisionService : IDecisionService
 
         IReadOnlyCollection<Patrol> PatrolsNotOrdered() => patrols.Where(x => !patrolsOrdered.Contains(x)).ToList();
         
-        // TODO Handle incidents
-        foreach (var incident in onGoingIncidents.Where(x => x.Status == IncidentStatusEnum.WaitingForResponse))
+        var onGoingIncidentsList = onGoingIncidents.ToList();
+        foreach (var shooting in onGoingIncidentsList.Where(x => x.Status == IncidentStatusEnum.OnGoingShooting))
+        {
+            var closestFreePatrols = PatrolsNotOrdered().Where(x => x.Status is PatrolStatusEnum.Patrolling or PatrolStatusEnum.AwaitingOrders)
+                .OrderBy(x => x.Position.GetDistanceTo(shooting.Location)).Take(MaxNumberOfSupportingPatrols);
+
+            foreach (var patrol in closestFreePatrols)
+            {
+                orders.Add(new SupportShootingOrder(patrol.Id, patrol.PatrolId, shooting.AsDto()));
+                patrolsOrdered.Add(patrol);
+            }
+        }
+        
+        foreach (var incident in onGoingIncidentsList.Where(x => x.Status == IncidentStatusEnum.WaitingForResponse))
         {
             var closestFreePatrol = PatrolsNotOrdered().Where(x => x.Status is PatrolStatusEnum.Patrolling or PatrolStatusEnum.AwaitingOrders)
                 .MinBy(x => x.Position.GetDistanceTo(incident.Location));

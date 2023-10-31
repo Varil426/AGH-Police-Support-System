@@ -5,12 +5,12 @@ using Simulation.Communication.Messages;
 
 namespace PatrolService.Simulation.Services;
 
-internal class ConfirmationService : IConfirmationService
+internal class SimulationConfirmationService : IConfirmationService
 {
     private readonly ISimulationMessageBus _messageBus;
     private readonly IPatrolInfoService _patrolInfoService;
 
-    public ConfirmationService(ISimulationMessageBus messageBus, IPatrolInfoService patrolInfoService)
+    public SimulationConfirmationService(ISimulationMessageBus messageBus, IPatrolInfoService patrolInfoService)
     {
         _messageBus = messageBus;
         _patrolInfoService = patrolInfoService;
@@ -18,4 +18,7 @@ internal class ConfirmationService : IConfirmationService
 
     public async Task ConfirmIncidentStart(Guid incidentId)
         => await _messageBus.SendSimulationMessage(new PatrolConfirmIncidentStartMessage(_patrolInfoService.PatrolId, incidentId));
+
+    public async Task ConfirmSupportShooting(Guid incidentId)
+        => await _messageBus.SendSimulationMessage(new PatrolJoinedShootingMessage(_patrolInfoService.PatrolId, incidentId));
 }

@@ -31,9 +31,10 @@ internal class HqAgent : AgentBase
             typeof(PatrolOfflineMessage),
             typeof(CurrentLocationMessage),
             typeof(PatrolStatusChangedMessage),
-            typeof(IncidentInvestigationStarted),
+            typeof(IncidentInvestigationStartedMessage),
             typeof(IncidentResolvedMessage),
-            typeof(GunFiredMessage)
+            typeof(GunFiredMessage),
+            typeof(JoinedShootingMessage)
         }
         .AsReadOnly();
 
@@ -78,6 +79,15 @@ internal class HqAgent : AgentBase
                         _incidentsToRelatedPatrols.Add(incident, new List<Patrol>());
                     _incidentsToRelatedPatrols[incident].Add(patrol);
                     break;
+                case SupportShootingOrder supportShootingOrder:
+                    messagesRequiringAcknowledgment.Add(
+                        new SupportShootingOrderMessage(Id, Guid.NewGuid(), supportShootingOrder.Id, supportShootingOrder.IncidentDto.Id, supportShootingOrder.IncidentDto.Location));
+                    incident = (await _incidentMonitoringService.GetIncidentById(supportShootingOrder.IncidentDto.Id))!;
+                    patrol = _patrolMonitoringService.Patrols.First(x => x.Id == supportShootingOrder.Id);
+                    if (!_incidentsToRelatedPatrols.ContainsKey(incident))
+                        _incidentsToRelatedPatrols.Add(incident, new List<Patrol>());
+                    _incidentsToRelatedPatrols[incident].Add(patrol);
+                    break;
                 default:
                     _logger.LogWarning("Received an unknown order type: {orderType}", order.GetType().Name);
                     break;
@@ -108,9 +118,10 @@ internal class HqAgent : AgentBase
             PatrolOfflineMessage patrolOfflineMessage => Handle(patrolOfflineMessage),
             CurrentLocationMessage currentLocationMessage => Handle(currentLocationMessage),
             PatrolStatusChangedMessage patrolStatusChangedMessage => Handle(patrolStatusChangedMessage),
-            IncidentInvestigationStarted incidentInvestigationStarted => Handle(incidentInvestigationStarted),
+            IncidentInvestigationStartedMessage incidentInvestigationStarted => Handle(incidentInvestigationStarted),
             IncidentResolvedMessage incidentResolvedMessage => Handle(incidentResolvedMessage),
             GunFiredMessage gunFiredMessage => Handle(gunFiredMessage),
+            JoinedShootingMessage joinedShootingMessage => Handle(joinedShootingMessage),
             _ => base.HandleMessage(message)
         };
 
@@ -165,10 +176,17 @@ internal class HqAgent : AgentBase
         return Task.CompletedTask;
     }
 
-    private async Task Handle(IncidentInvestigationStarted incidentInvestigationStarted)
+    private async Task Handle(IncidentInvestigationStartedMessage incidentInvestigationStartedMessage)
     {
-        var incident = await _incidentMonitoringService.GetIncidentById(incidentInvestigationStarted.IncidentId) ?? throw new Exception("Incident not found");
+        var incident = await _incidentMonitoringService.GetIncidentById(incidentInvestigationStartedMessage.IncidentId) ?? throw new Exception("Incident not found");
         incident.UpdateStatus(IncidentStatusEnum.OnGoingNormal);
+        await _domainEventProcessor.ProcessDomainEvents(incident);
+    }
+    
+    private async Task Handle(JoinedShootingMessage joinedShootingMessage)
+    {
+        var incident = await _incidentMonitoringService.GetIncidentById(joinedShootingMessage.IncidentId) ?? throw new Exception("Incident not found");
+        incident.UpdateStatus(IncidentStatusEnum.OnGoingShooting);
         await _domainEventProcessor.ProcessDomainEvents(incident);
     }
     

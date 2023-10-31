@@ -18,7 +18,7 @@ public class PatrolAgent : AgentBase
     private readonly IConfirmationService _confirmationService;
 
     private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedMessageTypes = new[]
-        { typeof(CurrentLocationMessage), typeof(PatrolDistrictOrderMessage), typeof(HandleIncidentOrderMessage), typeof(DestinationReachedMessage), typeof(GunFiredMessage) }.AsReadOnly();
+        { typeof(CurrentLocationMessage), typeof(PatrolDistrictOrderMessage), typeof(HandleIncidentOrderMessage), typeof(DestinationReachedMessage), typeof(GunFiredMessage), typeof(SupportShootingOrderMessage) }.AsReadOnly();
 
     private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedEnvironmentSignalTypes = new[] { typeof(IncidentResolvedSignal) }.AsReadOnly();
 
@@ -54,6 +54,7 @@ public class PatrolAgent : AgentBase
         HandleIncidentOrderMessage handleIncidentOrderMessage => Handle(handleIncidentOrderMessage),
         DestinationReachedMessage destinationReachedMessage => Handle(destinationReachedMessage),
         GunFiredMessage gunFiredMessage => Handle(gunFiredMessage),
+        SupportShootingOrderMessage supportShootingOrderMessage => Handle(supportShootingOrderMessage),
         _ => base.HandleMessage(message)
     };
 
@@ -100,9 +101,21 @@ public class PatrolAgent : AgentBase
         _logger.LogInformation("Patrol: {PatrolId} received a handle incident ({IncidentId}) order.", _patrolInfoService.PatrolId, handleIncidentOrderMessage.IncidentId);
         _status = PatrolStatusEnum.ResolvingIncident;
         await MessageService.SendMessageAsync(new PatrolStatusChangedMessage(Id, _status));
-        _lastOrder = new HandleIncidentOrder(OrderTypeEnum.Patrol, handleIncidentOrderMessage.CreatedAt, handleIncidentOrderMessage.IncidentLocation, handleIncidentOrderMessage.IncidentId);
+        _lastOrder = new HandleIncidentOrder(OrderTypeEnum.HandleIncident, handleIncidentOrderMessage.CreatedAt, handleIncidentOrderMessage.IncidentLocation, handleIncidentOrderMessage.IncidentId);
         await SendWithAcknowledgeRequired(new NavigateToMessage(Id, _patrolInfoService.NavAgentId, handleIncidentOrderMessage.IncidentLocation, true));
         await AcknowledgeMessage(handleIncidentOrderMessage);
+    }
+    
+    private async Task Handle(SupportShootingOrderMessage supportShootingOrderMessage)
+    {
+        if (_lastOrder?.GivenAt > supportShootingOrderMessage.CreatedAt)
+            return;
+        _logger.LogInformation("Patrol: {PatrolId} received a support shooting ({IncidentId}) order.", _patrolInfoService.PatrolId, supportShootingOrderMessage.IncidentId);
+        _status = PatrolStatusEnum.InShooting;
+        await MessageService.SendMessageAsync(new PatrolStatusChangedMessage(Id, _status));
+        _lastOrder = new SupportShootingOrder(OrderTypeEnum.SupportShooting, supportShootingOrderMessage.CreatedAt, supportShootingOrderMessage.IncidentLocation, supportShootingOrderMessage.IncidentId);
+        await SendWithAcknowledgeRequired(new NavigateToMessage(Id, _patrolInfoService.NavAgentId, supportShootingOrderMessage.IncidentLocation, true));
+        await AcknowledgeMessage(supportShootingOrderMessage);
     }
 
     private async Task Handle(DestinationReachedMessage destinationReachedMessage)
@@ -111,9 +124,12 @@ public class PatrolAgent : AgentBase
         {
             case HandleIncidentOrder handleIncidentOrder:
                 await _confirmationService.ConfirmIncidentStart(handleIncidentOrder.IncidentId);
-                await MessageService.SendMessageAsync(new IncidentInvestigationStarted(handleIncidentOrder.IncidentId, Id, Guid.NewGuid()));
+                await MessageService.SendMessageAsync(new IncidentInvestigationStartedMessage(handleIncidentOrder.IncidentId, Id, Guid.NewGuid()));
                 break;
-            // TODO SupportShootingOrder
+            case SupportShootingOrder supportShootingOrder:
+                await _confirmationService.ConfirmSupportShooting(supportShootingOrder.IncidentId);
+                await MessageService.SendMessageAsync(new JoinedShootingMessage(supportShootingOrder.IncidentId, Id, Guid.NewGuid()));
+                break;
         }
     }
     

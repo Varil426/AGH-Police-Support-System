@@ -6,32 +6,37 @@ using Simulation.Communication.Messages;
 
 namespace Simulation.Application.Handlers.Messages;
 
-internal class PatrolConfirmIncidentStartMessageHandler : BaseSimulationMessageHandler<PatrolConfirmIncidentStartMessage>
+internal class PatrolJoinedShootingMessageHandler : BaseSimulationMessageHandler<PatrolJoinedShootingMessage>
 {
-    private readonly ILogger<PatrolConfirmIncidentStartMessageHandler> _logger;
+    private readonly ILogger<PatrolJoinedShootingMessageHandler> _logger;
 
-    public PatrolConfirmIncidentStartMessageHandler(ILogger<PatrolConfirmIncidentStartMessageHandler> logger)
+    public PatrolJoinedShootingMessageHandler(ILogger<PatrolJoinedShootingMessageHandler> logger)
     {
         _logger = logger;
     }
 
-    public override Task HandleAsync(ISimulation simulation, PatrolConfirmIncidentStartMessage message)
+    public override Task HandleAsync(ISimulation simulation, PatrolJoinedShootingMessage message)
     {
         var incident = simulation.Incidents.FirstOrDefault(x => x.Id == message.IncidentId) ?? throw new Exception("Incident not found");
+
+        if (incident.Status != IncidentStatusEnum.OnGoingShooting)
+        {
+            _logger.LogWarning("Incident isn't in a shooting state.");
+            return Task.CompletedTask;
+        }
         
         var patrol = simulation.Patrols.FirstOrDefault(x => x.PatrolId.Equals(message.PatrolId, StringComparison.InvariantCultureIgnoreCase)) ??
-            throw new Exception("Patrol not found");
+                     throw new Exception("Patrol not found");
         if (patrol.Action is not ReadyAction)
         {
             _logger.LogWarning("Patrol {PatrolId} wasn't ready.", patrol.PatrolId);
             return Task.CompletedTask;
         }
         
-        incident.UpdateStatus(IncidentStatusEnum.OnGoingNormal);
-        patrol.UpdateStatus(PatrolStatusEnum.ResolvingIncident);
+        patrol.UpdateStatus(PatrolStatusEnum.InShooting);
         patrol.Action = new ResolvingIncidentAction(simulation.Incidents.First(x => x.Id == message.IncidentId));
         incident.AddRelatedPatrol(patrol);
-        _logger.LogInformation("Patrol {PatrolId} has started investigating an incident with ID {IncidentId}", message.PatrolId, message.IncidentId);
+        _logger.LogInformation("Patrol {PatrolId} has join a shooting with ID {IncidentId}", message.PatrolId, message.IncidentId);
         
         return Task.CompletedTask;
     }

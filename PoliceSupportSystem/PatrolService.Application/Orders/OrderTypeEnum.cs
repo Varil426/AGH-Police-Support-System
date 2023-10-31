@@ -4,6 +4,6 @@ internal enum OrderTypeEnum
 {
     Patrol,
     HandleIncident,
-    SupportFiring,
+    SupportShooting,
     Wait
 }
