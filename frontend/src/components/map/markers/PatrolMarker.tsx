@@ -21,7 +21,7 @@ export const PatrolMarker = observer(
         }}
         icon={
           new DivIcon({
-            html: "🚓",
+            html: "",
             className: `marker-icon ${bgColor} bg-opacity-75`,
           })
         }
