@@ -55,7 +55,7 @@ internal class Simulation : ISimulation
             // Process messages - Update state
             await _simulationMessageProcessor.ProcessAsync(this, messages);
             // Perform actions
-            await Task.WhenAll(_directors.Select(x => x.Act(this))); // TODO Add Patrol Director
+            await Task.WhenAll(_directors.Select(x => x.Act(this)));
             _simulationTimeService.UpdateLastActionTime();
             // Send updates - Handle Domain Events
             await HandleDomainEvents();

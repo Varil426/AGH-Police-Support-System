@@ -10,10 +10,10 @@ internal class IncidentRandomizer : IIncidentRandomizer
 {
     private const int MinimumIncidentDuration = 10;
     private const int MaximumIncidentDuration = 60;
-    
+
     private const int MinimumTimeToChangeIntoShooting = 1;
     private const int MaximumTimeToChangeIntoShooting = 10;
-    
+
     private readonly IncidentDirectorSettings _settings;
     private readonly IMapService _mapService;
     private readonly Random _random = new();
@@ -33,13 +33,13 @@ internal class IncidentRandomizer : IIncidentRandomizer
         var results = new List<PlannedIncident>();
         var numberOfIncidents = (int)Math.Floor(DetermineNumberOfIncidentsForDay(district.DangerLevel) * planAheadFor.TotalDays);
         var positions = await _mapService.GetRandomPositionsInDistrict(district.Name, numberOfIncidents);
-        
+
         foreach (var position in positions)
         {
             var startAfter = currentSimulationTime + TimeSpan.FromMinutes(_random.Next((int)planAheadFor.TotalMinutes));
             var finishAfter = TimeSpan.FromMinutes(_random.Next(MinimumIncidentDuration, MaximumIncidentDuration));
             TimeSpan? changeIntoShootingAfter = ShouldChangeIntoShooting(district.DangerLevel) ? TimeSpan.FromMinutes(_random.Next(MinimumTimeToChangeIntoShooting, MaximumTimeToChangeIntoShooting)) : null;
-            
+
             results.Add(new PlannedIncident(Guid.NewGuid(), position, startAfter, IncidentTypeEnum.NormalIncident, finishAfter, changeIntoShootingAfter, changeIntoShootingAfter is null ? null : 2)); // TODO Random number of required patrols to solve
         }
 
