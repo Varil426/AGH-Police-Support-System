@@ -10,6 +10,14 @@
   border-radius: 50%;
 }
 
+.marker-icon.patrol {
+  width: 10px !important;
+  height: 10px !important;
+
+  border-width: 1px;
+  border-color: black;
+}
+
 .marker-icon.selected {
   background-color: teal;
 }
