@@ -11,15 +11,22 @@ public class StatisticsManager : IStatisticsManager
     private List<double> _distancesOfConsideredPatrolsFromIncident = new();
     private List<double> _distancesOfChosenPatrolsFromIncident = new();
 
+    private Dictionary<DateTimeOffset, int> _numberOfActiveIncidentsInTime = new();
+    private Dictionary<DateTimeOffset, int> _numberOfActiveShootingsInTime = new();
+
     public void AddIncident(Guid incidentId, Position position, DateTimeOffset createdAt)
     {
         var incidentData = new IncidentData(incidentId, position, createdAt);
         incidentData.History.States.Add((IncidentStatusEnum.AwaitingPatrolArrival, createdAt));
         _incidentData.Add(incidentData);
+        UpdateIncidentsInTimeData();
     }
 
-    public void UpdateIncident(Guid incidentId, IncidentStatusEnum statusEnum, DateTimeOffset changedAt) =>
+    public void UpdateIncident(Guid incidentId, IncidentStatusEnum statusEnum, DateTimeOffset changedAt)
+    {
         _incidentData.First(x => x.IncidentId == incidentId).History.States.Add((statusEnum, changedAt));
+        UpdateIncidentsInTimeData();
+    }
 
     public void AddPatrol(string patrolId, Position position)
     {
@@ -38,4 +45,12 @@ public class StatisticsManager : IStatisticsManager
     public void AddDistanceOfConsideredPatrolFromIncident(double distance) => _distancesOfConsideredPatrolsFromIncident.Add(distance);
 
     public void DistanceOfChosenPatrolFromIncident(double distance) => _distancesOfChosenPatrolsFromIncident.Add(distance);
+
+    private void UpdateIncidentsInTimeData()
+    {
+        UpdateNumberOfActiveShootingsInTime();
+        UpdateNumberOfActiveIncidentsInTime();
+    }
+    private void UpdateNumberOfActiveShootingsInTime() => _numberOfActiveShootingsInTime[DateTimeOffset.UtcNow] = _incidentData.Count(x => x.History.States.Last().state == IncidentStatusEnum.OnGoingShooting);
+    private void UpdateNumberOfActiveIncidentsInTime() => _numberOfActiveShootingsInTime[DateTimeOffset.UtcNow] = _incidentData.Count(x => x.History.States.Last().state is not IncidentStatusEnum.Resolved);
 }
