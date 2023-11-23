@@ -10,9 +10,9 @@ services:
       - ./RabbitMQ/data/:/var/lib/rabbitmq/
       - ./RabbitMQ/log/:/var/log/rabbitmq/
     healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 3s
-      timeout: 3s
+      test: sleep 20s; rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
       retries: 3
     networks:
       - rabbitmq_net
