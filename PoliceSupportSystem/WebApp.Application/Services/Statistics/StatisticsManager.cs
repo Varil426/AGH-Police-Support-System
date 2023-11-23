@@ -8,6 +8,8 @@ public class StatisticsManager : IStatisticsManager
 {
     private List<PatrolData> _patrolData = new();
     private List<IncidentData> _incidentData = new();
+    private List<double> _distancesOfConsideredPatrolsFromIncident = new();
+    private List<double> _distancesOfChosenPatrolsFromIncident = new();
 
     public void AddIncident(Guid incidentId, Position position, DateTimeOffset createdAt)
     {
@@ -32,4 +34,8 @@ public class StatisticsManager : IStatisticsManager
 
     public void UpdatePatrol(string patrolId, Position position, DateTimeOffset changedAt) => _patrolData
         .First(x => x.PatrolId.Equals(patrolId, StringComparison.InvariantCultureIgnoreCase)).PositionHistory.Add((position, changedAt));
+
+    public void AddDistanceOfConsideredPatrolFromIncident(double distance) => _distancesOfConsideredPatrolsFromIncident.Add(distance);
+
+    public void DistanceOfChosenPatrolFromIncident(double distance) => _distancesOfChosenPatrolsFromIncident.Add(distance);
 }
