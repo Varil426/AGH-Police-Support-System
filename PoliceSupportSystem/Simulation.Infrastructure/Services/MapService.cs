@@ -115,7 +115,23 @@ internal sealed class MapService : IMapService
             positions.Add(new Position(reader.GetDouble("latitude"), reader.GetDouble("longitude")));
         return positions;
     }
-    
+
+    public async Task<string?> GetDistrictName(Position position)
+    {
+	    await using var connection = await _dataSource.OpenConnectionAsync();
+	    await using var command = new NpgsqlCommand($"""
+	                                                 select x.name from (select
+	                                                 	st_makepolygon(st_transform(way,{DefaultSrid})) poly,
+	                                                 	name
+	                                                 from
+	                                                 	planet_osm_line
+	                                                 where
+	                                                 	name is not null) x where ST_Contains(x.poly, ST_GeometryFromText('POINT({position.Longitude} {position.Latitude})', {DefaultSrid}));
+	                                                 """,connection);
+	    await using var reader = await command.ExecuteReaderAsync();
+	    return await reader.ReadAsync() ? reader.GetString("name") : null;
+    }
+
     private static void FillGaps(List<Path> paths)
     {
 	    var steps = paths.ToList();
