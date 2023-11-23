@@ -5,7 +5,7 @@ namespace WebApp.Application.Services.Statistics;
 
 public class IncidentData
 {
-    public StateHistory<IncidentStatusEnum> History = new();
+    public StateHistory<IncidentStatusEnum> History { get; } = new();
     public DateTimeOffset? ResponseAt => History.States.FirstOrDefault(x => x.state == IncidentStatusEnum.OnGoingNormal).since;
     public DateTimeOffset? ResolvedAt => History.States.FirstOrDefault(x => x.state == IncidentStatusEnum.Resolved).since;
     public bool ChangedIntoFiring => History.States.Any(x => x.state == IncidentStatusEnum.OnGoingShooting);

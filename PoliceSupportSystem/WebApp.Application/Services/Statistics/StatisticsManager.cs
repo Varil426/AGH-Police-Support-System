@@ -19,13 +19,17 @@ public class StatisticsManager : IStatisticsManager
     public void UpdateIncident(Guid incidentId, IncidentStatusEnum statusEnum, DateTimeOffset changedAt) =>
         _incidentData.First(x => x.IncidentId == incidentId).History.States.Add((statusEnum, changedAt));
 
-    public void AddPatrol(string patrolId)
+    public void AddPatrol(string patrolId, Position position)
     {
         var patrolData = new PatrolData(patrolId);
         patrolData.History.States.Add((PatrolStatusEnum.AwaitingOrders, DateTimeOffset.UtcNow));
+        patrolData.PositionHistory.Add((position, DateTimeOffset.UtcNow));
         _patrolData.Add(patrolData);
     }
 
     public void UpdatePatrol(string patrolId, PatrolStatusEnum patrolStatusEnum, DateTimeOffset changedAt) => _patrolData
         .First(x => x.PatrolId.Equals(patrolId, StringComparison.InvariantCultureIgnoreCase)).History.States.Add((patrolStatusEnum, changedAt));
+
+    public void UpdatePatrol(string patrolId, Position position, DateTimeOffset changedAt) => _patrolData
+        .First(x => x.PatrolId.Equals(patrolId, StringComparison.InvariantCultureIgnoreCase)).PositionHistory.Add((position, changedAt));
 }

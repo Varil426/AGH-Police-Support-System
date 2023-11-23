@@ -28,10 +28,13 @@ internal class LocalDomainEventProcessor : IDomainEventProcessor
                 _statisticsManager.UpdateIncident(incidentStatusUpdated.Incident.Id, incidentStatusUpdated.NewStatus, incidentStatusUpdated.Incident.UpdatedAt);
                 break;
             case PatrolCreated patrolCreated:
-                _statisticsManager.AddPatrol(patrolCreated.PatrolId);
+                _statisticsManager.AddPatrol(patrolCreated.PatrolId, patrolCreated.Position);
                 break;
             case PatrolStatusUpdated patrolStatusUpdated:
                 _statisticsManager.UpdatePatrol(patrolStatusUpdated.Patrol.PatrolId, patrolStatusUpdated.NewStatus, patrolStatusUpdated.Patrol.UpdatedAt);
+                break;
+            case PatrolPositionUpdated patrolPositionUpdated:
+                _statisticsManager.UpdatePatrol(patrolPositionUpdated.Patrol.PatrolId, patrolPositionUpdated.NewPosition, patrolPositionUpdated.Patrol.UpdatedAt);
                 break;
         }
 
