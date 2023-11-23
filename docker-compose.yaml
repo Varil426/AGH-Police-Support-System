@@ -36,90 +36,180 @@ services:
       service: patrol
     environment:
       - PoliceSupportSystem_PatrolSettings__PatrolId=0
-      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=8703c9e4-fbaf-4e76-b552-604c932522e4
-      - PoliceSupportSystem_PatrolSettings__NavAgentId=d9194ba8-96bf-414b-80d4-198962c01de2
-      - PoliceSupportSystem_PatrolSettings__GunAgentId=986d8bd7-d8ee-4da3-a08f-d6b2afb9cc8e
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=fdadd28d-4768-417e-a041-8fd66a25961d
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=9c38efa2-4153-46fe-9ce1-2dd3b7dddd25
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=552db772-bd29-4fb0-b469-084b308859ec
   patrol_1:
     extends:
       file: patrol-docker-compose.yaml
       service: patrol
     environment:
       - PoliceSupportSystem_PatrolSettings__PatrolId=1
-      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=697282ea-5446-46d6-a375-eab415586a5a
-      - PoliceSupportSystem_PatrolSettings__NavAgentId=d8a052b0-fa2e-4151-b76c-230b6751168b
-      - PoliceSupportSystem_PatrolSettings__GunAgentId=aaedd861-0270-4d6e-a984-14632cbe9798
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=024ac982-55bd-40f1-a0b5-2aaffacc9b6b
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=57b3297b-fcb9-4652-9e80-e16f28eb7b19
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=9943fbd6-ab71-4369-979f-c88f4f7625b8
   patrol_2:
     extends:
       file: patrol-docker-compose.yaml
       service: patrol
     environment:
       - PoliceSupportSystem_PatrolSettings__PatrolId=2
-      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=6e9a65fa-0954-496f-9b23-0be454fd383b
-      - PoliceSupportSystem_PatrolSettings__NavAgentId=5428fe4b-da3c-4add-b219-bea0eccff043
-      - PoliceSupportSystem_PatrolSettings__GunAgentId=a9ec7c8f-81c2-4d2f-8a07-f0404d490365
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=832d872a-69ea-4cbb-843f-25b0f9531c63
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=828b011e-662e-4629-84fb-ca0bd7211a80
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=6fcefc34-8b2b-4746-b7c9-4dfe3e9f32c8
   patrol_3:
     extends:
       file: patrol-docker-compose.yaml
       service: patrol
     environment:
       - PoliceSupportSystem_PatrolSettings__PatrolId=3
-      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=4e332856-7e9c-401e-a5b1-8c1eab4712df
-      - PoliceSupportSystem_PatrolSettings__NavAgentId=d750b5f3-2ddc-4c59-9062-27e33f144f80
-      - PoliceSupportSystem_PatrolSettings__GunAgentId=a6d37fdf-b074-4840-b2a0-2e6a7d073a25
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=fc9d538c-9500-44c4-a659-66c9105c7d0a
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=3b4b8a85-e853-432a-a346-061d67e0c76b
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=aa3d3d69-94f4-4c43-9371-cf320ffa5108
   patrol_4:
     extends:
       file: patrol-docker-compose.yaml
       service: patrol
     environment:
       - PoliceSupportSystem_PatrolSettings__PatrolId=4
-      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=21708d24-a6bd-47c1-91a8-da3ac87655ab
-      - PoliceSupportSystem_PatrolSettings__NavAgentId=8a047ecd-617a-4ed5-835e-ef9f6cb452f4
-      - PoliceSupportSystem_PatrolSettings__GunAgentId=4ed1c09c-3e5b-4bab-81e3-85b354093760
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=ff0cb69d-ab5f-46a5-bf65-d31a3e4277c8
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=44ba07de-5780-46ab-b92c-a3bf0e84630d
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=46f7a1bf-49bd-4987-916b-104d32a00f7e
   patrol_5:
     extends:
       file: patrol-docker-compose.yaml
       service: patrol
     environment:
       - PoliceSupportSystem_PatrolSettings__PatrolId=5
-      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=0ed63818-3f5d-416c-abbc-c0686af0296f
-      - PoliceSupportSystem_PatrolSettings__NavAgentId=fdc0f00e-7b2b-4d70-9f0f-7b5954676af5
-      - PoliceSupportSystem_PatrolSettings__GunAgentId=9134bce0-46ca-4e05-941a-306c51b345f5
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=9f61aac5-be3c-4fbd-8539-d7a8178eb80b
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=ffbe80a4-7d2d-4b60-8c31-ffc970e0f8c1
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=e678215f-52ba-4754-8472-79a5cf40807b
   patrol_6:
     extends:
       file: patrol-docker-compose.yaml
       service: patrol
     environment:
       - PoliceSupportSystem_PatrolSettings__PatrolId=6
-      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=16834abf-fcc2-4cf2-ac89-6b9e8dc0ff1e
-      - PoliceSupportSystem_PatrolSettings__NavAgentId=12f767e1-80b6-429c-a6c5-bf5481d211c9
-      - PoliceSupportSystem_PatrolSettings__GunAgentId=06a42b12-d015-4984-bca0-b5d7dbbb25f3
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=0f2e9cca-5cda-4c04-b244-fa8ba698aca3
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=ac65de5e-550a-47dd-8234-516d9d9f806c
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=72eace22-bf2a-42d1-88cb-92a7a2e9abc2
   patrol_7:
     extends:
       file: patrol-docker-compose.yaml
       service: patrol
     environment:
       - PoliceSupportSystem_PatrolSettings__PatrolId=7
-      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=165d661d-986b-4653-9999-3cfda225f32e
-      - PoliceSupportSystem_PatrolSettings__NavAgentId=4f87af09-8379-4632-bc5a-81e6218d149c
-      - PoliceSupportSystem_PatrolSettings__GunAgentId=4660b998-c411-447f-9b82-5e39b9ce2542
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=bdefb4c0-b92b-428a-9092-b45e7655fda6
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=5ee46382-047f-4110-9772-4da5450814dc
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=59a3fc0f-38b4-410d-912b-0c8b4f6852c8
   patrol_8:
     extends:
       file: patrol-docker-compose.yaml
       service: patrol
     environment:
       - PoliceSupportSystem_PatrolSettings__PatrolId=8
-      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=1678519c-f735-4099-a3f9-8a2a5c099efe
-      - PoliceSupportSystem_PatrolSettings__NavAgentId=241d017d-115f-42ef-9061-04e27c0ef4eb
-      - PoliceSupportSystem_PatrolSettings__GunAgentId=9b77458e-aa30-4e50-b047-b6ea53553f19
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=4e21d974-af91-4951-b844-209448cb24d5
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=cfe6f75a-a559-4fa2-8f6e-b00c433a49fb
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=db78038f-bd84-49a7-8e9c-ac90e7d3fe5c
   patrol_9:
     extends:
       file: patrol-docker-compose.yaml
       service: patrol
     environment:
       - PoliceSupportSystem_PatrolSettings__PatrolId=9
-      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=72593575-a37d-4b5b-85b2-4cba0f5ec2a3
-      - PoliceSupportSystem_PatrolSettings__NavAgentId=837d5e2c-4f41-46a4-8aef-11d631d96689
-      - PoliceSupportSystem_PatrolSettings__GunAgentId=472fe91e-d2a9-4f1a-a7b2-e0f53d3a1803
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=23a0db9e-dc82-45f4-995e-cd9cdf73e10f
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=763068d2-e291-4bf2-961d-b39ce776851e
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=56ce4f4d-74c1-4378-a866-0be9c0a5cd85
+  patrol_10:
+    extends:
+      file: patrol-docker-compose.yaml
+      service: patrol
+    environment:
+      - PoliceSupportSystem_PatrolSettings__PatrolId=10
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=d630936f-eac1-49af-912b-bdb77c2c2b7f
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=0859b6c0-51d8-41d6-9a91-b8809be757af
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=c924e981-f610-43de-b1f7-9b8cdbf09b95
+  patrol_11:
+    extends:
+      file: patrol-docker-compose.yaml
+      service: patrol
+    environment:
+      - PoliceSupportSystem_PatrolSettings__PatrolId=11
+      - PoliceSupportSystem_PatrolSettings__PatrolAgentId=ac8dd6eb-5f17-4c49-ac92-ea53186bc106
+      - PoliceSupportSystem_PatrolSettings__NavAgentId=5cda35e0-1375-4c93-9986-585ea978fcf7
+      - PoliceSupportSystem_PatrolSettings__GunAgentId=4c371a66-804a-4b6e-b940-7c6c0c493bad
+  # patrol_12:
+  #   extends:
+  #     file: patrol-docker-compose.yaml
+  #     service: patrol
+  #   environment:
+  #     - PoliceSupportSystem_PatrolSettings__PatrolId=12
+  #     - PoliceSupportSystem_PatrolSettings__PatrolAgentId=85a23c18-0650-431f-8995-1ca12fc70935
+  #     - PoliceSupportSystem_PatrolSettings__NavAgentId=7da52437-a7fd-4a4f-841d-93811ca6cc8e
+  #     - PoliceSupportSystem_PatrolSettings__GunAgentId=8675c034-b20f-4067-8abd-a068527562f5
+  # patrol_13:
+  #   extends:
+  #     file: patrol-docker-compose.yaml
+  #     service: patrol
+  #   environment:
+  #     - PoliceSupportSystem_PatrolSettings__PatrolId=13
+  #     - PoliceSupportSystem_PatrolSettings__PatrolAgentId=c7939a4e-b2d2-4773-a4cf-a034dd9262c0
+  #     - PoliceSupportSystem_PatrolSettings__NavAgentId=c75dab3e-bb3f-4a27-8b64-b6326d0106ca
+  #     - PoliceSupportSystem_PatrolSettings__GunAgentId=04bf8b98-91d7-4790-8893-e8769a95e65f
+  # patrol_14:
+  #   extends:
+  #     file: patrol-docker-compose.yaml
+  #     service: patrol
+  #   environment:
+  #     - PoliceSupportSystem_PatrolSettings__PatrolId=14
+  #     - PoliceSupportSystem_PatrolSettings__PatrolAgentId=047c1364-0329-4f81-a898-3273e87e1929
+  #     - PoliceSupportSystem_PatrolSettings__NavAgentId=dd9bb56a-30bb-4982-9309-e5b00d8d78f6
+  #     - PoliceSupportSystem_PatrolSettings__GunAgentId=0cc2bfb1-a516-47d6-a58c-9f8e0915a631
+  # patrol_15:
+  #   extends:
+  #     file: patrol-docker-compose.yaml
+  #     service: patrol
+  #   environment:
+  #     - PoliceSupportSystem_PatrolSettings__PatrolId=15
+  #     - PoliceSupportSystem_PatrolSettings__PatrolAgentId=3f01958d-b510-459e-a0f5-0d65bfc79463
+  #     - PoliceSupportSystem_PatrolSettings__NavAgentId=9faacae1-eba0-40fe-8029-c7ab2ae0211b
+  #     - PoliceSupportSystem_PatrolSettings__GunAgentId=78e92305-ebc0-40eb-b3b3-beffe63988fe
+  # patrol_16:
+  #   extends:
+  #     file: patrol-docker-compose.yaml
+  #     service: patrol
+  #   environment:
+  #     - PoliceSupportSystem_PatrolSettings__PatrolId=16
+  #     - PoliceSupportSystem_PatrolSettings__PatrolAgentId=22df32d7-0675-4f57-887d-1e748fcfed06
+  #     - PoliceSupportSystem_PatrolSettings__NavAgentId=b9f5610a-7be4-4e1a-8828-03dab1659370
+  #     - PoliceSupportSystem_PatrolSettings__GunAgentId=22d91035-dff9-4f25-a9c3-73130afbb7cb
+  # patrol_17:
+  #   extends:
+  #     file: patrol-docker-compose.yaml
+  #     service: patrol
+  #   environment:
+  #     - PoliceSupportSystem_PatrolSettings__PatrolId=17
+  #     - PoliceSupportSystem_PatrolSettings__PatrolAgentId=c8ee6ce9-d4cb-47af-b08a-d762de0bf7e3
+  #     - PoliceSupportSystem_PatrolSettings__NavAgentId=f7e86064-4452-4934-84e6-d89065e880f7
+  #     - PoliceSupportSystem_PatrolSettings__GunAgentId=e89435f7-549f-437b-92a1-1bb59b5dd15f
+  # patrol_18:
+  #   extends:
+  #     file: patrol-docker-compose.yaml
+  #     service: patrol
+  #   environment:
+  #     - PoliceSupportSystem_PatrolSettings__PatrolId=18
+  #     - PoliceSupportSystem_PatrolSettings__PatrolAgentId=ef7de742-4de2-4f7b-a762-b3a1377ddd4f
+  #     - PoliceSupportSystem_PatrolSettings__NavAgentId=80b86c4d-1170-4bfc-b0ec-037d9712fa38
+  #     - PoliceSupportSystem_PatrolSettings__GunAgentId=a500eb47-3c66-49c1-a0f4-aa3bb129bbdd
+  # patrol_19:
+  #   extends:
+  #     file: patrol-docker-compose.yaml
+  #     service: patrol
+  #   environment:
+  #     - PoliceSupportSystem_PatrolSettings__PatrolId=19
+  #     - PoliceSupportSystem_PatrolSettings__PatrolAgentId=1bbe919f-1a0e-440a-a559-cf56faff73cc
+  #     - PoliceSupportSystem_PatrolSettings__NavAgentId=e5326750-0dc1-4a67-a0e1-6701872e55e7
+  #     - PoliceSupportSystem_PatrolSettings__GunAgentId=a89a05f8-ad9c-4fd8-83b8-7bb235cc9003
 networks:
   rabbitmq_net:
     driver: bridge
