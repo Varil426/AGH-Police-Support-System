@@ -1,4 +1,4 @@
-﻿namespace Simulation.Application.Entities;
+﻿namespace Shared.CommonTypes.District;
 
 public enum DistrictDangerLevelEnum
 {

@@ -5,7 +5,8 @@ using HqService.Simulation;
 using Shared.Simulation;
 using Shared.Infrastructure;
 
-var host = Host.CreateDefaultBuilder(args)
+var builder = Host.CreateDefaultBuilder(args);
+var host = builder
     .UseAutofac()
     .AddSerilog()
     .AddSharedAppSettings()
@@ -18,11 +19,11 @@ var host = Host.CreateDefaultBuilder(args)
             services
                 .AddMessageService()
                 .AddMessageBus()
-        // TODO Create agents
     )
     .AddServiceStatusNotifier()
     .RegisterSharedApplicationModule()
-    .RegisterModule<ApplicationModule>()
+    // .RegisterModule<ApplicationModule>()
+    .ConfigureAppConfiguration(configurationBuilder => builder.RegisterModule(new ApplicationModule(configurationBuilder.Build())))
     .AddSharedSimulation(new[] { typeof(SimulationModule).Assembly })
     .RegisterModule<SimulationModule>()
     .Build();

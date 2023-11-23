@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Shared.CommonTypes.District;
 using Shared.CommonTypes.Incident;
 using Shared.CommonTypes.Patrol;
 using Simulation.Application.Directors.Settings;

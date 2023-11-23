@@ -1,4 +1,5 @@
-﻿using Shared.Application.Helpers;
+﻿using HqService.Application.Settings;
+using Shared.Application.Helpers;
 using Shared.CommonTypes.Incident;
 using Shared.CommonTypes.Patrol;
 using Shared.Domain.Helpers;
@@ -7,17 +8,19 @@ using Shared.Domain.Patrol;
 
 namespace HqService.Application.Services.DecisionService;
 
-internal class SimpleDecisionService : IDecisionService
+internal class DecisionService : IDecisionService
 {
-    private const int MaxNumberOfSupportingPatrols = 2;
+    private const int MaxNumberOfSupportingPatrols = 1;
     private readonly IMapInfoService _mapInfoService;
+    private readonly DecisionServiceSettings _decisionServiceSettings;
     private readonly Random _random;
 
     private readonly Dictionary<Incident, IList<Patrol>> _patrolsRelatedToIncident = new();
 
-    public SimpleDecisionService(IMapInfoService mapInfoService)
+    public DecisionService(IMapInfoService mapInfoService, DecisionServiceSettings decisionServiceSettings)
     {
         _mapInfoService = mapInfoService;
+        _decisionServiceSettings = decisionServiceSettings;
         _random = new Random();
     }
 

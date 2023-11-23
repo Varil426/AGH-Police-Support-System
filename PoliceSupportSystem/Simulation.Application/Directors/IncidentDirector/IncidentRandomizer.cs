@@ -1,4 +1,5 @@
-﻿using Shared.CommonTypes.Incident;
+﻿using Shared.CommonTypes.District;
+using Shared.CommonTypes.Incident;
 using Simulation.Application.Directors.Settings;
 using Simulation.Application.Entities;
 using Simulation.Application.Helpers;

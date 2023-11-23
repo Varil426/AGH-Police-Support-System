@@ -1,4 +1,5 @@
-﻿using Simulation.Application.Entities;
+﻿using Shared.CommonTypes.District;
+using Simulation.Application.Entities;
 
 namespace Simulation.Application.Directors.IncidentDirector;
 

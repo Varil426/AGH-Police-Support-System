@@ -1,4 +1,4 @@
-﻿using Simulation.Application.Entities;
+﻿using Shared.CommonTypes.District;
 
 namespace Simulation.Application.Directors.Settings;
 
