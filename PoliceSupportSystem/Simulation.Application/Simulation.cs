@@ -15,6 +15,7 @@ internal class Simulation : ISimulation
     private readonly IReadOnlyCollection<IDirector> _directors;
     private readonly ISimulationTimeService _simulationTimeService;
     private readonly IDomainEventProcessor _domainEventProcessor;
+    private readonly SimulationSettings _simulationSettings;
 
     private readonly List<IService> _services = new();
     private readonly List<SimulationIncident> _incidents = new();
@@ -26,7 +27,8 @@ internal class Simulation : ISimulation
         ISimulationMessageProcessor simulationMessageProcessor,
         IReadOnlyCollection<IDirector> directors,
         ISimulationTimeService simulationTimeService,
-        IDomainEventProcessor domainEventProcessor)
+        IDomainEventProcessor domainEventProcessor,
+        SimulationSettings simulationSettings)
     {
         _logger = logger;
         _messageService = messageService;
@@ -34,6 +36,7 @@ internal class Simulation : ISimulation
         _directors = directors;
         _simulationTimeService = simulationTimeService;
         _domainEventProcessor = domainEventProcessor;
+        _simulationSettings = simulationSettings;
     }
 
     public IReadOnlyCollection<SimulationIncident> Incidents => _incidents.AsReadOnly();
@@ -46,7 +49,7 @@ internal class Simulation : ISimulation
         _simulationTimeService.Start();
         _logger.LogInformation("Simulation has started");
         // var simulationUpdateDelay = TimeSpan.FromMinutes(1) / _simulationTimeService.SimulationTimeRate;
-        while (cancellationToken is { IsCancellationRequested: false } or null)
+        while (cancellationToken is { IsCancellationRequested: false } or null && (_simulationSettings.EndAfterSimulationTime is null || _simulationTimeService.SimulationTimeSinceStart < _simulationSettings.EndAfterSimulationTime))
         {
             var cycleStart = DateTimeOffset.UtcNow;
             
