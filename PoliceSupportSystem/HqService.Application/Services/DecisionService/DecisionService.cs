@@ -1,5 +1,6 @@
 ﻿using HqService.Application.Settings;
 using Shared.Application.Helpers;
+using Shared.CommonTypes.District;
 using Shared.CommonTypes.Incident;
 using Shared.CommonTypes.Patrol;
 using Shared.Domain.Helpers;
@@ -14,6 +15,8 @@ internal class DecisionService : IDecisionService
     private readonly IMapInfoService _mapInfoService;
     private readonly DecisionServiceSettings _decisionServiceSettings;
     private readonly Random _random;
+
+    private readonly Dictionary<Guid, string> _patrolToDistrictAssignment = new();
 
     private readonly Dictionary<Incident, IList<Patrol>> _patrolsRelatedToIncident = new();
 
@@ -64,17 +67,22 @@ internal class DecisionService : IDecisionService
         }
         
         // Rest of the patrols can patrol
-        // TODO Improve selection? Add some balancing?
         orders.AddRange(
             PatrolsNotOrdered()
                 .Where(x => x.Status == PatrolStatusEnum.AwaitingOrders)
                 .Select(
                     x =>
                     {
-                        var order = new PatrollingOrder(
-                            x.Id,
-                            x.PatrolId,
-                            districts[_random.Next(districts.Count)]);
+                        PatrollingOrder order;
+                        if (_patrolToDistrictAssignment.TryGetValue(x.Id, out var assignedDistrictName))
+                            order = new PatrollingOrder(x.Id, x.PatrolId, assignedDistrictName);
+                        else
+                        {
+                            var chosenDistrict = ChooseDistrictForPatrol(districts);
+                            _patrolToDistrictAssignment[x.Id] = chosenDistrict;
+                            order = new PatrollingOrder(x.Id, x.PatrolId, chosenDistrict);
+                        }
+                        
                         patrolsOrdered.Add(x);
                         return order;
                     }));
@@ -96,5 +104,42 @@ internal class DecisionService : IDecisionService
         _patrolsRelatedToIncident[incident].Add(patrol);
     }
 
+    private string ChooseDistrictForPatrol(IList<string> districts)
+    {
+        string chosenDistrict;
+        if (_decisionServiceSettings.EvenPatrolDistribution)
+        {
+            var numberOfPatrolsAssignedToDistrict = districts.ToDictionary(x => x, x => 0);
+            foreach (var group in _patrolToDistrictAssignment.Values.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count()))
+                numberOfPatrolsAssignedToDistrict[group.Key] += group.Value;
+            
+            var districtsWithLowestNumberOfPatrols = numberOfPatrolsAssignedToDistrict.GroupBy(x => x.Value).OrderBy(x => x.Key).First().Select(x => x.Key).ToList();
+            
+            chosenDistrict = districtsWithLowestNumberOfPatrols[_random.Next(districtsWithLowestNumberOfPatrols.Count)];
+        }
+        else
+        {
+            var numberOfPatrolsAssignedToDistrict = districts.ToDictionary(x => x, x => 0);
+            foreach (var group in _patrolToDistrictAssignment.Values.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count()))
+                numberOfPatrolsAssignedToDistrict[group.Key] += group.Value;
+
+            var missingPatrolsForDistrict = numberOfPatrolsAssignedToDistrict.ToDictionary(
+                x => x.Key,
+                x => x.Value - GetOptimalNumberOfPatrolsForDangerLevel(GetDistrictDangerLevel(x.Key)));
+            
+            var districtsThatMostNeedPatrol = missingPatrolsForDistrict.GroupBy(x => x.Value).OrderBy(x => x.Key).First().Select(x => x.Key).ToList();
+            
+            chosenDistrict = districtsThatMostNeedPatrol[_random.Next(districtsThatMostNeedPatrol.Count)];;
+        }
+
+        return chosenDistrict;
+    }
+    
     private int GetNumberOfRelatedPatrols(Incident incident) => _patrolsRelatedToIncident.TryGetValue(incident, out var l) ? l.Count : 0;
+
+    private DistrictDangerLevelEnum GetDistrictDangerLevel(string districtName) => _decisionServiceSettings.DistrictDangerLevels.TryGetValue(districtName, out var dangerLevelEnum)
+        ? dangerLevelEnum
+        : DistrictDangerLevelEnum.Normal;
+
+    private int GetOptimalNumberOfPatrolsForDangerLevel(DistrictDangerLevelEnum dangerLevelEnum) => _decisionServiceSettings.DangerLevelRequiredPatrollingPatrols[dangerLevelEnum];
 }
