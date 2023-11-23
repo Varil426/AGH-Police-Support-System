@@ -1,6 +1,7 @@
 ﻿using Shared.Application.Factories;
 using Shared.Application.Helpers;
 using Shared.Application.Integration.DTOs;
+using Shared.Application.Services;
 using Shared.CommonTypes.Geo;
 using Shared.Domain.Incident;
 using Shared.Domain.Patrol;
@@ -14,6 +15,7 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
 
     private readonly MapSettings _mapSettings;
     private readonly IPatrolFactory _patrolFactory;
+    private readonly IDomainEventProcessor _domainEventProcessor;
 
     // private readonly List<Func<ICityStateMonitoringService, Task>> _subscriptions = new();
     private readonly List<Incident> _incidents = new();
@@ -45,11 +47,12 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         }
     }
 
-    public CityStateMonitoringService(IIncidentFactory incidentFactory, MapSettings mapSettings, IPatrolFactory patrolFactory)
+    public CityStateMonitoringService(IIncidentFactory incidentFactory, MapSettings mapSettings, IPatrolFactory patrolFactory, IDomainEventProcessor domainEventProcessor)
     {
         _incidentFactory = incidentFactory;
         _mapSettings = mapSettings;
         _patrolFactory = patrolFactory;
+        _domainEventProcessor = domainEventProcessor;
     }
 
     // public void Subscribe(Func<ICityStateMonitoringService, Task> callback) => _subscriptions.Add(callback);
@@ -60,7 +63,10 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         if (_incidents.Any(x => x.Id == newIncidentDto.Id))
             throw new Exception($"Incident with {newIncidentDto.Id} is already present.");
 
-        _incidents.Add(_incidentFactory.CreateIncident(newIncidentDto));
+        var newIncident = _incidentFactory.CreateIncident(newIncidentDto);
+        _incidents.Add(newIncident);
+        await _domainEventProcessor.ProcessDomainEvents(newIncident);
+
         _semaphoreSlim.Release();
     }
 
@@ -70,7 +76,10 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         if (_patrols.Any(x => x.Id == patrolDto.Id))
             throw new Exception($"Patrol with {patrolDto.Id} is already present.");
 
-        _patrols.Add(_patrolFactory.CreatePatrol(patrolDto));
+        var newPatrol = _patrolFactory.CreatePatrol(patrolDto);
+        _patrols.Add(newPatrol);
+        await _domainEventProcessor.ProcessDomainEvents(newPatrol);
+        
         _semaphoreSlim.Release();
     }
 
@@ -85,6 +94,8 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         //     incident.Update(incidentDto);
         
         incident.Update(incidentDto);
+
+        await _domainEventProcessor.ProcessDomainEvents(incident);
         
         _semaphoreSlim.Release();
     }
@@ -94,6 +105,7 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         await _semaphoreSlim.WaitAsync();
         var patrol = _patrols.FirstOrDefault(x => x.Id == patrolDto.Id) ?? throw new Exception($"Patrol with ID: {patrolDto.Id} not found");
         patrol.Update(patrolDto);
+        await _domainEventProcessor.ProcessDomainEvents(patrol);
         _semaphoreSlim.Release();
     }
 
