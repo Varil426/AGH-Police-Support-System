@@ -21,7 +21,7 @@ export const MapViewModel = observer(({ model }: IMapViewModelProps) => {
       center={[model.center.latitude, model.center.longitude]}
       zoom={13}
       scrollWheelZoom={false}
-      style={{ height: 500, width: 500 }}
+      style={{ height: 800, width: 800 }}
       key={mapKey}
     >
       <TileLayer
