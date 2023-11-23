@@ -1,7 +1,7 @@
 import { makeObservable, observable } from "mobx";
 import { Patrol } from "../../models/Patrol";
 
-export class MapPageModel {
+export class MainPageModel {
   @observable public readonly selectedPatrols: Patrol[] = [];
 
   constructor() {

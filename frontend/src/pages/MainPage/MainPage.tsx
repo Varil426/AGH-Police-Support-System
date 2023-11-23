@@ -8,15 +8,15 @@ import { observer } from "mobx-react-lite";
 import { Flex } from "antd";
 import { PatrolListViewModel } from "../../components/patrolList/PatrolListViewModel";
 import { PatrolListModel } from "../../components/patrolList/PatrolListModel";
-import { MapPageModel } from "./MapPageModel";
+import { MainPageModel } from "./MainPageModel";
 import { IncidentStatsPanelViewModel } from "../../components/incidentStatsPanel/IncidentStatsPanelViewModel";
 import { IncidentStatsPanelModel } from "../../components/incidentStatsPanel/IncidentStatsPanelModel";
 
-export interface MapPageProps {
-  model: MapPageModel;
+export interface MainPageProps {
+  model: MainPageModel;
 }
 
-export const MapPage = observer(({ model }: MapPageProps) => {
+export const MainPage = observer(({ model }: MainPageProps) => {
   const incidentStore = useRootStore().incidentStore;
   const patrolStore = useRootStore().patrolStore;
   const hub = new MonitoringHubClient(incidentStore, patrolStore);
@@ -26,7 +26,7 @@ export const MapPage = observer(({ model }: MapPageProps) => {
   });
 
   return (
-    <Route path="/map">
+    <Route path="/">
       <Flex>
         <MapViewModel model={new MapModel(hub, model.selectedPatrols)} />
         <Flex vertical>

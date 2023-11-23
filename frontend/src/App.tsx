@@ -1,14 +1,14 @@
 import "./App.css";
 import { RootStorePrivider } from "./utils/RootStoreProvider";
 import { Router } from "wouter";
-import { MapPage } from "./pages/MapPage/MapPage";
+import { MainPage } from "./pages/MainPage/MainPage";
 import { RootStore } from "./stores/RootStore";
 import { IncidentStore } from "./stores/IncidentStore";
 import { ToastContainer } from "react-toastify";
 import { observer } from "mobx-react-lite";
 import { TestPage } from "./pages/TestPage";
 import { PatrolStore } from "./stores/PatrolStore";
-import { MapPageModel } from "./pages/MapPage/MapPageModel";
+import { MainPageModel } from "./pages/MainPage/MainPageModel";
 
 export const App = observer(() => {
   const incidentStore = new IncidentStore();
@@ -20,7 +20,7 @@ export const App = observer(() => {
       <RootStorePrivider store={rootStore}>
         <ToastContainer />
         <div>
-          <MapPage model={new MapPageModel()} />
+          <MainPage model={new MainPageModel()} />
           <TestPage />
         </div>
       </RootStorePrivider>
