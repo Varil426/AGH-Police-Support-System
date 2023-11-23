@@ -24,6 +24,7 @@ public class ApplicationModule : ConfigurationAwareModule
         
         builder.RegisterType<CityStateMonitoringService>().As<ICityStateMonitoringService>().SingleInstance();
         builder.RegisterType<StatisticsManager>().As<IStatisticsManager>().SingleInstance();
+        builder.RegisterType<StatisticsExporter>().As<IStatisticsExporter>();
     }
 
 }

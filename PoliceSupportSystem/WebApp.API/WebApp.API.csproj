@@ -16,11 +16,6 @@
       <PackageReference Include="Reinforced.Typings" Version="1.6.2" />
     </ItemGroup>
 
-
-    <ItemGroup>
-      <Folder Include="Handlers\" />
-    </ItemGroup>
-
     <PropertyGroup>
         <ReinforcedTypingsRemoveOld>false</ReinforcedTypingsRemoveOld>
     </PropertyGroup>

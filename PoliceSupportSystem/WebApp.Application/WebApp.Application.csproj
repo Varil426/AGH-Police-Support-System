@@ -14,4 +14,8 @@
       <Folder Include="DTOs\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="DotNetZip" Version="1.16.0" />
+    </ItemGroup>
+
 </Project>

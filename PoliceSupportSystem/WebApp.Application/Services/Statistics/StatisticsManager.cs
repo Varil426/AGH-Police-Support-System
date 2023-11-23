@@ -6,13 +6,17 @@ namespace WebApp.Application.Services.Statistics;
 
 public class StatisticsManager : IStatisticsManager
 {
-    private List<PatrolData> _patrolData = new();
-    private List<IncidentData> _incidentData = new();
-    private List<double> _distancesOfConsideredPatrolsFromIncident = new();
-    private List<double> _distancesOfChosenPatrolsFromIncident = new();
+    private readonly List<PatrolData> _patrolData = new();
+    private readonly List<IncidentData> _incidentData = new();
+    private readonly List<double> _distancesOfConsideredPatrolsFromIncident = new();
+    private readonly List<double> _distancesOfChosenPatrolsFromIncident = new();
+    private readonly Dictionary<DateTimeOffset, (int numberOfIncidents, int numberOfShootings)> _numberOfActiveIncidentsInTime = new();
 
-    private Dictionary<DateTimeOffset, int> _numberOfActiveIncidentsInTime = new();
-    private Dictionary<DateTimeOffset, int> _numberOfActiveShootingsInTime = new();
+    public IReadOnlyDictionary<DateTimeOffset, (int numberOfIncidents, int numberOfShootings)> IncidentsInTime => _numberOfActiveIncidentsInTime.AsReadOnly();
+    public IReadOnlyCollection<PatrolData> PatrolData => _patrolData.AsReadOnly();
+    public IReadOnlyCollection<IncidentData> IncidentData => _incidentData.AsReadOnly();
+    public IReadOnlyCollection<double> DistancesOfConsideredPatrolsFromIncident => _distancesOfConsideredPatrolsFromIncident.AsReadOnly();
+    public IReadOnlyCollection<double> DistancesOfChosenPatrolsFromIncident => _distancesOfChosenPatrolsFromIncident.AsReadOnly();
 
     public void AddIncident(Guid incidentId, Position position, DateTimeOffset createdAt)
     {
@@ -48,9 +52,12 @@ public class StatisticsManager : IStatisticsManager
 
     private void UpdateIncidentsInTimeData()
     {
-        UpdateNumberOfActiveShootingsInTime();
-        UpdateNumberOfActiveIncidentsInTime();
+        // UpdateNumberOfActiveShootingsInTime();
+        // UpdateNumberOfActiveIncidentsInTime();
+        var activeIncidents = _incidentData.Count(x => x.History.States.Last().state is not IncidentStatusEnum.Resolved);
+        var activeShootings = _incidentData.Count(x => x.History.States.Last().state == IncidentStatusEnum.OnGoingShooting);
+        _numberOfActiveIncidentsInTime[DateTimeOffset.UtcNow] = (activeIncidents, activeShootings);
     }
-    private void UpdateNumberOfActiveShootingsInTime() => _numberOfActiveShootingsInTime[DateTimeOffset.UtcNow] = _incidentData.Count(x => x.History.States.Last().state == IncidentStatusEnum.OnGoingShooting);
-    private void UpdateNumberOfActiveIncidentsInTime() => _numberOfActiveShootingsInTime[DateTimeOffset.UtcNow] = _incidentData.Count(x => x.History.States.Last().state is not IncidentStatusEnum.Resolved);
+    // private void UpdateNumberOfActiveShootingsInTime() => _numberOfActiveShootingsInTime[DateTimeOffset.UtcNow] = _incidentData.Count(x => x.History.States.Last().state == IncidentStatusEnum.OnGoingShooting);
+    // private void UpdateNumberOfActiveIncidentsInTime() => _numberOfActiveShootingsInTime[DateTimeOffset.UtcNow] = _incidentData.Count(x => x.History.States.Last().state is not IncidentStatusEnum.Resolved);
 }

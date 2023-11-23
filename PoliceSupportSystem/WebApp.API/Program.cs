@@ -1,5 +1,6 @@
 using Shared.Infrastructure;
 using WebApp.API;
+using WebApp.API.Handlers;
 using WebApp.API.Workers;
 using WebApp.Application;
 using WebApp.Infrastructure;
@@ -38,11 +39,13 @@ builder.Host
                                 .AllowCredentials();
                         });
                 });
+
+            s.AddScoped<GetStatisticsHandler>();
         });
 
 var app = builder.Build();
 
-app.SubscribeHandlers(new[] { typeof(ApplicationModule).Assembly }); // TODO
+app.SubscribeHandlers(new[] { typeof(ApplicationModule).Assembly });
 app.AddRouting();
 app.UseCors();
 
