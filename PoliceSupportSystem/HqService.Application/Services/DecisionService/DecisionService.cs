@@ -39,13 +39,13 @@ internal class DecisionService : IDecisionService
         var patrolsOrdered = new List<Patrol>();
 
         IReadOnlyCollection<Patrol> PatrolsNotOrdered() => patrols.Where(x => !patrolsOrdered.Contains(x)).ToList();
-        
+
         var onGoingIncidentsList = onGoingIncidents.ToList();
         foreach (var shooting in onGoingIncidentsList.Where(x => x.Status == IncidentStatusEnum.OnGoingShooting))
         {
             if (GetNumberOfRelatedPatrols(shooting) >= MaxNumberOfSupportingPatrols + 1)
                 continue;
-            
+
             var closestFreePatrols = PatrolsNotOrdered().Where(x => x.Status is PatrolStatusEnum.Patrolling or PatrolStatusEnum.AwaitingOrders)
                 .OrderBy(x => x.Position.GetDistanceTo(shooting.Location)).Take(MaxNumberOfSupportingPatrols);
 
@@ -56,7 +56,7 @@ internal class DecisionService : IDecisionService
                 AddRelatedPatrol(shooting, patrol);
             }
         }
-        
+
         foreach (var incident in onGoingIncidentsList.Where(x => x.Status == IncidentStatusEnum.WaitingForResponse))
         {
             await _messageBus.PublishAsync(new PatrolsDistanceToIncidentEvent(PatrolsNotOrdered().Select(x => x.Position.GetDistanceTo(incident.Location))));
@@ -67,12 +67,12 @@ internal class DecisionService : IDecisionService
                 break;
 
             await _messageBus.PublishAsync(new ChosenPatrolDistanceToIncidentEvent(chosenPatrol.Position.GetDistanceTo(incident.Location)));
-            
+
             orders.Add(new HandleIncidentOrder(chosenPatrol.Id, chosenPatrol.PatrolId, incident.AsDto()));
             patrolsOrdered.Add(chosenPatrol);
             AddRelatedPatrol(incident, chosenPatrol);
         }
-        
+
         // Rest of the patrols can patrol
         orders.AddRange(
             PatrolsNotOrdered()
@@ -89,7 +89,7 @@ internal class DecisionService : IDecisionService
                             _patrolToDistrictAssignment[x.Id] = chosenDistrict;
                             order = new PatrollingOrder(x.Id, x.PatrolId, chosenDistrict);
                         }
-                        
+
                         patrolsOrdered.Add(x);
                         return order;
                     }));
@@ -102,12 +102,12 @@ internal class DecisionService : IDecisionService
         var resolved = _patrolsRelatedToIncident.Keys.Where(x => x.Status == IncidentStatusEnum.Resolved).ToList();
         resolved.ForEach(x => _patrolsRelatedToIncident.Remove(x));
     }
-    
+
     private void AddRelatedPatrol(Incident incident, Patrol patrol)
     {
         if (!_patrolsRelatedToIncident.ContainsKey(incident))
             _patrolsRelatedToIncident[incident] = new List<Patrol>();
-        
+
         _patrolsRelatedToIncident[incident].Add(patrol);
     }
 
@@ -119,9 +119,9 @@ internal class DecisionService : IDecisionService
             var numberOfPatrolsAssignedToDistrict = districts.ToDictionary(x => x, x => 0);
             foreach (var group in _patrolToDistrictAssignment.Values.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count()))
                 numberOfPatrolsAssignedToDistrict[group.Key] += group.Value;
-            
+
             var districtsWithLowestNumberOfPatrols = numberOfPatrolsAssignedToDistrict.GroupBy(x => x.Value).OrderBy(x => x.Key).First().Select(x => x.Key).ToList();
-            
+
             chosenDistrict = districtsWithLowestNumberOfPatrols[_random.Next(districtsWithLowestNumberOfPatrols.Count)];
         }
         else
@@ -133,22 +133,22 @@ internal class DecisionService : IDecisionService
             var missingPatrolsForDistrict = numberOfPatrolsAssignedToDistrict.ToDictionary(
                 x => x.Key,
                 x => x.Value - GetOptimalNumberOfPatrolsForDangerLevel(GetDistrictDangerLevel(x.Key)));
-            
+
             var districtsThatMostNeedPatrol = missingPatrolsForDistrict.GroupBy(x => x.Value).OrderBy(x => x.Key).First().Select(x => x.Key).ToList();
-            
-            chosenDistrict = districtsThatMostNeedPatrol[_random.Next(districtsThatMostNeedPatrol.Count)];;
+
+            chosenDistrict = districtsThatMostNeedPatrol[_random.Next(districtsThatMostNeedPatrol.Count)]; ;
         }
 
         return chosenDistrict;
     }
-    
+
     private int GetNumberOfRelatedPatrols(Incident incident) => _patrolsRelatedToIncident.TryGetValue(incident, out var l) ? l.Count : 0;
 
     private async Task<Patrol?> ChoosePatrol(Incident incident, IList<Patrol> patrols)
     {
         if (!patrols.Any())
             return null;
-        
+
         var allDistances = patrols.Select(x => x.Position.GetDistanceTo(incident.Location)).ToList();
         var minDistance = allDistances.Min(); // TODO What when minDistance == 0
         var maxDistance = allDistances.Max();
@@ -167,7 +167,7 @@ internal class DecisionService : IDecisionService
             var requiredNumberOfPatrolsInDistrict = GetOptimalNumberOfPatrolsForDangerLevel(GetDistrictDangerLevel(incidentDistrict));
             var currentNumberOfPatrolsInDistrict = _patrolToDistrictAssignment.Count(x => x.Value == incidentDistrict);
             var diffInPatrols = requiredNumberOfPatrolsInDistrict - currentNumberOfPatrolsInDistrict;
-            var willCauseInsufficientPatrolsInDistrict = diffInPatrols < 0 ? 1d : (double)currentNumberOfPatrolsInDistrict / requiredNumberOfPatrolsInDistrict;
+            var willCauseInsufficientPatrolsInDistrict = diffInPatrols < 0 ? 1d : (double)Math.Max(currentNumberOfPatrolsInDistrict - 1, 0) / requiredNumberOfPatrolsInDistrict;
 
             return normalizedDistance * _decisionServiceSettings.DistanceWeight + isTheSameDistrict * _decisionServiceSettings.SameDistrictWeight +
                    willCauseInsufficientPatrolsInDistrict * _decisionServiceSettings.InsufficientNumberOfPatrolsInDistrictWeight;
