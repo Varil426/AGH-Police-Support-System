@@ -60,9 +60,8 @@ internal class DecisionService : IDecisionService
         foreach (var incident in onGoingIncidentsList.Where(x => x.Status == IncidentStatusEnum.WaitingForResponse))
         {
             await _messageBus.PublishAsync(new PatrolsDistanceToIncidentEvent(PatrolsNotOrdered().Select(x => x.Position.GetDistanceTo(incident.Location))));
-            
-            var chosenPatrol = PatrolsNotOrdered().Where(x => x.Status is PatrolStatusEnum.Patrolling or PatrolStatusEnum.AwaitingOrders)
-                .MinBy(x => x.Position.GetDistanceTo(incident.Location));
+
+            var chosenPatrol = await ChoosePatrol(incident, PatrolsNotOrdered().Where(x => x.Status is PatrolStatusEnum.Patrolling or PatrolStatusEnum.AwaitingOrders).ToList());
 
             if (chosenPatrol is null)
                 break;
@@ -144,6 +143,38 @@ internal class DecisionService : IDecisionService
     }
     
     private int GetNumberOfRelatedPatrols(Incident incident) => _patrolsRelatedToIncident.TryGetValue(incident, out var l) ? l.Count : 0;
+
+    private async Task<Patrol?> ChoosePatrol(Incident incident, IList<Patrol> patrols)
+    {
+        if (!patrols.Any())
+            return null;
+        
+        var allDistances = patrols.Select(x => x.Position.GetDistanceTo(incident.Location)).ToList();
+        var minDistance = allDistances.Min(); // TODO What when minDistance == 0
+        var maxDistance = allDistances.Max();
+
+        var incidentDistrict = await _mapInfoService.GetDistrict(incident.Location);// ?? throw new Exception("Unknown district");
+
+
+        double ScoreFunction(Patrol patrol)
+        {
+            // Positive values - positive effect, negative values - negative effect
+            var distance = patrol.Position.GetDistanceTo(incident.Location);
+            var normalizedDistance = 1 - (distance - minDistance) / (maxDistance - minDistance);
+
+            var isTheSameDistrict = !_patrolToDistrictAssignment.ContainsKey(patrol.Id) || _patrolToDistrictAssignment[patrol.Id] == incidentDistrict ? 1 : 0;
+
+            var requiredNumberOfPatrolsInDistrict = GetOptimalNumberOfPatrolsForDangerLevel(GetDistrictDangerLevel(incidentDistrict));
+            var currentNumberOfPatrolsInDistrict = _patrolToDistrictAssignment.Count(x => x.Value == incidentDistrict);
+            var diffInPatrols = requiredNumberOfPatrolsInDistrict - currentNumberOfPatrolsInDistrict;
+            var willCauseInsufficientPatrolsInDistrict = diffInPatrols < 0 ? 1d : (double)currentNumberOfPatrolsInDistrict / requiredNumberOfPatrolsInDistrict;
+
+            return normalizedDistance * _decisionServiceSettings.DistanceWeight + isTheSameDistrict * _decisionServiceSettings.SameDistrictWeight +
+                   willCauseInsufficientPatrolsInDistrict * _decisionServiceSettings.InsufficientNumberOfPatrolsInDistrictWeight;
+        }
+
+        return patrols.MaxBy(ScoreFunction);
+    }
 
     private DistrictDangerLevelEnum GetDistrictDangerLevel(string districtName) => _decisionServiceSettings.DistrictDangerLevels.TryGetValue(districtName, out var dangerLevelEnum)
         ? dangerLevelEnum
