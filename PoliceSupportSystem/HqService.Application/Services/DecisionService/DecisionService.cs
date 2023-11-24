@@ -1,5 +1,7 @@
 ﻿using HqService.Application.Settings;
 using Shared.Application.Helpers;
+using Shared.Application.Integration.Events;
+using Shared.Application.Services;
 using Shared.CommonTypes.District;
 using Shared.CommonTypes.Incident;
 using Shared.CommonTypes.Patrol;
@@ -14,16 +16,18 @@ internal class DecisionService : IDecisionService
     private const int MaxNumberOfSupportingPatrols = 1;
     private readonly IMapInfoService _mapInfoService;
     private readonly DecisionServiceSettings _decisionServiceSettings;
+    private readonly IMessageBus _messageBus;
     private readonly Random _random;
 
     private readonly Dictionary<Guid, string> _patrolToDistrictAssignment = new();
 
     private readonly Dictionary<Incident, IList<Patrol>> _patrolsRelatedToIncident = new();
 
-    public DecisionService(IMapInfoService mapInfoService, DecisionServiceSettings decisionServiceSettings)
+    public DecisionService(IMapInfoService mapInfoService, DecisionServiceSettings decisionServiceSettings, IMessageBus messageBus)
     {
         _mapInfoService = mapInfoService;
         _decisionServiceSettings = decisionServiceSettings;
+        _messageBus = messageBus;
         _random = new Random();
     }
 
@@ -55,15 +59,19 @@ internal class DecisionService : IDecisionService
         
         foreach (var incident in onGoingIncidentsList.Where(x => x.Status == IncidentStatusEnum.WaitingForResponse))
         {
-            var closestFreePatrol = PatrolsNotOrdered().Where(x => x.Status is PatrolStatusEnum.Patrolling or PatrolStatusEnum.AwaitingOrders)
+            await _messageBus.PublishAsync(new PatrolsDistanceToIncidentEvent(PatrolsNotOrdered().Select(x => x.Position.GetDistanceTo(incident.Location))));
+            
+            var chosenPatrol = PatrolsNotOrdered().Where(x => x.Status is PatrolStatusEnum.Patrolling or PatrolStatusEnum.AwaitingOrders)
                 .MinBy(x => x.Position.GetDistanceTo(incident.Location));
 
-            if (closestFreePatrol is null)
+            if (chosenPatrol is null)
                 break;
+
+            await _messageBus.PublishAsync(new ChosenPatrolDistanceToIncidentEvent(chosenPatrol.Position.GetDistanceTo(incident.Location)));
             
-            orders.Add(new HandleIncidentOrder(closestFreePatrol.Id, closestFreePatrol.PatrolId, incident.AsDto()));
-            patrolsOrdered.Add(closestFreePatrol);
-            AddRelatedPatrol(incident, closestFreePatrol);
+            orders.Add(new HandleIncidentOrder(chosenPatrol.Id, chosenPatrol.PatrolId, incident.AsDto()));
+            patrolsOrdered.Add(chosenPatrol);
+            AddRelatedPatrol(incident, chosenPatrol);
         }
         
         // Rest of the patrols can patrol

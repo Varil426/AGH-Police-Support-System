@@ -21,5 +21,5 @@ public interface IStatisticsManager
     public void UpdatePatrol(string patrolId, PatrolStatusEnum patrolStatusEnum, DateTimeOffset changedAt);
     public void UpdatePatrol(string patrolId, Position position, DateTimeOffset changedAt);
     public void AddDistanceOfConsideredPatrolFromIncident(double distance);
-    public void DistanceOfChosenPatrolFromIncident(double distance);
+    public void AddDistanceOfChosenPatrolFromIncident(double distance);
 }

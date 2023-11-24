@@ -48,7 +48,7 @@ public class StatisticsManager : IStatisticsManager
 
     public void AddDistanceOfConsideredPatrolFromIncident(double distance) => _distancesOfConsideredPatrolsFromIncident.Add(distance);
 
-    public void DistanceOfChosenPatrolFromIncident(double distance) => _distancesOfChosenPatrolsFromIncident.Add(distance);
+    public void AddDistanceOfChosenPatrolFromIncident(double distance) => _distancesOfChosenPatrolsFromIncident.Add(distance);
 
     private void UpdateIncidentsInTimeData()
     {
