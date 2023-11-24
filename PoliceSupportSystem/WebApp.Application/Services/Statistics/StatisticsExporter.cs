@@ -20,6 +20,7 @@ internal class StatisticsExporter : IStatisticsExporter
         zip.AddEntry("PatrolStateHistory.csv", ExportPatrolStateHistory());
         zip.AddEntry("IncidentStateHistory.csv", ExportIncidentStateHistory());
         zip.AddEntry("IncidentSummary.csv", ExportIncidentSummary());
+        zip.AddEntry("NumberOfIncidentsInTime.csv", ExportNumberOfIncidentsInTime());
         zip.Save(stream);
     }
 
@@ -131,6 +132,15 @@ internal class StatisticsExporter : IStatisticsExporter
         }
 
         return results.ToString();
+    }
+
+    private string ExportNumberOfIncidentsInTime()
+    {
+        var header = "NumberOfActiveIncidents, NumberOfActiveShootings, Time";
+        var result = new StringBuilder(header);
+        foreach (var kv in _statisticsManager.IncidentsInTime)
+            result.AppendLine($"{kv.Value.numberOfIncidents}, {kv.Value.numberOfShootings}, {kv.Key}");
+        return result.ToString();
     }
     
     private Stream GenerateStreamFromString(string s)
