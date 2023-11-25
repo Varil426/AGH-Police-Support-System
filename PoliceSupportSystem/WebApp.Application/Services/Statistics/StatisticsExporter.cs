@@ -79,7 +79,7 @@ internal class StatisticsExporter : IStatisticsExporter
 
     private string ExportPatrolPositionHistory()
     {
-        var header = "Id, Latitude, Longitude, ChangedAt";
+        var header = "Id, Latitude, Longitude, ChangedAt\n";
         var results = new StringBuilder(header);
         foreach (var patrolData in _statisticsManager.PatrolData)
         {
@@ -94,7 +94,7 @@ internal class StatisticsExporter : IStatisticsExporter
 
     private string ExportPatrolStateHistory()
     {
-        var header = "Id, State, ChangedAt";
+        var header = "Id, State, ChangedAt\n";
         var results = new StringBuilder(header);
         foreach (var patrolData in _statisticsManager.PatrolData)
         {
@@ -109,7 +109,7 @@ internal class StatisticsExporter : IStatisticsExporter
     
     private string ExportIncidentStateHistory()
     {
-        var header = "Id, State, ChangedAt";
+        var header = "Id, State, ChangedAt\n";
         var results = new StringBuilder(header);
         foreach (var incidentData in _statisticsManager.IncidentData)
         {
@@ -124,7 +124,7 @@ internal class StatisticsExporter : IStatisticsExporter
 
     private string ExportIncidentSummary()
     {
-        var header = "Id, Latitude, Longitude, CreatedAt, ResponseAt, ResolvedAt, ChangedIntoFiring";
+        var header = "Id, Latitude, Longitude, CreatedAt, ResponseAt, ResolvedAt, ChangedIntoFiring\n";
         var results = new StringBuilder(header);
         foreach (var incidentData in _statisticsManager.IncidentData)
         {
@@ -136,7 +136,7 @@ internal class StatisticsExporter : IStatisticsExporter
 
     private string ExportNumberOfIncidentsInTime()
     {
-        var header = "NumberOfActiveIncidents, NumberOfActiveShootings, Time";
+        var header = "NumberOfActiveIncidents, NumberOfActiveShootings, Time\n";
         var result = new StringBuilder(header);
         foreach (var kv in _statisticsManager.IncidentsInTime)
             result.AppendLine($"{kv.Value.numberOfIncidents}, {kv.Value.numberOfShootings}, {kv.Key}");
