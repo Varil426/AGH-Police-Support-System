@@ -9,11 +9,11 @@ namespace Simulation.Application.Directors.IncidentDirector;
 
 internal class IncidentRandomizer : IIncidentRandomizer
 {
-    private const int MinimumIncidentDuration = 10;
-    private const int MaximumIncidentDuration = 60;
+    private const int MinimumIncidentDuration = 30;
+    private const int MaximumIncidentDuration = 120;
 
     private const int MinimumTimeToChangeIntoShooting = 1;
-    private const int MaximumTimeToChangeIntoShooting = 10;
+    private const int MaximumTimeToChangeIntoShooting = 30;
 
     private readonly IncidentDirectorSettings _settings;
     private readonly IMapService _mapService;
