@@ -19,7 +19,6 @@ var host = Host.CreateDefaultBuilder(args)
             services
                 .AddMessageService()
                 .AddMessageBus()
-        // TODO Create agents
     )
     .AddServiceStatusNotifier()
     .RegisterSharedApplicationModule()

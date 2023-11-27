@@ -2,5 +2,4 @@
 
 public abstract record Order
 {
-    // private DateTimeOffset ReceivedAt { get; } = DateTimeOffset.UtcNow;
 }

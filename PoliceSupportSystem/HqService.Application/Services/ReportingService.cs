@@ -30,8 +30,6 @@ public class ReportingService : IReportingService
 
         var newIncident = _incidentFactory.CreateIncident(newIncidentDto);
         await _incidentMonitoringService.AddIncident(newIncident);
-        // TODO Notify HQ Agent
-
         await _domainEventProcessor.ProcessDomainEvents(newIncident);
     }
 
@@ -40,7 +38,6 @@ public class ReportingService : IReportingService
         _logger.LogInformation($"Received an incident update info: {updateIncidentDto}");
 
         await _incidentMonitoringService.UpdatedIncident(updateIncidentDto);
-        // TODO Notify HQ Agent
         var incident = (await _incidentMonitoringService.GetIncidentById(updateIncidentDto.Id))!;
         await _domainEventProcessor.ProcessDomainEvents(incident);
     }

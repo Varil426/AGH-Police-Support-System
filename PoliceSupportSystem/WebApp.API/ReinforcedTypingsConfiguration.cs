@@ -10,14 +10,6 @@ public class ReinforcedTypingsConfiguration
     {
         builder.Substitute(typeof(Guid), new RtSimpleTypeName("string"));
 
-        // builder.SubstituteGeneric(
-        //     typeof(IEnumerable<>),
-        //     (type, typeResolver) =>
-        //     {
-        //         var args = type.GetGenericArguments();
-        //         return new RtArrayType(typeResolver.ResolveTypeName(args[0]));
-        //     });
-        
         builder.Global(config => config
             .CamelCaseForProperties()
             .CamelCaseForMethods()

@@ -41,7 +41,7 @@ internal class IncidentRandomizer : IIncidentRandomizer
             var finishAfter = TimeSpan.FromMinutes(_random.Next(MinimumIncidentDuration, MaximumIncidentDuration));
             TimeSpan? changeIntoShootingAfter = ShouldChangeIntoShooting(district.DangerLevel) ? TimeSpan.FromMinutes(_random.Next(MinimumTimeToChangeIntoShooting, MaximumTimeToChangeIntoShooting)) : null;
 
-            results.Add(new PlannedIncident(Guid.NewGuid(), position, startAfter, IncidentTypeEnum.NormalIncident, finishAfter, changeIntoShootingAfter, changeIntoShootingAfter is null ? null : 2)); // TODO Random number of required patrols to solve
+            results.Add(new PlannedIncident(Guid.NewGuid(), position, startAfter, IncidentTypeEnum.NormalIncident, finishAfter, changeIntoShootingAfter, changeIntoShootingAfter is null ? null : 2));
         }
 
         return results;

@@ -16,7 +16,6 @@ public class MonitoringHubEmitter : BackgroundService
         _monitoringService = monitoringService;
     }
 
-    // TODO Could be improved by sending just change info
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)

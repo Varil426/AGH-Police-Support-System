@@ -53,7 +53,7 @@ public static class InfrastructureExtensions
     public static TSettings GetSettings<TSettings>(this IConfiguration configuration, string sectionName)
     {
         var configSection = configuration.GetRequiredSection(sectionName);
-        var settings = configSection.Get<TSettings>() ?? throw new Exception(); // TODO Change exception type
+        var settings = configSection.Get<TSettings>() ?? throw new Exception();
         return settings;
     }
 
@@ -77,11 +77,11 @@ public static class InfrastructureExtensions
 
         return hostBuilder;
     }
-    
+
     public static IHostBuilder AddRabbitMqBus(this IHostBuilder hostBuilder)
     {
         hostBuilder.ConfigureRabbitMq();
-        
+
         hostBuilder.ConfigureServices(
             (ctx, s) =>
             {
@@ -100,7 +100,7 @@ public static class InfrastructureExtensions
                         var bus = sp.GetRequiredService<IBus>();
                         var exchangeName = rabbitMqSettings.SimulationExchangeName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.SimulationExchangeName));
                         var queueName = rabbitMqSettings.IncomingMessageQueueName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.IncomingMessageQueueName));
-        
+
                         return bus.CreateAsyncSubscriber(
                             x =>
                                 x.SetExchange(exchangeName)
@@ -109,10 +109,10 @@ public static class InfrastructureExtensions
                                     .SetReceiveSelfPublish(false)
                         );
                     });
-                
+
                 s.AddSingleton<IMessageSubscriberService, MessageSubscriberService>();
             });
-        
+
         return hostBuilder;
     }
 
@@ -126,14 +126,14 @@ public static class InfrastructureExtensions
                     x => s.AddScoped(
                         x.GetInterfaces().First(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationMessageHandler<>)),
                         x));
-                
+
                 var queryMessageHandlers = DiscoverQueryHandlers(handlerAssembly).ToList();
                 queryMessageHandlers.ForEach(
                     x => s.AddScoped(
                         x.GetInterfaces().First(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationQueryHandler<,>)),
                         x));
             });
-        
+
         return hostBuilder;
     }
 
@@ -141,10 +141,10 @@ public static class InfrastructureExtensions
         (_, builder) =>
         {
             builder.RegisterModule<ApplicationModule>();
-            
+
             builder.RegisterType<SimulationMessageProcessor>().As<ISimulationMessageProcessor>().SingleInstance();
             builder.RegisterType<MessageService>().As<IMessageService>().SingleInstance();
-            
+
             builder.RegisterType<MapService>().As<IMapService>();
         });
 
@@ -155,56 +155,34 @@ public static class InfrastructureExtensions
             {
                 var rabbitMqSettings = ctx.Configuration.GetSettings<RabbitMqSettings>(nameof(RabbitMqSettings));
                 var factory = new ConnectionFactory
-                    { HostName = rabbitMqSettings.Host, Password = rabbitMqSettings.Password, UserName = rabbitMqSettings.Username, Port = rabbitMqSettings.Port };
+                { HostName = rabbitMqSettings.Host, Password = rabbitMqSettings.Password, UserName = rabbitMqSettings.Username, Port = rabbitMqSettings.Port };
                 using var connection = factory.CreateConnection();
                 using var model = connection.CreateModel();
 
                 if (rabbitMqSettings.SimulationExchangeName is not null)
                     model.ExchangeDeclare(rabbitMqSettings.SimulationExchangeName, ExchangeType.Topic, false, true);
             });
-        
+
         return hostBuilder;
     }
-    
+
     public static IHost SubscribeMessageSubscriber(this IHost host, Assembly messageAssembly)
     {
-        // var bus = host.Services.GetRequiredService<IBus>();
-        // var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
-        //
-        // var exchangeName = rabbitMqSettings.SimulationExchangeName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.SimulationExchangeName));
-        // var queueName = rabbitMqSettings.IncomingMessageQueueName ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.IncomingMessageQueueName));
-        
-        // var messageSubscriber = bus.CreateAsyncSubscriber(
-        //     x =>
-        //         x.SetExchange(exchangeName)
-        //             .SetRoutingKey(queueName)
-        //             .SetConsumerTag(queueName)
-        //             .SetReceiveSelfPublish(false)
-        // );
-        
-        // foreach (var handlerType in DiscoverHandlers(handlerAssembly))
-        // {
-        //     var messageHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IMessageHandler<>));
-        //     var messageType = messageHandlerInterface.GetGenericArguments()[0];
-        //     typeof(InfrastructureExtensions).GetMethod(nameof(AddHandler), BindingFlags.NonPublic | BindingFlags.Static)!
-        //         .MakeGenericMethod(messageType).Invoke(null, new object[] { messageSubscriber, host.Services });
-        // }
-
         var messageSubscriber = host.Services.GetRequiredService<IAsyncSubscriber>();
-        
-        foreach (var messageType in DiscoverMessageTypes(new [] { messageAssembly }))
+
+        foreach (var messageType in DiscoverMessageTypes(new[] { messageAssembly }))
             typeof(InfrastructureExtensions).GetMethod(nameof(SubscribeForMessage), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(messageType).Invoke(null, new object[] { messageSubscriber, host.Services });
-        
-        foreach (var messageType in DiscoverSimulationQueryTypes(new [] { messageAssembly }))
+
+        foreach (var messageType in DiscoverSimulationQueryTypes(new[] { messageAssembly }))
             typeof(InfrastructureExtensions).GetMethod(nameof(SubscribeForSimulationQueries), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(messageType, messageType.GetInterface(typeof(ISimulationQuery<>).Name)!.GetGenericArguments().First()).Invoke(null, new object[] { messageSubscriber, host.Services });
-        
+
         messageSubscriber.Open();
 
         return host;
     }
-    
+
     public static IHostBuilder AddSerilog(this IHostBuilder hostBuilder) => hostBuilder
         .ConfigureLogging((_, loggingBuilder) => loggingBuilder.ClearProviders())
         .UseSerilog(
@@ -215,14 +193,9 @@ public static class InfrastructureExtensions
                 var lokiCredentials = new LokiCredentials { Login = lokiSettings.Login, Password = lokiSettings.Password };
                 var labels = new[] { new LokiLabel { Key = "Id", Value = lokiSettings.Label } };
                 var propertiesAsLabels = Enumerable.Empty<string>();
-            
-                // var lokiCredentials = new BasicAuthCredentials(lokiSettings.Uri, lokiSettings.Login, lokiSettings.Password);
-                // var labels = new LogLabelProvider(new List<LokiLabel> { new LokiLabel(nameof(serviceSettings.Id), serviceSettings.Id) });
-            
-                // TODO Add logging middleware - log exceptions and so on
 
                 config.MinimumLevel.Verbose();
-            
+
                 config.WriteTo.Console();
                 config.WriteTo.GrafanaLoki(
                     lokiSettings.Uri,
@@ -230,9 +203,8 @@ public static class InfrastructureExtensions
                     labels: labels,
                     propertiesAsLabels: propertiesAsLabels,
                     restrictedToMinimumLevel: LogEventLevel.Verbose);
-                // config.WriteTo.LokiHttp(lokiCredentials, labels);
             });
-    
+
     private static IAsyncSubscriber SubscribeForMessage<TMessage>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
         where TMessage : class, ISimulationMessage
     {
@@ -244,7 +216,7 @@ public static class InfrastructureExtensions
             });
         return subscriber;
     }
-    
+
     private static IAsyncSubscriber SubscribeForSimulationQueries<TQuery, TResult>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
         where TQuery : class, ISimulationQuery<TResult>
         where TResult : ISimulationMessage
@@ -258,10 +230,10 @@ public static class InfrastructureExtensions
             });
         return subscriber;
     }
-    
+
     private static IEnumerable<Type> DiscoverHandlers(Assembly assembly) => assembly.GetTypes().Where(
         x => !x.IsAbstract && x.GetInterfaces().Any(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationMessageHandler<>)));
-    
+
     private static IEnumerable<Type> DiscoverQueryHandlers(Assembly assembly) => assembly.GetTypes().Where(
         x => !x.IsAbstract && x.GetInterfaces().Any(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationQueryHandler<,>)));
 
@@ -274,7 +246,7 @@ public static class InfrastructureExtensions
                     x => !x.IsAbstract && x.IsAssignableTo(typeof(ISimulationMessage))));
         return messageTypes;
     }
-    
+
     private static IEnumerable<Type> DiscoverSimulationQueryTypes(IEnumerable<Assembly> assemblies)
     {
         var messageTypes = new List<Type>();

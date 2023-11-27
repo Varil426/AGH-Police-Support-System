@@ -9,7 +9,7 @@ public class IncidentMonitoringService : IIncidentMonitoringService
 {
     private Dictionary<Guid, Incident> _incidents = new();
 
-    private SemaphoreSlim _semaphore = new(1, 1); // TODO Consider some read write async mechanism (similar to ReaderWriterLockSlim but async/await friendly)
+    private SemaphoreSlim _semaphore = new(1, 1);
 
     public IncidentMonitoringService()
     {

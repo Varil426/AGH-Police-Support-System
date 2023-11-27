@@ -52,12 +52,8 @@ public class StatisticsManager : IStatisticsManager
 
     private void UpdateIncidentsInTimeData()
     {
-        // UpdateNumberOfActiveShootingsInTime();
-        // UpdateNumberOfActiveIncidentsInTime();
         var activeIncidents = _incidentData.Count(x => x.History.States.Last().state is not IncidentStatusEnum.Resolved);
         var activeShootings = _incidentData.Count(x => x.History.States.Last().state == IncidentStatusEnum.OnGoingShooting);
         _numberOfActiveIncidentsInTime[DateTimeOffset.UtcNow] = (activeIncidents, activeShootings);
     }
-    // private void UpdateNumberOfActiveShootingsInTime() => _numberOfActiveShootingsInTime[DateTimeOffset.UtcNow] = _incidentData.Count(x => x.History.States.Last().state == IncidentStatusEnum.OnGoingShooting);
-    // private void UpdateNumberOfActiveIncidentsInTime() => _numberOfActiveShootingsInTime[DateTimeOffset.UtcNow] = _incidentData.Count(x => x.History.States.Last().state is not IncidentStatusEnum.Resolved);
 }

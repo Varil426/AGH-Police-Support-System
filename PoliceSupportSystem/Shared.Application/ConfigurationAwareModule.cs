@@ -11,11 +11,11 @@ public abstract class ConfigurationAwareModule : Module
     {
         Configuration = configuration;
     }
-    
+
     protected TSettings GetSettings<TSettings>(string sectionName)
     {
         var configSection = Configuration.GetRequiredSection(sectionName);
-        var settings = configSection.Get<TSettings>() ?? throw new Exception(); // TODO Change exception type
+        var settings = configSection.Get<TSettings>() ?? throw new Exception();
         return settings;
     }
 }

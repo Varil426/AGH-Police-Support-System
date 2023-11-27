@@ -17,15 +17,13 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
     private readonly IPatrolFactory _patrolFactory;
     private readonly IDomainEventProcessor _domainEventProcessor;
 
-    // private readonly List<Func<ICityStateMonitoringService, Task>> _subscriptions = new();
     private readonly List<Incident> _incidents = new();
     private readonly List<Patrol> _patrols = new();
     private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
 
-    public Position HqLocation => _mapSettings.HqLocation; 
+    public Position HqLocation => _mapSettings.HqLocation;
     public IReadOnlyCollection<Incident> Incidents
     {
-        // TODO Improve this
         get
         {
             _semaphoreSlim.Wait();
@@ -37,7 +35,6 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
 
     public IReadOnlyCollection<Patrol> Patrols
     {
-        // TODO Improve this
         get
         {
             _semaphoreSlim.Wait();
@@ -55,7 +52,6 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         _domainEventProcessor = domainEventProcessor;
     }
 
-    // public void Subscribe(Func<ICityStateMonitoringService, Task> callback) => _subscriptions.Add(callback);
 
     public async Task AddIncident(NewIncidentDto newIncidentDto)
     {
@@ -79,7 +75,7 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         var newPatrol = _patrolFactory.CreatePatrol(patrolDto);
         _patrols.Add(newPatrol);
         await _domainEventProcessor.ProcessDomainEvents(newPatrol);
-        
+
         _semaphoreSlim.Release();
     }
 
@@ -88,15 +84,10 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         await _semaphoreSlim.WaitAsync();
         var incident = _incidents.FirstOrDefault(x => x.Id == incidentDto.Id) ?? throw new Exception($"Incident with ID: {incidentDto.Id} not found");
 
-        // if (incidentDto.Status == IncidentStatusEnum.Resolved)
-        //     _incidents.Remove(incident);
-        // else
-        //     incident.Update(incidentDto);
-        
         incident.Update(incidentDto);
 
         await _domainEventProcessor.ProcessDomainEvents(incident);
-        
+
         _semaphoreSlim.Release();
     }
 
@@ -108,10 +99,4 @@ internal class CityStateMonitoringService : ICityStateMonitoringService
         await _domainEventProcessor.ProcessDomainEvents(patrol);
         _semaphoreSlim.Release();
     }
-
-    // private async Task NotifyAll()
-    // {
-    //     foreach (var subscription in _subscriptions)
-    //         await subscription.Invoke(this);
-    // }
 }

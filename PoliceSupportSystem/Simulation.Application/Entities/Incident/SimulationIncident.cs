@@ -15,7 +15,7 @@ public class SimulationIncident : Shared.Domain.Incident.Incident, ISimulationRo
     public IReadOnlyCollection<IService> RelatedServices => _relatedServices.AsReadOnly();
     public IReadOnlyCollection<ISimulationPatrol> RelatedPatrols => _relatedPatrols.AsReadOnly();
     public IEnumerable<IIncidentAuditEntry> History => _history.AsReadOnly();
-    
+
     public SimulationIncident(
         Guid id,
         Position location,
@@ -51,7 +51,6 @@ public class SimulationIncident : Shared.Domain.Incident.Incident, ISimulationRo
         _history.Add(new RelatedPatrolRemovedAuditEntry(patrol, _relatedPatrols.Count, UpdatedAt));
     }
 
-    // public new void ClearDomainEvents() => base.ClearDomainEvents();
 
     public override void UpdateStatus(IncidentStatusEnum newStatus)
     {

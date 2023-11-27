@@ -150,7 +150,7 @@ internal class DecisionService : IDecisionService
             return null;
 
         var allDistances = patrols.Select(x => x.Position.GetDistanceTo(incident.Location)).ToList();
-        var minDistance = allDistances.Min(); // TODO What when minDistance == 0
+        var minDistance = allDistances.Min();
         var maxDistance = allDistances.Max();
 
         var incidentDistrict = await _mapInfoService.GetDistrict(incident.Location);// ?? throw new Exception("Unknown district");

@@ -48,11 +48,10 @@ internal class Simulation : ISimulation
     {
         _simulationTimeService.Start();
         _logger.LogInformation("Simulation has started");
-        // var simulationUpdateDelay = TimeSpan.FromMinutes(1) / _simulationTimeService.SimulationTimeRate;
         while (cancellationToken is { IsCancellationRequested: false } or null && (_simulationSettings.EndAfterSimulationTime is null || _simulationTimeService.SimulationTimeSinceStart < _simulationSettings.EndAfterSimulationTime))
         {
             var cycleStart = DateTimeOffset.UtcNow;
-            
+
             // Receive messages
             var messages = (await _messageService.GetMessagesAsync()).OrderBy(x => x.CreatedAt);
             // Process messages - Update state
@@ -62,11 +61,11 @@ internal class Simulation : ISimulation
             _simulationTimeService.UpdateLastActionTime();
             // Send updates - Handle Domain Events
             await HandleDomainEvents();
-            
+
             var cycleEnd = DateTimeOffset.UtcNow;
             var cycleDuration = cycleEnd - cycleStart;
             var delay = TimeSpan.FromSeconds(1) / 60 - cycleDuration;
-            
+
             await Task.Delay(delay > TimeSpan.FromMilliseconds(0) ? delay : TimeSpan.FromMilliseconds(0));
         }
     }
@@ -119,7 +118,7 @@ internal class Simulation : ISimulation
         _incidents.Add(newIncident);
         _logger.LogInformation($"Added a new incident with ID: {newIncident.Id}");
     }
-    
+
     private async Task HandleDomainEvents()
     {
         await _domainEventProcessor.ProcessDomainEvents(SimulationRootEntities/*.SelectMany(x => x.Events)*/);

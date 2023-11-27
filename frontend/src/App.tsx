@@ -6,7 +6,6 @@ import { RootStore } from "./stores/RootStore";
 import { IncidentStore } from "./stores/IncidentStore";
 import { ToastContainer } from "react-toastify";
 import { observer } from "mobx-react-lite";
-import { TestPage } from "./pages/TestPage";
 import { PatrolStore } from "./stores/PatrolStore";
 import { MainPageModel } from "./pages/MainPage/MainPageModel";
 
@@ -21,7 +20,6 @@ export const App = observer(() => {
         <ToastContainer />
         <div>
           <MainPage model={new MainPageModel()} />
-          <TestPage />
         </div>
       </RootStorePrivider>
     </Router>

@@ -13,7 +13,7 @@ builder.Host
     .AddSharedAppSettings()
     .AddRabbitMqSettings()
     .AddServiceSettings()
-    .AddRabbitMqBus(new[] { typeof(ApplicationModule).Assembly }) // TODO
+    .AddRabbitMqBus(new[] { typeof(ApplicationModule).Assembly })
     .RegisterSharedApplicationModule()
     .RegisterModule(new ApplicationModule(builder.Configuration))
     .RegisterModule<InfrastructureModule>()

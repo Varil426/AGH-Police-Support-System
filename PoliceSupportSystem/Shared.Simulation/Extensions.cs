@@ -31,34 +31,34 @@ public static class Extensions
     public static IHost SubscribeSimulationMessageHandlers(this IHost host, Assembly[] handlerAssemblies)
     {
         handlerAssemblies = handlerAssemblies.Append(typeof(Extensions).Assembly).ToArray();
-        
+
         var subscriberManager = host.Services.GetRequiredService<ISimulationBusSubscriberManager>();
         var serviceInfo = host.Services.GetRequiredService<IServiceInfoService>();
         var settings = host.Services.GetRequiredService<SimulationCommunicationSettings>();
 
         var simulationDirectMessageSubscriber = subscriberManager.CreateSubscriber(
             x =>
-            
+
                 x.SetExchange(settings.SimulationExchangeName)
                     .SetRoutingKey(serviceInfo.Id)
                     .SetConsumerTag(serviceInfo.Id)
-                    .SetReceiveSelfPublish(false) // TODO Add to config
+                    .SetReceiveSelfPublish(false)
         );
-        
+
         var simulationMessageSubscriber = subscriberManager.CreateSubscriber(
             x =>
-            
+
                 x.SetExchange(settings.SimulationExchangeName)
                     .SetRoutingKey("public")
                     .SetConsumerTag(serviceInfo.Id)
-                    .SetReceiveSelfPublish(false) // TODO Add to config
+                    .SetReceiveSelfPublish(false)
         );
-        
+
         foreach (var handlerType in DiscoverSimulationMessageHandlers(handlerAssemblies))
         {
             var simulationMessageHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ISimulationMessageHandler<>));
             var messageType = simulationMessageHandlerInterface.GetGenericArguments()[0];
-            // TODO Can be improved - multiple handlers with Autofac
+
             typeof(Extensions).GetMethod(nameof(AddSimulationMessageHandler), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(simulationMessageHandlerInterface, messageType).Invoke(
                     null,
@@ -69,7 +69,7 @@ public static class Extensions
 
         simulationDirectMessageSubscriber.Open();
         simulationMessageSubscriber.Open();
-        
+
         return host;
     }
 
@@ -85,7 +85,7 @@ public static class Extensions
             });
         return subscriber;
     }
-    
+
     private static IHostBuilder AddSimulationMessageHandlers(this IHostBuilder hostBuilder, Assembly[] handlersAssemblies)
     {
         hostBuilder.ConfigureServices(
@@ -97,7 +97,7 @@ public static class Extensions
                         x.GetInterfaces().First(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(ISimulationMessageHandler<>)),
                         x));
             });
-        
+
         return hostBuilder;
     }
 
@@ -108,14 +108,14 @@ public static class Extensions
             {
                 builder.RegisterGenericDecorator(typeof(DirectSimulationMessageHandlerDecorator<>), typeof(ISimulationMessageHandler<>));
             });
-        
+
         return hostBuilder;
     }
-    
+
     private static IHostBuilder AddRabbitMqSimulationBus(this IHostBuilder hostBuilder)
     {
         hostBuilder.ConfigureRabbitMq();
-        
+
         hostBuilder.ConfigureContainer<ContainerBuilder>(
             (ctx, builder) =>
             {
@@ -133,19 +133,11 @@ public static class Extensions
                                 $"amqp://{simulationCommunicationSettings.Username}:{simulationCommunicationSettings.Password}@{simulationCommunicationSettings.Host}:{simulationCommunicationSettings.Port}/");
                             configurator.UseErrorSubscriber(componentContext.ResolveKeyed<IErrorSubscriber>(Constants.SimulationSubscriberErrorServiceKey));
                         })).As<IBus>().Keyed<IBus>(Constants.SimulationBusKey).SingleInstance().PreserveExistingDefaults();
-                
-                // builder.Register(
-                //     _ => new RabbitMQBus(
-                //         configurator =>
-                //         {
-                //             configurator.UseConnectionString(
-                //                 $"amqp://{simulationCommunicationSettings.Username}:{simulationCommunicationSettings.Password}@{simulationCommunicationSettings.Host}:{simulationCommunicationSettings.Port}/");
-                //         })).As<IBus>().Keyed<IBus>(Constants.SimulationBusKey);
             });
 
         return hostBuilder;
     }
-    
+
     private static IHostBuilder ConfigureRabbitMq(this IHostBuilder hostBuilder)
     {
         hostBuilder.ConfigureServices(
@@ -153,21 +145,21 @@ public static class Extensions
             {
                 var simulationCommunicationSettings = ctx.Configuration.GetSettings<SimulationCommunicationSettings>(nameof(SimulationCommunicationSettings));
                 var factory = new ConnectionFactory
-                    {
-                        HostName = simulationCommunicationSettings.Host,
-                        Password = simulationCommunicationSettings.Password,
-                        UserName = simulationCommunicationSettings.Username,
-                        Port = simulationCommunicationSettings.Port
-                    };
+                {
+                    HostName = simulationCommunicationSettings.Host,
+                    Password = simulationCommunicationSettings.Password,
+                    UserName = simulationCommunicationSettings.Username,
+                    Port = simulationCommunicationSettings.Port
+                };
                 using var connection = factory.CreateConnection();
                 using var model = connection.CreateModel();
 
                 model.ExchangeDeclare(simulationCommunicationSettings.SimulationExchangeName, ExchangeType.Topic, false, true);
             });
-        
+
         return hostBuilder;
     }
-    
+
     private static IHostBuilder AddInternalServices(this IHostBuilder hostBuilder)
     {
         hostBuilder.ConfigureServices(
@@ -176,7 +168,7 @@ public static class Extensions
                 s.AddSingleton(_ => ctx.Configuration.GetSettings<SimulationCommunicationSettings>(nameof(SimulationCommunicationSettings)));
                 s.AddTransient<ITypeMapper, TypeMapper>();
             });
-        
+
         hostBuilder.ConfigureContainer<ContainerBuilder>(
             (ctx, builder) =>
             {
@@ -186,7 +178,7 @@ public static class Extensions
 
         return hostBuilder;
     }
-    
+
     private static IHostBuilder AddPatrolServices(this IHostBuilder hostBuilder)
     {
         hostBuilder.ConfigureServices(
@@ -194,10 +186,10 @@ public static class Extensions
             {
                 s.AddScoped<IStatusService, PatrolSimulationStatusService>();
             });
-        
+
         return hostBuilder;
     }
-    
+
     private static IHostBuilder AddSimulatedServices(this IHostBuilder hostBuilder)
     {
         hostBuilder.ConfigureServices(
@@ -205,20 +197,20 @@ public static class Extensions
             {
                 s.AddScoped<IStatusService, SimulationStatusService>();
             });
-        
+
         hostBuilder.ConfigureContainer<ContainerBuilder>(
             (ctx, builder) =>
             {
-                
+
             });
 
         return hostBuilder;
     }
-    
+
     private static TSettings GetSettings<TSettings>(this IConfiguration configuration, string sectionName)
     {
         var configSection = configuration.GetRequiredSection(sectionName);
-        var settings = configSection.Get<TSettings>() ?? throw new Exception(); // TODO Change exception type
+        var settings = configSection.Get<TSettings>() ?? throw new Exception();
         return settings;
     }
 

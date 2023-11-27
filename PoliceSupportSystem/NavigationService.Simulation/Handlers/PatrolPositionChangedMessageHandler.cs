@@ -11,7 +11,6 @@ internal class PatrolPositionChangedMessageHandler : ISimulationMessageHandler<P
     private readonly NavigationAgent _navigationAgent;
     private readonly SimulationNavigationService _simulationNavigationService;
 
-    // TODO This can be improved
     private static DateTimeOffset _lastUpdate = DateTimeOffset.MinValue;
 
     public PatrolPositionChangedMessageHandler(

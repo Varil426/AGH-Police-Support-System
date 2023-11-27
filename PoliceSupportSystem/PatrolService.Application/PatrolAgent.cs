@@ -20,7 +20,7 @@ public class PatrolAgent : AgentBase
     private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedMessageTypes = new[]
         { typeof(CurrentLocationMessage), typeof(PatrolDistrictOrderMessage), typeof(HandleIncidentOrderMessage), typeof(DestinationReachedMessage), typeof(GunFiredMessage), typeof(SupportShootingOrderMessage) }.AsReadOnly();
 
-     private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedEnvironmentSignalTypes = new[] { typeof(IncidentResolvedSignal), typeof(IncidentAlreadyOverSignal) }.AsReadOnly();
+    private static readonly IReadOnlyCollection<Type> PatrolAgentAcceptedEnvironmentSignalTypes = new[] { typeof(IncidentResolvedSignal), typeof(IncidentAlreadyOverSignal) }.AsReadOnly();
 
     private Position? _lastKnowPosition;
     private PatrolStatusEnum _status;
@@ -70,8 +70,6 @@ public class PatrolAgent : AgentBase
     {
         if (_lastOrder is null)
             return;
-        
-        // _logger.LogInformation($"TEST PatrolOrder {_lastOrder.Type}"); // TODO Remove
     }
 
     private async Task Handle(CurrentLocationMessage currentLocationMessage)
@@ -82,7 +80,7 @@ public class PatrolAgent : AgentBase
         _lastKnowPosition = currentLocationMessage.Position;
         await MessageService.SendMessageAsync(new CurrentLocationMessage(_lastKnowPosition, Id, Guid.NewGuid(), DateTimeOffset.UtcNow));
     }
-    
+
     private async Task Handle(PatrolDistrictOrderMessage patrolDistrictOrderMessage)
     {
         if (_lastOrder?.GivenAt > patrolDistrictOrderMessage.CreatedAt)
@@ -94,7 +92,7 @@ public class PatrolAgent : AgentBase
         await SendWithAcknowledgeRequired(new ShowDistrictMessage(Id, _patrolInfoService.NavAgentId, patrolDistrictOrderMessage.DistrictName));
         await AcknowledgeMessage(patrolDistrictOrderMessage);
     }
-    
+
     private async Task Handle(HandleIncidentOrderMessage handleIncidentOrderMessage)
     {
         if (_lastOrder?.GivenAt > handleIncidentOrderMessage.CreatedAt)
@@ -106,7 +104,7 @@ public class PatrolAgent : AgentBase
         await SendWithAcknowledgeRequired(new NavigateToMessage(Id, _patrolInfoService.NavAgentId, handleIncidentOrderMessage.IncidentLocation, true));
         await AcknowledgeMessage(handleIncidentOrderMessage);
     }
-    
+
     private async Task Handle(SupportShootingOrderMessage supportShootingOrderMessage)
     {
         if (_lastOrder?.GivenAt > supportShootingOrderMessage.CreatedAt)
@@ -133,7 +131,7 @@ public class PatrolAgent : AgentBase
                 break;
         }
     }
-    
+
     private async Task Handle(GunFiredMessage gunFiredMessage)
     {
         if (gunFiredMessage.Sender != _patrolInfoService.GunAgentId)
@@ -151,7 +149,7 @@ public class PatrolAgent : AgentBase
         _status = PatrolStatusEnum.AwaitingOrders;
         await MessageService.SendMessageAsync(new IncidentResolvedMessage(Id, Guid.NewGuid(), baseIncident.IncidentId));
     }
-    
+
     private async Task Handle(IncidentAlreadyOverSignal incidentAlreadyOverSignal)
     {
         if (_lastOrder is not BaseIncidentOrder baseIncident || baseIncident.IncidentId != incidentAlreadyOverSignal.IncidentId)

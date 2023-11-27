@@ -31,7 +31,6 @@ using IMessageBus = Shared.Application.Services.IMessageBus;
 
 namespace Shared.Infrastructure;
 
-// TODO Split this file into many - specialized
 public static class Extensions
 {
     private const string RabbitMqConfigSectionName = "RabbitMq";
@@ -43,9 +42,9 @@ public static class Extensions
             (context, config) =>
             {
                 var env = context.HostingEnvironment;
-                
+
                 string sharedSettingsDirectoryPath = Path.Combine(Path.GetDirectoryName(Assembly.GetAssembly(typeof(Extensions))!.Location)!);
-                
+
                 config
                     .AddJsonFile(Path.Combine(sharedSettingsDirectoryPath, "sharedsettings.json"), optional: true)
                     .AddJsonFile(Path.Combine(sharedSettingsDirectoryPath, $"sharedsettings.{env.EnvironmentName}.json"), optional: true)
@@ -53,7 +52,7 @@ public static class Extensions
                     .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 
                 config.AddEnvironmentVariables(EnvironmentVariablePrefix);
-                
+
             });
 
     public static IHostBuilder UseAutofac(this IHostBuilder hostBuilder) => hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -71,14 +70,9 @@ public static class Extensions
             var lokiCredentials = new LokiCredentials { Login = lokiSettings.Login, Password = lokiSettings.Password };
             var labels = new[] { new LokiLabel { Key = nameof(serviceSettings.Id), Value = serviceSettings.Id } };
             var propertiesAsLabels = Enumerable.Empty<string>();
-            
-            // var lokiCredentials = new BasicAuthCredentials(lokiSettings.Uri, lokiSettings.Login, lokiSettings.Password);
-            // var labels = new LogLabelProvider(new List<LokiLabel> { new LokiLabel(nameof(serviceSettings.Id), serviceSettings.Id) });
-            
-            // TODO Add logging middleware - log exceptions and so on
 
             config.MinimumLevel.Verbose();
-            
+
             config.WriteTo.Console();
             config.WriteTo.GrafanaLoki(
                 lokiSettings.Uri,
@@ -88,7 +82,7 @@ public static class Extensions
                 restrictedToMinimumLevel: LogEventLevel.Verbose);
             // config.WriteTo.LokiHttp(lokiCredentials, labels);
         });
-    
+
     public static IServiceCollection AddMessageService(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddSingleton<MessageService>();
@@ -101,7 +95,7 @@ public static class Extensions
 
     public static IHostBuilder RegisterModule<TModule>(this IHostBuilder hostBuilder) where TModule : IModule, new() => hostBuilder.ConfigureContainer<ContainerBuilder>(
         builder => builder.RegisterModule<TModule>());
-    
+
     public static IHostBuilder RegisterModule<TModule>(this IHostBuilder hostBuilder, TModule module) where TModule : ConfigurationAwareModule => hostBuilder.ConfigureContainer<ContainerBuilder>(
         builder => builder.RegisterModule(module));
 
@@ -132,10 +126,10 @@ public static class Extensions
                 services.AddSingleton(serviceSettings);
                 services.AddSingleton<IServiceInfoService>(serviceSettings);
             });
-    
+
         return builder;
     }
-    
+
     public static IHostBuilder AddPatrolSettings(this IHostBuilder builder)
     {
         builder.ConfigureServices(
@@ -145,21 +139,21 @@ public static class Extensions
                 services.AddSingleton(patrolSettings);
                 services.AddSingleton<IPatrolInfoService>(patrolSettings);
             });
-    
+
         return builder;
     }
 
     public static TSettings GetSettings<TSettings>(this IConfiguration configuration, string sectionName)
     {
         var configSection = configuration.GetRequiredSection(sectionName);
-        var settings = configSection.Get<TSettings>() ?? throw new Exception(); // TODO Change exception type
+        var settings = configSection.Get<TSettings>() ?? throw new Exception();
         return settings;
     }
 
     public static IHostBuilder AddRabbitMqBus(this IHostBuilder hostBuilder, IEnumerable<Assembly> handlerAssemblies/*, Assembly? integrationAssembly = null, Assembly? agentCommunicationAssembly = null*/)
     {
         hostBuilder.ConfigureRabbitMq();
-        
+
         hostBuilder.ConfigureServices(
             (ctx, s) =>
             {
@@ -176,15 +170,7 @@ public static class Extensions
                         }));
 
                 s.AddSingleton<IBusSubscriberManager, BusSubscriberManager>();
-                
-                // s.AddTransient<IBus>(
-                //     _ => new RabbitMQBus(
-                //         configurator =>
-                //         {
-                //             configurator.UseConnectionString($"amqp://{rabbitMqSettings.Username}:{rabbitMqSettings.Password}@{rabbitMqSettings.Host}:{rabbitMqSettings.Port}/");
-                //         }));
 
-                // TODO Can be improved - multiple handlers with Autofac
                 var handlerAssembliesList = handlerAssemblies.ToList();
                 if (rabbitMqSettings.QueryExchange is not null)
                 {
@@ -193,26 +179,24 @@ public static class Extensions
                     queryHandlers.ForEach(x => s.AddScoped(x));
                 }
 
-                // TODO Can be improved - multiple handlers with Autofac
                 if (rabbitMqSettings.CommandExchange is not null)
                 {
                     // Register Command Handlers
                     var commandHandlers = DiscoverCommandHandlers(handlerAssembliesList).ToList();
                     commandHandlers.ForEach(x => s.AddScoped(x));
                 }
-                
-                // TODO Can be improved - multiple handlers with Autofac
+
                 if (rabbitMqSettings.EventExchange is not null)
                 {
                     // Register Event Handlers
                     var eventHandlers = DiscoverEventHandlers(handlerAssembliesList).ToList();
                     eventHandlers.ForEach(x => s.AddScoped(x));
                 }
-                        
-                
+
+
             });
-        
-        
+
+
         return hostBuilder;
     }
 
@@ -223,7 +207,7 @@ public static class Extensions
             {
                 var rabbitMqSettings = ctx.Configuration.GetSettings<RabbitMqSettings>(RabbitMqConfigSectionName);
                 var factory = new ConnectionFactory
-                    { HostName = rabbitMqSettings.Host, Password = rabbitMqSettings.Password, UserName = rabbitMqSettings.Username, Port = rabbitMqSettings.Port };
+                { HostName = rabbitMqSettings.Host, Password = rabbitMqSettings.Password, UserName = rabbitMqSettings.Username, Port = rabbitMqSettings.Port };
                 using var connection = factory.CreateConnection();
                 using var model = connection.CreateModel();
 
@@ -238,7 +222,7 @@ public static class Extensions
                 if (rabbitMqSettings.MessageExchange is not null)
                     model.ExchangeDeclare(rabbitMqSettings.MessageExchange, ExchangeType.Fanout, false, true);
             });
-        
+
         return hostBuilder;
     }
 
@@ -251,7 +235,7 @@ public static class Extensions
                     x => !x.IsAbstract && x.IsAssignableTo(typeof(IMessage))));
         return messageTypes;
     }
-    
+
     private static IEnumerable<Type> DiscoverQueryHandlers(IEnumerable<Assembly> assemblies)
     {
         var queryHandlers = new List<Type>();
@@ -260,7 +244,7 @@ public static class Extensions
                 assembly.GetTypes().Where(x => x.GetInterfaces().Any(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(IQueryHandler<,>))));
         return queryHandlers;
     }
-    
+
     private static IEnumerable<Type> DiscoverCommandHandlers(IEnumerable<Assembly> assemblies)
     {
         var commandHandlers = new List<Type>();
@@ -286,22 +270,21 @@ public static class Extensions
     {
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
 
-        // TODO Can be improved - multiple handlers with Autofac
         if (rabbitMqSettings.QueryExchange is not null)
             host.SubscribeQueryHandlers(handlerAssemblies);
-        
+
         if (rabbitMqSettings.EventExchange is not null)
             host.SubscribeEventHandlers(handlerAssemblies);
-        
+
         if (rabbitMqSettings.CommandExchange is not null)
             host.SubscribeCommandHandlers(handlerAssemblies);
-        
+
         if (rabbitMqSettings.MessageExchange is not null)
             host.SubscribeMessageService();
 
         return host;
     }
-    
+
     public static IHost SubscribeQueryHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
     {
         var subscriberManager = host.Services.GetRequiredService<IBusSubscriberManager>();
@@ -310,13 +293,13 @@ public static class Extensions
 
         var querySubscriber = subscriberManager.CreateSubscriber(
             x =>
-            
+
                 x.SetExchange(rabbitMqSettings.QueryExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.QueryExchange)))
                 .SetRoutingKey(serviceSettings.Id)
                 .SetConsumerTag(serviceSettings.Id)
-                .SetReceiveSelfPublish(false)// TODO Add to config? Resign from it?
+                .SetReceiveSelfPublish(false)
             );
-        
+
         foreach (var handlerType in DiscoverQueryHandlers(handlerAssemblies))
         {
             var queryHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IQueryHandler<,>));
@@ -330,21 +313,21 @@ public static class Extensions
 
         return host;
     }
-    
+
     public static IHost SubscribeEventHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
     {
         var subscriberManager = host.Services.GetRequiredService<IBusSubscriberManager>();
 
         var rabbitMqSettings = host.Services.GetRequiredService<RabbitMqSettings>();
         var serviceSettings = host.Services.GetRequiredService<ServiceSettings>();
-        
+
         var eventSubscriber = subscriberManager.CreateSubscriber(
             x =>
-            
+
                 x.SetExchange(rabbitMqSettings.EventExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.EventExchange)))
                     .SetRoutingKey(serviceSettings.Id)
                     .SetConsumerTag(serviceSettings.Id)
-                    .SetReceiveSelfPublish(false)// TODO Add to config? Resign from it?
+                    .SetReceiveSelfPublish(false)
         );
 
         foreach (var handlerType in DiscoverEventHandlers(handlerAssemblies))
@@ -354,12 +337,12 @@ public static class Extensions
             typeof(Extensions).GetMethod(nameof(AddEventHandler), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(handlerType, eventType).Invoke(null, new object[] { eventSubscriber, host.Services });
         }
-        
+
         eventSubscriber.Open();
 
         return host;
     }
-    
+
     public static IHost SubscribeCommandHandlers(this IHost host, IEnumerable<Assembly> handlerAssemblies /*Action<IAsyncSubscriber, IServiceProvider> action*/)
     {
         var subscriberManager = host.Services.GetRequiredService<IBusSubscriberManager>();
@@ -368,13 +351,13 @@ public static class Extensions
 
         var commandSubscriber = subscriberManager.CreateSubscriber(
             x =>
-            
+
                 x.SetExchange(rabbitMqSettings.CommandExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.CommandExchange)))
                     .SetRoutingKey(serviceSettings.Id)
                     .SetConsumerTag(serviceSettings.Id)
-                    .SetReceiveSelfPublish(false)// TODO Add to config? Resign from it?
+                    .SetReceiveSelfPublish(false)
         );
-        
+
         foreach (var handlerType in DiscoverCommandHandlers(handlerAssemblies))
         {
             var commandHandlerInterface = handlerType.GetInterfaces().First(x => x.IsGenericType &&
@@ -391,7 +374,7 @@ public static class Extensions
                 typeof(Extensions).GetMethods(BindingFlags.Static | BindingFlags.NonPublic).First(x => x.Name == nameof(AddCommandHandler) && x.GetGenericArguments().Length == 2)
                     .MakeGenericMethod(handlerType, commandType).Invoke(null, new object[] { commandSubscriber, host.Services });
         }
-        
+
         commandSubscriber.Open();
 
         return host;
@@ -408,7 +391,7 @@ public static class Extensions
                 x.SetExchange(rabbitMqSettings.MessageExchange ?? throw new MissingConfigurationException(nameof(rabbitMqSettings.MessageExchange)))
                     .SetRoutingKey(serviceSettings.Id)
                     .SetConsumerTag(serviceSettings.Id)
-                    .SetReceiveSelfPublish() // TODO Add to config
+                    .SetReceiveSelfPublish()
         );
 
         foreach (var messageType in DiscoverMessageTypes(new[] { typeof(IMessage).Assembly }))
@@ -416,7 +399,7 @@ public static class Extensions
                 .Invoke(null, new object[] { messageSubscriber, host.Services });
 
         messageSubscriber.Open();
-        
+
         return host;
     }
 
@@ -432,7 +415,7 @@ public static class Extensions
             });
         return subscriber;
     }
-    
+
     private static IAsyncSubscriber AddEventHandler<THandler, TEvent>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
         where THandler : class, IEventHandler<TEvent>
         where TEvent : class, IEvent
@@ -458,7 +441,7 @@ public static class Extensions
             });
         return subscriber;
     }
-    
+
     private static IAsyncSubscriber AddCommandHandler<THandler, TCommand>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
         where THandler : class, ICommandHandler<TCommand>
         where TCommand : class, ICommand
@@ -471,7 +454,7 @@ public static class Extensions
             });
         return subscriber;
     }
-    
+
     internal static IAsyncSubscriber AddMessageHandler<TMessage>(this IAsyncSubscriber subscriber, IServiceProvider serviceProvider)
         where TMessage : class, IMessage
     {

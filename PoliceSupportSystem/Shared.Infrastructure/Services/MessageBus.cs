@@ -17,7 +17,7 @@ internal class MessageBus : IMessageBus, IDisposable
     private readonly RabbitMqSettings _rabbitMqSettings;
     private readonly ThreadLocal<IPublisher>? _eventPublisher;
     private readonly ThreadLocal<IPublisher>? _messagePublisher;
-    
+
     public MessageBus(IBus messageBus, ServiceSettings serviceSettings, RabbitMqSettings rabbitMqSettings)
     {
         _messageBus = messageBus;
@@ -44,12 +44,12 @@ internal class MessageBus : IMessageBus, IDisposable
             x =>
             {
                 x.SetRoutingKey(command.Receiver);
-                x.SetConsumerTag(_serviceSettings.Id); // TODO Do I need it?
+                x.SetConsumerTag(_serviceSettings.Id);
                 x.SetExchange(_rabbitMqSettings.CommandExchange ?? throw new MissingConfigurationException(nameof(RabbitMqSettings.CommandExchange)));
             });
         return publisher.Send(command, cancellationToken: cancellation);
     }
-    
+
     public async Task<TResult> InvokeAsync<TCommand, TResult>(TCommand command, CancellationToken cancellation = default, TimeSpan? timeout = null)
         where TCommand : class, ICommand<TResult>
         where TResult : class
@@ -97,22 +97,21 @@ internal class MessageBus : IMessageBus, IDisposable
             _messagePublisher.Value?.Send(message);
         else
             throw new InvalidOperationException("Missing config for messages.");
-        
+
         return Task.CompletedTask;
     }
-    
+
     public Task PublishAsync<TEvent>(TEvent @event) where TEvent : class, IEvent
     {
         if (_eventPublisher is not null)
             _eventPublisher.Value?.Send(@event);
-        else 
+        else
             throw new InvalidOperationException("Missing config for events.");
         return Task.CompletedTask;
     }
 
-    public void Dispose() // TODO Improve
+    public void Dispose()
     {
-        // _messageBus.Dispose();
         _eventPublisher?.Dispose();
         _messagePublisher?.Dispose();
     }

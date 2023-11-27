@@ -4,5 +4,4 @@ namespace Simulation.Application.Entities;
 
 public interface ISimulationRootEntity : ISimulationEntity, IRootDomainEntity
 {
-    // void ClearDomainEvents();
 }

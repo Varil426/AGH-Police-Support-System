@@ -42,10 +42,10 @@ internal class StatisticsExporter : IStatisticsExporter
             dataSince = oldestPatrolData;
         else
             dataSince = oldestIncidentData;
-        
-        
+
+
         var newestIncidentData = _statisticsManager.IncidentData.Any() ? _statisticsManager.IncidentData.MaxBy(x => x.History.States.Last().since)?.History.States.Last().since : null;
-        var newestPatrolData =  _statisticsManager.PatrolData.Any() ? _statisticsManager.PatrolData.MaxBy(x => x.History.States.Last().since)?.History.States.Last().since : null;
+        var newestPatrolData = _statisticsManager.PatrolData.Any() ? _statisticsManager.PatrolData.MaxBy(x => x.History.States.Last().since)?.History.States.Last().since : null;
         DateTimeOffset? dataTo;
 
         if (newestIncidentData is not null && newestPatrolData is not null)
@@ -55,22 +55,6 @@ internal class StatisticsExporter : IStatisticsExporter
         else
             dataTo = newestIncidentData;
 
-//         var results = $"""
-//                        NumberOfPatrols: {},
-//                        NumberOfIncidents: {},
-//                        NumberOfShootings:
-//                        """;
-//
-//         return new MemoryStream(Encoding.UTF8.GetBytes(results));
-
-        // using var memoryStream = new MemoryStream();
-        // using var streamWriter = new StreamWriter(memoryStream);
-        // using var csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture);
-        //
-        // csvWriter.WriteRecord();
-        //
-        // return memoryStream.ToString() ?? string.Empty;
-        
         return $"""
                 NumberOfPatrols, NumberOfIncidents, NumberOfShootings, AverageDistanceOfConsideredPatrolFromIncident, AverageDistanceOfChosenPatrolFromIncident, DataSince, DataTo
                 {numberOfPatrols},{numberOfIncidents},{numberOfShootings},{averageDistanceOfConsideredPatrolFromIncident},{averageDistanceOfChosenPatrolFromIncident},{dataSince},{dataTo}
@@ -106,7 +90,7 @@ internal class StatisticsExporter : IStatisticsExporter
 
         return results.ToString();
     }
-    
+
     private string ExportIncidentStateHistory()
     {
         var header = "Id, State, ChangedAt\n";
@@ -142,7 +126,7 @@ internal class StatisticsExporter : IStatisticsExporter
             result.AppendLine($"{kv.Value.numberOfIncidents}, {kv.Value.numberOfShootings}, {kv.Key}");
         return result.ToString();
     }
-    
+
     private Stream GenerateStreamFromString(string s)
     {
         MemoryStream stream = new MemoryStream();

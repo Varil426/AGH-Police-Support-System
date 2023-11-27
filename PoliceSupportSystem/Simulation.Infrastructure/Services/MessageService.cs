@@ -31,14 +31,13 @@ internal class MessageService : IMessageService, IDisposable
 
     public async Task SendMessageAsync(ISimulationMessage message, string receiver)
     {
-        // TODO Fix - Simulation messages shouldn't be awaited
         using var publisher = _bus.CreatePublisher(
             x =>
             {
                 x.SetExchange(_rabbitMqSettings.SimulationExchangeName);
                 x.SetRoutingKey(receiver);
             });
-        
+
         publisher.Send(message);
     }
 
@@ -52,7 +51,6 @@ internal class MessageService : IMessageService, IDisposable
 
     public async Task SendMessagesAsync(IEnumerable<ISimulationMessage> messages, string receiver)
     {
-        // TODO Fix - Simulation messages shouldn't be awaited
         using var publisher = _bus.CreatePublisher(
             x =>
             {
@@ -60,7 +58,7 @@ internal class MessageService : IMessageService, IDisposable
                 x.SetRoutingKey(receiver);
             });
 
-        foreach (var message in messages) 
+        foreach (var message in messages)
             publisher.Send(message);
     }
 
@@ -69,9 +67,8 @@ internal class MessageService : IMessageService, IDisposable
     public async Task PublishMessagesAsync(IEnumerable<ISimulationMessage> messages) => await Task.WhenAll(messages.Select(PublishMessageAsync));
 
 
-    public void Dispose() // TODO Improve
+    public void Dispose()
     {
-        // _bus.Dispose();
         _messagePublisher.Dispose();
     }
 }

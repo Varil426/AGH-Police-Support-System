@@ -13,8 +13,6 @@ export interface IMapViewModelProps {
 export const MapViewModel = observer(({ model }: IMapViewModelProps) => {
   const [mapKey, setMapKey] = useState(uuidv4());
   useEffect(() => setMapKey(uuidv4()), [model.center]);
-  // TODO Fix using https://stackoverflow.com/questions/62182987/is-the-react-way-really-to-re-render-the-whole-react-leaflet-component-regular
-  // Maybe there's no need to fix anything. It loads just once, and then updates, when markers are updated.
 
   return (
     <MapContainer

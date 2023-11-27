@@ -17,7 +17,7 @@ internal class MessageService : IMessageService, IMessageHandler, IDisposable
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<MessageService> _logger;
     private readonly ISet<IAgent> _subscribedAgents = new HashSet<IAgent>();
-    private readonly SemaphoreSlim _subscribeSemaphore = new(1,1);
+    private readonly SemaphoreSlim _subscribeSemaphore = new(1, 1);
 
     public MessageService(
         IMessageBus messageBus,
@@ -55,7 +55,7 @@ internal class MessageService : IMessageService, IMessageHandler, IDisposable
         SubscribeForDirectMessages(agent);
         _subscribeSemaphore.Release();
     }
-    
+
     public virtual void Dispose()
     {
         Dispose(true);
@@ -69,7 +69,7 @@ internal class MessageService : IMessageService, IMessageHandler, IDisposable
                 x.SetExchange(_rabbitMqSettings.DirectMessageExchange ?? throw new MissingConfigurationException(nameof(_rabbitMqSettings.DirectMessageExchange)))
                     .SetRoutingKey(agent.Id.ToString())
                     .SetConsumerTag(agent.Id.ToString())
-                    .SetReceiveSelfPublish() // TODO Add to config
+                    .SetReceiveSelfPublish()
         );
 
         foreach (var messageType in Extensions.DiscoverMessageTypes(new[] { typeof(IMessage).Assembly }))

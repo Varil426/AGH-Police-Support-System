@@ -1,5 +1,4 @@
 using HqService.Application;
-using HqService.Application.Handlers;
 using HqService.Infrastructure;
 using HqService.Simulation;
 using Shared.Simulation;
@@ -13,7 +12,7 @@ var host = builder
     .AddRabbitMqSettings()
     .AddServiceSettings()
     .AddHqAgentSettings()
-    .AddRabbitMqBus(new[] { typeof(TestCommandHandler).Assembly })
+    .AddRabbitMqBus(new[] { typeof(ApplicationModule).Assembly })
     .ConfigureServices(
         services =>
             services
@@ -28,7 +27,7 @@ var host = builder
     .RegisterModule<SimulationModule>()
     .Build();
 
-host.SubscribeHandlers(new [] { typeof(TestEventHandler).Assembly });
+host.SubscribeHandlers(new [] { typeof(ApplicationModule).Assembly });
 host.SubscribeSimulationMessageHandlers(new[] { typeof(SimulationModule).Assembly });
 
 host.Run();

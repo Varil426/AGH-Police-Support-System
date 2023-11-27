@@ -8,7 +8,6 @@ namespace Shared.Simulation.Services;
 
 internal sealed class SimulationMessageBus : ISimulationMessageBus, IDisposable
 {
-    // private readonly IBus _bus;
     private readonly IPublisher _publisher;
     private readonly IRpcAsyncPublisher _rpcAsyncPublisher;
 
@@ -20,7 +19,7 @@ internal sealed class SimulationMessageBus : ISimulationMessageBus, IDisposable
                 x.SetExchange(simulationCommunicationSettings.SimulationExchangeName);
                 x.SetRoutingKey(simulationCommunicationSettings.SimulationQueueName);
             });
-        
+
         _rpcAsyncPublisher = bus.CreateAsyncRpcPublisher(
             x =>
             {
@@ -44,6 +43,5 @@ internal sealed class SimulationMessageBus : ISimulationMessageBus, IDisposable
     {
         _publisher.Dispose();
         _rpcAsyncPublisher.Dispose();
-        // _bus.Dispose();
     }
 }
